@@ -1,0 +1,19 @@
+{
+  "0": {
+    "basicblocks": 17,
+    "calls": "",
+    "file": "spmv_csr.cpp",
+    "fileloc": 3,
+    "instructions": 79,
+    "loads": {
+      "L": 1,
+      "T": 5
+    },
+    "name": "spmv_csr",
+    "stores": {
+      "L": 1,
+      "T": 1
+    },
+    "total_instructions": 79
+  }
+}

@@ -1,0 +1,61 @@
+{
+    "top_level_hw_fn_id": 327,
+    "functions": {
+        "200": {
+            "fn_id": 200,
+            "mangled_name": "_GLOBAL__sub_I_tb_spmv.cpp",
+            "fully_qualified_name": "_GLOBAL__sub_I_tb_spmv",
+            "is_sys": true,
+            "is_declaration": false,
+            "supports_dataflow": false,
+            "src_loc": {
+                "file": "/home/romoirib/QP/spmv/HLS/test/tb_spmv.cpp",
+                "line": 0,
+                "column": 0
+            }
+        },
+        "201": {
+            "fn_id": 201,
+            "mangled_name": "__cxx_global_var_init",
+            "fully_qualified_name": "__cxx_global_var_init",
+            "is_sys": true,
+            "is_declaration": false,
+            "supports_dataflow": false,
+            "src_loc": {
+                "file": "/home/romoirib/QP/spmv/HLS/test/tb_spmv.cpp",
+                "line": 0,
+                "column": 0
+            }
+        },
+        "327": {
+            "fn_id": 327,
+            "mangled_name": "_Z8spmv_csriiPKiS0_PKfS2_Pf",
+            "fully_qualified_name": "spmv_csr",
+            "is_sys": false,
+            "is_declaration": false,
+            "supports_dataflow": false,
+            "src_loc": {
+                "file": "/home/romoirib/QP/spmv/HLS/src/spmv_csr.cpp",
+                "line": 3,
+                "column": 1
+            }
+        }
+    },
+    "loops": {
+        "5": {
+            "fn_id": 327,
+            "lp_id": 5,
+            "label": "L1"
+        },
+        "6": {
+            "fn_id": 327,
+            "lp_id": 6,
+            "label": "L2"
+        },
+        "7": {
+            "fn_id": 327,
+            "lp_id": 7,
+            "label": "READ_X"
+        }
+    }
+}

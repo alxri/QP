@@ -1,0 +1,156 @@
+<ENTRY>
+{
+ "thisFile": "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/spmv_csr.hlsrun_csim_summary",
+ "connectId": "",
+ "serverToken": "",
+ "timestamp": "0"
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_CmdStep",
+ "dateTimestamp": "Thu Apr  9 10:53:45 2026",
+ "timestampMillis": "1775724825579",
+ "buildStep": {
+  "cmdId": "82b3cc16-8a6b-40dd-a11f-0c4c8dfec841",
+  "name": "vitis-run",
+  "logFile": "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/logs/spmv_csr.steps.log",
+  "commandLine": "/opt/Xilinx/Vitis/2024.2/bin/unwrapped/lnx64.o/vitis-run  --mode hls --csim --config /home/romoirib/QP/spmv/HLS/spmv_csr/hls_config.cfg --work_dir spmv_csr ",
+  "args": [
+   "--mode",
+   "hls",
+   "--csim",
+   "--config",
+   "/home/romoirib/QP/spmv/HLS/spmv_csr/hls_config.cfg",
+   "--work_dir",
+   "spmv_csr"
+  ],
+  "iniFiles": [],
+  "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Thu Apr  9 10:53:45 2026",
+ "timestampMillis": "1775724825579",
+ "status": {
+  "cmdId": "82b3cc16-8a6b-40dd-a11f-0c4c8dfec841",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_FlowMetaData",
+ "dateTimestamp": "Thu Apr  9 10:53:49 2026",
+ "timestampMillis": "1775724829722",
+ "buildSummary": {
+  "hardwarePlatform": "",
+  "hardwareDsa": "",
+  "platformDirectory": "",
+  "runtime": "",
+  "systemConfig": "",
+  "flow": "BF_RUN",
+  "target": "TT_HLS_C_SIM",
+  "kernels": [
+   {
+    "base": {
+     "type": "KERNEL",
+     "name": "spmv_csr",
+     "file": "",
+     "reports": [],
+     "uuid": ""
+    },
+    "sources": [
+     "/home/romoirib/QP/spmv/HLS/src/spmv_csr.cpp"
+    ],
+    "psSources": [],
+    "cuNames": [],
+    "type": "HLS",
+    "frequency": 0,
+    "freqUnits": ""
+   }
+  ],
+  "toolVersion": "2024.2"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Thu Apr  9 10:53:49 2026",
+ "timestampMillis": "1775724829723",
+ "buildStep": {
+  "cmdId": "fa114477-cfd6-42ba-8fe4-c99c06a06cd8",
+  "name": "",
+  "logFile": "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/hls.log",
+  "commandLine": "",
+  "args": [],
+  "iniFiles": [],
+  "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Thu Apr  9 10:53:49 2026",
+ "timestampMillis": "1775724829723",
+ "status": {
+  "cmdId": "fa114477-cfd6-42ba-8fe4-c99c06a06cd8",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Thu Apr  9 10:53:50 2026",
+ "timestampMillis": "1775724830688",
+ "status": {
+  "cmdId": "fa114477-cfd6-42ba-8fe4-c99c06a06cd8",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Thu Apr  9 10:53:50 2026",
+ "timestampMillis": "1775724830800",
+ "status": {
+  "cmdId": "82b3cc16-8a6b-40dd-a11f-0c4c8dfec841",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Thu Apr  9 10:53:50 2026",
+ "timestampMillis": "1775724830800",
+ "report": {
+  "path": "",
+  "name": "",
+  "fileType": "HTML",
+  "reportType": "GLOBAL_RULECHECK_GUIDANCE",
+  "cmdId": ""
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Thu Apr  9 10:53:50 2026",
+ "timestampMillis": "1775724830801",
+ "report": {
+  "path": "",
+  "name": "",
+  "fileType": "BINARY_PROTOBUF",
+  "reportType": "GLOBAL_RULECHECK_GUIDANCE",
+  "cmdId": ""
+ }
+}
+</ENTRY>

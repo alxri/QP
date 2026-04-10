@@ -1,0 +1,57 @@
+<xilinx:hls_fe_msgs>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="directive:1:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaContext="directive" ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="name=spmv_csr" ARG_PragmaType="top" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:5:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="m_axi port=A_row_index offset=slave bundle=gmem0" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:6:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="m_axi port=A_col_index offset=slave bundle=gmem1" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:7:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="m_axi port=A_values offset=slave bundle=gmem2" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:8:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="m_axi port=x offset=slave bundle=gmem3" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:9:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="m_axi port=y offset=slave bundle=gmem4" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:11:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="s_axilite port=num_rows bundle=control" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:12:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="s_axilite port=num_cols bundle=control" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:13:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="s_axilite port=A_row_index bundle=control" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:14:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="s_axilite port=A_col_index bundle=control" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:15:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="s_axilite port=A_values bundle=control" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:16:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="s_axilite port=x bundle=control" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:17:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="s_axilite port=y bundle=control" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:18:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="s_axilite port=return bundle=control" ARG_PragmaType="interface" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:24:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="II=1" ARG_PragmaType="pipeline" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="PRAGMA_VERBOSE_DUMP" msg_id="207-5471" msg_severity="WARNING" msg_loc="../src/spmv_csr.cpp:37:9" msg_body="HLS pragma dump">
+        <args ARG_PragmaFunction="spmv_csr" ARG_PragmaIsValid="1" ARG_PragmaOptions="II=1" ARG_PragmaType="pipeline" ClangWarningOption="dump-hls-pragmas"/>
+    </msg>
+    <msg msg_groups="AUTOMATION PRAGMA_MISC" msg_id="214-437" msg_severity="INFO" msg_loc="../src/spmv_csr.cpp:29:5" msg_body="Automatically disabling loop flattening for loop 'L1'.">
+        <args LoopName="L1"/>
+    </msg>
+    <msg msg_groups="AUTOMATION_VERBOSE_PASSED" msg_id="214-335" msg_severity="INFO" msg_loc="../src/spmv_csr.cpp:29:5" msg_body="loop_flatten 0 1 spmv_csr ../src/spmv_csr.cpp:29:5L1 ../src/spmv_csr.cpp:29:5">
+        <args LoopLoc="../src/spmv_csr.cpp:29:5" LoopLoc-DebugLoc="File ../src/spmv_csr.cpp Line 29 Column 5" LoopName="L1" PragmaFunction="spmv_csr" PragmaIsAuto="1" PragmaOptions="0" PragmaSrcLoc="../src/spmv_csr.cpp:29:5" PragmaSrcLoc-DebugLoc="File ../src/spmv_csr.cpp Line 29 Column 5" PragmaType="loop_flatten"/>
+    </msg>
+</xilinx:hls_fe_msgs>
+

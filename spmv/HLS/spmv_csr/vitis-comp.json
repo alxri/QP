@@ -1,0 +1,12 @@
+{
+  "name": "spmv_csr",
+  "type": "HLS",
+  "configuration": {
+    "componentType": "HLS",
+    "configFiles": [
+      "hls_config.cfg"
+    ],
+    "work_dir": "spmv_csr"
+  },
+  "template": "empty_hls_component"
+}

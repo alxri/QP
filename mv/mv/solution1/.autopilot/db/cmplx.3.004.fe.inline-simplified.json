@@ -1,0 +1,19 @@
+{
+  "0": {
+    "basicblocks": 15,
+    "calls": "",
+    "file": "mv.cpp",
+    "fileloc": 2,
+    "instructions": 66,
+    "loads": {
+      "L": 2,
+      "T": 2
+    },
+    "name": "mv",
+    "stores": {
+      "L": 2,
+      "T": 1
+    },
+    "total_instructions": 66
+  }
+}

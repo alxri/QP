@@ -1,0 +1,17 @@
+<pragmas>
+<pragma file="../src/spmv_csr.cpp" line="37" pragmaType="pipeline" parentfunction="spmv_csr" off="0" ii="1" rewind="0" style=""/>
+<pragma file="../src/spmv_csr.cpp" line="24" pragmaType="pipeline" parentfunction="spmv_csr" off="0" ii="1" rewind="0" style=""/>
+<pragma file="../src/spmv_csr.cpp" line="5" pragmaType="interface" parentfunction="spmv_csr" mode="m_axi" port="A_row_index" bundle="gmem0" offset="slave" name="" depth="-1" num_read_outstanding="-1" num_write_outstanding="-1" max_burst_read_length="-1" max_burst_write_length="-1" latency="-1" max_widen_bitwidth="-1" channel=""/>
+<pragma file="../src/spmv_csr.cpp" line="6" pragmaType="interface" parentfunction="spmv_csr" mode="m_axi" port="A_col_index" bundle="gmem1" offset="slave" name="" depth="-1" num_read_outstanding="-1" num_write_outstanding="-1" max_burst_read_length="-1" max_burst_write_length="-1" latency="-1" max_widen_bitwidth="-1" channel=""/>
+<pragma file="../src/spmv_csr.cpp" line="7" pragmaType="interface" parentfunction="spmv_csr" mode="m_axi" port="A_values" bundle="gmem2" offset="slave" name="" depth="-1" num_read_outstanding="-1" num_write_outstanding="-1" max_burst_read_length="-1" max_burst_write_length="-1" latency="-1" max_widen_bitwidth="-1" channel=""/>
+<pragma file="../src/spmv_csr.cpp" line="8" pragmaType="interface" parentfunction="spmv_csr" mode="m_axi" port="x" bundle="gmem3" offset="slave" name="" depth="-1" num_read_outstanding="-1" num_write_outstanding="-1" max_burst_read_length="-1" max_burst_write_length="-1" latency="-1" max_widen_bitwidth="-1" channel=""/>
+<pragma file="../src/spmv_csr.cpp" line="9" pragmaType="interface" parentfunction="spmv_csr" mode="m_axi" port="y" bundle="gmem4" offset="slave" name="" depth="-1" num_read_outstanding="-1" num_write_outstanding="-1" max_burst_read_length="-1" max_burst_write_length="-1" latency="-1" max_widen_bitwidth="-1" channel=""/>
+<pragma file="../src/spmv_csr.cpp" line="11" pragmaType="interface" parentfunction="spmv_csr" mode="s_axilite" port="num_rows" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../src/spmv_csr.cpp" line="12" pragmaType="interface" parentfunction="spmv_csr" mode="s_axilite" port="num_cols" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../src/spmv_csr.cpp" line="13" pragmaType="interface" parentfunction="spmv_csr" mode="s_axilite" port="A_row_index" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../src/spmv_csr.cpp" line="14" pragmaType="interface" parentfunction="spmv_csr" mode="s_axilite" port="A_col_index" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../src/spmv_csr.cpp" line="15" pragmaType="interface" parentfunction="spmv_csr" mode="s_axilite" port="A_values" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../src/spmv_csr.cpp" line="16" pragmaType="interface" parentfunction="spmv_csr" mode="s_axilite" port="x" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../src/spmv_csr.cpp" line="17" pragmaType="interface" parentfunction="spmv_csr" mode="s_axilite" port="y" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../src/spmv_csr.cpp" line="18" pragmaType="interface" parentfunction="spmv_csr" mode="s_axilite" port="" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+</pragmas>

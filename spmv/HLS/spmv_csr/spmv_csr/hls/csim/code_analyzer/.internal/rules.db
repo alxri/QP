@@ -1,0 +1,190 @@
+{
+    "rules": {
+        "['/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/spmv_csr.cpp.0.o', '/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/spmv_csr.cpp.0.o.d']": {
+            "command": [
+                "/opt/Xilinx/Vitis/2024.2/vcxx/libexec/clang",
+                "-c",
+                "-I/home/romoirib/QP/spmv/HLS/include",
+                "-MD",
+                "-MF",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/spmv_csr.cpp.0.o.d",
+                "-fhls-tb",
+                "-hls-sim-headers-dir=/opt/Xilinx/Vitis/2024.2/vcxx/data/include",
+                "-vitis-hls=/opt/Xilinx/Vitis/2024.2",
+                "--gcc-toolchain=/opt/Xilinx/Vivado/2024.2/tps/lnx64/gcc-8.3.0",
+                "-fslxtrace",
+                "-fslx-compile-mode",
+                "-fslxskipfunctionbody",
+                "-fhlstoplevel=spmv_csr",
+                "../src/spmv_csr.cpp",
+                "-o",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/spmv_csr.cpp.0.o"
+            ],
+            "exectime": 0.07647371292114258,
+            "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr"
+        },
+        "['/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/spmv_csr.cpp.0.bc', '/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/spmv_csr.cpp.0.bc.d']": {
+            "command": [
+                "/opt/Xilinx/Vitis/2024.2/vcxx/libexec/clang",
+                "-c",
+                "-emit-llvm",
+                "-I/home/romoirib/QP/spmv/HLS/include",
+                "-MD",
+                "-MF",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/spmv_csr.cpp.0.bc.d",
+                "-fhls",
+                "-hls-syn-headers-dir=/opt/Xilinx/Vitis/2024.2/vcxx/data/autopilot",
+                "-vitis-hls=/opt/Xilinx/Vitis/2024.2",
+                "--gcc-toolchain=/opt/Xilinx/Vivado/2024.2/tps/lnx64/gcc-8.3.0",
+                "-hls-clock-period=10.0",
+                "-fslxtrace",
+                "-fslx-compile-mode",
+                "-fhlstoplevel=spmv_csr",
+                "../src/spmv_csr.cpp",
+                "-o",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/spmv_csr.cpp.0.bc"
+            ],
+            "exectime": 0.09557819366455078,
+            "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr"
+        },
+        "['/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/tb_spmv.cpp.0.o', '/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/tb_spmv.cpp.0.o.d']": {
+            "command": [
+                "/opt/Xilinx/Vitis/2024.2/vcxx/libexec/clang",
+                "-c",
+                "-I/home/romoirib/QP/spmv/HLS/include",
+                "-MD",
+                "-MF",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/tb_spmv.cpp.0.o.d",
+                "-fhls-tb",
+                "-hls-sim-headers-dir=/opt/Xilinx/Vitis/2024.2/vcxx/data/include",
+                "-vitis-hls=/opt/Xilinx/Vitis/2024.2",
+                "--gcc-toolchain=/opt/Xilinx/Vivado/2024.2/tps/lnx64/gcc-8.3.0",
+                "-fslxtrace",
+                "-fslx-compile-mode",
+                "-fslxskipfunctionbody",
+                "-fhlstoplevel=spmv_csr",
+                "/home/romoirib/QP/spmv/HLS/test/tb_spmv.cpp",
+                "-o",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/tb_spmv.cpp.0.o"
+            ],
+            "exectime": 0.527271032333374,
+            "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr"
+        },
+        "['/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/syn_srcs.bc']": {
+            "command": [
+                "/opt/Xilinx/Vitis/2024.2/vcxx/libexec/llvm-link",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/spmv_csr.cpp.0.bc",
+                "-o",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/syn_srcs.bc"
+            ],
+            "exectime": 0.02259516716003418,
+            "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr"
+        },
+        "['/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/syn_srcs.opt.bc']": {
+            "command": [
+                "/opt/Xilinx/Vitis/2024.2/vcxx/libexec/opt",
+                "-check-single-toplevel",
+                "-make-non-toplevel-internal",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/syn_srcs.bc",
+                "-o",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/syn_srcs.opt.bc"
+            ],
+            "exectime": 0.07059669494628906,
+            "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr"
+        },
+        "['/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/app.exe']": {
+            "command": [
+                "/opt/Xilinx/Vitis/2024.2/vcxx/libexec/clang++",
+                "-o",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/app.exe",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/tb_spmv.cpp.0.o",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/spmv_csr.cpp.0.o",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/syn_srcs.opt.bc",
+                "-fhls",
+                "-fhlstoplevel=spmv_csr",
+                "-Wl,--as-needed",
+                "-L/opt/Xilinx/Vitis/2024.2/lnx64/tools/dds_v6_0",
+                "-lIp_dds_compiler_v6_0_bitacc_cmodel",
+                "-Wl,--disable-new-dtags",
+                "-Wl,-rpath=/opt/Xilinx/Vitis/2024.2/lnx64/tools/dds_v6_0",
+                "-L/opt/Xilinx/Vitis/2024.2/lnx64/tools/fft_v9_1",
+                "-lIp_xfft_v9_1_bitacc_cmodel",
+                "-Wl,-rpath=/opt/Xilinx/Vitis/2024.2/lnx64/tools/fft_v9_1",
+                "-L/opt/Xilinx/Vitis/2024.2/lnx64/tools/fir_v7_0",
+                "-lIp_fir_compiler_v7_2_bitacc_cmodel",
+                "-Wl,-rpath=/opt/Xilinx/Vitis/2024.2/lnx64/tools/fir_v7_0",
+                "-L/opt/Xilinx/Vitis/2024.2/lnx64/tools/fpo_v7_1",
+                "-lIp_floating_point_v7_1_bitacc_cmodel",
+                "-Wl,-rpath=/opt/Xilinx/Vitis/2024.2/lnx64/tools/fpo_v7_1",
+                "-lm",
+                "-L/opt/Xilinx/Vitis/2024.2/lnx64/lib/csim",
+                "-lhlsm-GCC46",
+                "-Wl,-rpath=/opt/Xilinx/Vitis/2024.2/lnx64/lib/csim",
+                "-lhlsmc++-GCC46",
+                "-lgmp",
+                "-lmpfr",
+                "-Wl,--no-as-needed",
+                "--gcc-toolchain=/opt/Xilinx/Vivado/2024.2/tps/lnx64/gcc-8.3.0",
+                "-Wl,--disable-new-dtags",
+                "-Wl,-rpath=/opt/Xilinx/Vivado/2024.2/tps/lnx64/gcc-8.3.0/lib64",
+                "-fslxtrace",
+                "-fslx-compile-mode",
+                "-Wl,-mllvm,-profilerOutputDirectory=/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/profiler/0",
+                "-fslxpthreads"
+            ],
+            "exectime": 0.5408928394317627,
+            "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr"
+        },
+        "['/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/instrument/app_0/hls_ir_info.json']": {
+            "command": [
+                "/opt/Xilinx/Vitis/2024.2/vcxx/libexec/irInfoDump",
+                "--ir-module",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/instrument/app_0/project.symbols.bc",
+                "--json-output",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/instrument/app_0/hls_ir_info.json",
+                "--hw-function",
+                "spmv_csr"
+            ],
+            "exectime": 0.047295570373535156,
+            "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr"
+        },
+        "['/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/instrument/app_0/binary_dependencies.json']": {
+            "command": [
+                "/opt/Xilinx/Vitis/2024.2/vcxx/libexec/clang-scan-deps",
+                "--compilation-database=/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/instrument/app_0/compile_commands.json",
+                "--format=vitiscxx",
+                "--reuse-filemanager=false",
+                "--output=/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/instrument/app_0/binary_dependencies.json"
+            ],
+            "exectime": 0.06711769104003906,
+            "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr"
+        },
+        "['/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/bin/.tracing_stdout.txt', '/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/bin/.tracing_stderr.txt']": {
+            "command": [
+                "/opt/Xilinx/Vitis/2024.2/vcxx/libexec/rwd",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/build/app.exe"
+            ],
+            "exectime": 0.053421974182128906,
+            "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/tracing/csim/build"
+        },
+        "['/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/instrument/app_0/annotated.bc']": {
+            "command": [
+                "/opt/Xilinx/Vitis/2024.2/vcxx/libexec/optimizer",
+                "-DFGPass",
+                "-outputDir",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/output",
+                "-logDir",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/log",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/instrument/app_0/project.symbols.bc",
+                "-staticFile",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/instrument/app_0/static.xml",
+                "-traceFile",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/profiler/0/app_0_0/thread0000-trace.txt",
+                "-o",
+                "/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/csim/code_analyzer/.internal/instrument/app_0/annotated.bc"
+            ],
+            "exectime": 0.18079519271850586,
+            "cwd": "/home/romoirib/QP/spmv/HLS/spmv_csr"
+        }
+    }
+}

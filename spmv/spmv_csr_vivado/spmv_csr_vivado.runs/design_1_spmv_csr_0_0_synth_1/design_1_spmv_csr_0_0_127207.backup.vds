@@ -1,0 +1,350 @@
+#-----------------------------------------------------------
+# Vivado v2024.2 (64-bit)
+# SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+# IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+# SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+# Start of session at: Thu Apr  9 11:57:21 2026
+# Process ID         : 127207
+# Current directory  : /home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/design_1_spmv_csr_0_0_synth_1
+# Command line       : vivado -log design_1_spmv_csr_0_0.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source design_1_spmv_csr_0_0.tcl
+# Log file           : /home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/design_1_spmv_csr_0_0_synth_1/design_1_spmv_csr_0_0.vds
+# Journal file       : /home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/design_1_spmv_csr_0_0_synth_1/vivado.jou
+# Running On         : eslpc53
+# Platform           : Ubuntu
+# Operating System   : Ubuntu 20.04.3 LTS
+# Processor Detail   : Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz
+# CPU Frequency      : 3200.000 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 16550 MB
+# Swap memory        : 1487 MB
+# Total Virtual      : 18037 MB
+# Available Virtual  : 10349 MB
+#-----------------------------------------------------------
+source design_1_spmv_csr_0_0.tcl -notrace
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/impl/ip'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx/Vivado/2024.2/data/ip'.
+INFO: [IP_Flow 19-6924] IPCACHE: Running cache check for IP inst: design_1_spmv_csr_0_0
+Command: synth_design -top design_1_spmv_csr_0_0 -part xczu7ev-ffvc1156-2-e -incremental_mode off -mode out_of_context
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xczu7ev'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xczu7ev'
+INFO: [Device 21-403] Loading part xczu7ev-ffvc1156-2-e
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 7 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 127297
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:06 ; elapsed = 00:00:07 . Memory (MB): peak = 2597.809 ; gain = 123.688 ; free physical = 153 ; free virtual = 1365
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'design_1_spmv_csr_0_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_spmv_csr_0_0/synth/design_1_spmv_csr_0_0.v:53]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr.v:9]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_x_buf_RAM_AUTO_1R1W' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_x_buf_RAM_AUTO_1R1W.v:7]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_x_buf_RAM_AUTO_1R1W' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_x_buf_RAM_AUTO_1R1W.v:7]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_spmv_csr_Pipeline_READ_X' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_spmv_csr_Pipeline_READ_X.v:9]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_flow_control_loop_pipe_sequential_init' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_flow_control_loop_pipe_sequential_init.v:11]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_flow_control_loop_pipe_sequential_init' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_flow_control_loop_pipe_sequential_init.v:11]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_spmv_csr_Pipeline_READ_X' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_spmv_csr_Pipeline_READ_X.v:9]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_spmv_csr_Pipeline_L2' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_spmv_csr_Pipeline_L2.v:9]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_fadd_32ns_32ns_32_4_full_dsp_1' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_fadd_32ns_32ns_32_4_full_dsp_1.v:9]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_fadd_32ns_32ns_32_4_full_dsp_1_ip' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/ip/spmv_csr_fadd_32ns_32ns_32_4_full_dsp_1_ip.v:53]
+INFO: [Synth 8-6157] synthesizing module 'LUT1' [/opt/Xilinx/Vivado/2024.2/scripts/rt/data/unisim_comp.v:84087]
+INFO: [Synth 8-6155] done synthesizing module 'LUT1' (0#1) [/opt/Xilinx/Vivado/2024.2/scripts/rt/data/unisim_comp.v:84087]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_fadd_32ns_32ns_32_4_full_dsp_1_ip' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/ip/spmv_csr_fadd_32ns_32ns_32_4_full_dsp_1_ip.v:53]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_fadd_32ns_32ns_32_4_full_dsp_1' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_fadd_32ns_32ns_32_4_full_dsp_1.v:9]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_fmul_32ns_32ns_32_3_max_dsp_1' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_fmul_32ns_32ns_32_3_max_dsp_1.v:9]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_fmul_32ns_32ns_32_3_max_dsp_1_ip' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/ip/spmv_csr_fmul_32ns_32ns_32_3_max_dsp_1_ip.v:53]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_fmul_32ns_32ns_32_3_max_dsp_1_ip' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/ip/spmv_csr_fmul_32ns_32ns_32_3_max_dsp_1_ip.v:53]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_fmul_32ns_32ns_32_3_max_dsp_1' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_fmul_32ns_32ns_32_3_max_dsp_1.v:9]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_spmv_csr_Pipeline_L2' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_spmv_csr_Pipeline_L2.v:9]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_control_s_axi' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_control_s_axi.v:9]
+INFO: [Synth 8-155] case statement is not full and has no default [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_control_s_axi.v:261]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_control_s_axi' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_control_s_axi.v:9]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:12]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi_load' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:245]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi_fifo' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi_srl' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi_srl' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi_fifo' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi_fifo__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi_mem' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2733]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi_mem' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2733]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi_fifo__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2501]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi_load' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:245]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi_read' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:1355]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi_burst_converter' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:1867]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi_reg_slice' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi_reg_slice' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi_burst_converter' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:1867]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi_reg_slice__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi_reg_slice__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2399]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi_fifo__parameterized1' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem0_m_axi_srl__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi_srl__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi_fifo__parameterized1' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:2501]
+WARNING: [Synth 8-589] replacing case/wildcard equality operator === with logical equality operator == [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:1539]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi_read' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:1355]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem0_m_axi' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem0_m_axi.v:12]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:12]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi_load' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:245]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi_fifo' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi_srl' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi_srl' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi_fifo' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi_fifo__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi_mem' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2733]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi_mem' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2733]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi_fifo__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2501]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi_load' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:245]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi_read' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:1355]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi_burst_converter' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:1867]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi_reg_slice' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi_reg_slice' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi_burst_converter' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:1867]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi_reg_slice__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi_reg_slice__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2399]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi_fifo__parameterized1' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem1_m_axi_srl__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi_srl__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi_fifo__parameterized1' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:2501]
+WARNING: [Synth 8-589] replacing case/wildcard equality operator === with logical equality operator == [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:1539]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi_read' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:1355]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem1_m_axi' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem1_m_axi.v:12]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:12]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi_load' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:245]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi_fifo' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi_srl' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi_srl' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi_fifo' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi_fifo__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi_mem' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2733]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi_mem' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2733]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi_fifo__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2501]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi_load' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:245]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi_read' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:1355]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi_burst_converter' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:1867]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi_reg_slice' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi_reg_slice' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi_burst_converter' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:1867]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi_reg_slice__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi_reg_slice__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2399]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi_fifo__parameterized1' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem2_m_axi_srl__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi_srl__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi_fifo__parameterized1' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:2501]
+WARNING: [Synth 8-589] replacing case/wildcard equality operator === with logical equality operator == [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:1539]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi_read' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:1355]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem2_m_axi' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem2_m_axi.v:12]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:12]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi_load' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:245]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi_fifo' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi_srl' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi_srl' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi_fifo' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi_fifo__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi_mem' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2733]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi_mem' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2733]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi_fifo__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2501]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi_load' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:245]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi_read' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:1355]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi_burst_converter' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:1867]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi_reg_slice' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi_reg_slice' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi_burst_converter' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:1867]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi_reg_slice__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2399]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi_reg_slice__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2399]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi_fifo__parameterized1' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2501]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem3_m_axi_srl__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi_srl__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2679]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi_fifo__parameterized1' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:2501]
+WARNING: [Synth 8-589] replacing case/wildcard equality operator === with logical equality operator == [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:1539]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi_read' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:1355]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem3_m_axi' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem3_m_axi.v:12]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:12]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_store' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:743]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_fifo' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_srl' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_srl' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_fifo' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_mem' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2739]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_mem' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2739]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized1' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_srl__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_srl__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized1' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized2' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_srl__parameterized1' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_srl__parameterized1' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized2' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_store' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:743]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_write' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:1553]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_burst_converter' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:1873]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_reg_slice' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2405]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_reg_slice' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2405]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_burst_converter' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:1873]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized3' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_srl__parameterized2' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_srl__parameterized2' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized3' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_throttle' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2179]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_reg_slice__parameterized0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2405]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_reg_slice__parameterized0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2405]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized4' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_srl__parameterized3' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_srl__parameterized3' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized4' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized5' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_srl__parameterized4' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_srl__parameterized4' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2685]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_fifo__parameterized5' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2507]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_throttle' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2179]
+INFO: [Synth 8-6157] synthesizing module 'spmv_csr_gmem4_m_axi_reg_slice__parameterized1' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2405]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_reg_slice__parameterized1' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:2405]
+WARNING: [Synth 8-589] replacing case/wildcard equality operator === with logical equality operator == [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:1864]
+WARNING: [Synth 8-589] replacing case/wildcard equality operator === with logical equality operator == [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:1867]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi_write' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:1553]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr_gmem4_m_axi' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_gmem4_m_axi.v:12]
+INFO: [Synth 8-6155] done synthesizing module 'spmv_csr' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr.v:9]
+INFO: [Synth 8-6155] done synthesizing module 'design_1_spmv_csr_0_0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_spmv_csr_0_0/synth/design_1_spmv_csr_0_0.v:53]
+INFO: [Synth 8-4490] FSM extraction disabled for register 'ap_CS_fsm_reg' through user attribute
+WARNING: [Synth 8-6014] Unused sequential element int_ap_done_reg was removed.  [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ipshared/5c64/hdl/verilog/spmv_csr_control_s_axi.v:361]
+INFO: [Synth 8-4490] FSM extraction disabled for register 'ap_CS_fsm_reg' through user attribute
+WARNING: [Synth 8-7129] Port in_BUS_BID[0] in module spmv_csr_gmem4_m_axi_write is either unconnected or has no load
+WARNING: [Synth 8-7129] Port in_BUS_BRESP[1] in module spmv_csr_gmem4_m_axi_write is either unconnected or has no load
+WARNING: [Synth 8-7129] Port in_BUS_BRESP[0] in module spmv_csr_gmem4_m_axi_write is either unconnected or has no load
+WARNING: [Synth 8-7129] Port in_BUS_BUSER[0] in module spmv_csr_gmem4_m_axi_write is either unconnected or has no load
+WARNING: [Synth 8-7129] Port ARREADY in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RID[0] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[31] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[30] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[29] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[28] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[27] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[26] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[25] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[24] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[23] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[22] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[21] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[20] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[19] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[18] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[17] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[16] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[15] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[14] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[13] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[12] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[11] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[10] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[9] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[8] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[7] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[6] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[5] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[4] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[3] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[2] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[1] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RDATA[0] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RRESP[1] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RRESP[0] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RLAST in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RUSER[0] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port RVALID in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[63] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[62] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[61] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[60] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[59] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[58] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[57] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[56] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[55] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[54] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[53] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[52] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[51] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[50] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[49] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[48] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[47] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[46] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[45] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[44] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[43] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[42] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[41] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[40] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[39] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[38] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[37] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[36] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[35] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[34] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[33] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[32] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[31] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[30] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[29] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[28] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[27] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[26] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[25] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[24] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[23] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[22] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[21] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[20] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[19] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[18] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[17] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[16] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[15] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[14] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[13] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[12] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[11] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[10] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[9] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[8] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+WARNING: [Synth 8-7129] Port I_CH0_ARADDR[7] in module spmv_csr_gmem4_m_axi is either unconnected or has no load
+INFO: [Common 17-14] Message 'Synth 8-7129' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:12 ; elapsed = 00:00:13 . Memory (MB): peak = 2790.746 ; gain = 316.625 ; free physical = 197 ; free virtual = 726
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:13 ; elapsed = 00:00:14 . Memory (MB): peak = 2790.746 ; gain = 316.625 ; free physical = 168 ; free virtual = 707
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:13 ; elapsed = 00:00:14 . Memory (MB): peak = 2790.746 ; gain = 316.625 ; free physical = 168 ; free virtual = 707
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00.14 ; elapsed = 00:00:00.14 . Memory (MB): peak = 2790.746 ; gain = 0.000 ; free physical = 180 ; free virtual = 699
+INFO: [Netlist 29-17] Analyzing 118 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_spmv_csr_0_0/constraints/spmv_csr_ooc.xdc] for cell 'inst'
+create_clock: Time (s): cpu = 00:00:05 ; elapsed = 00:01:44 . Memory (MB): peak = 2909.621 ; gain = 3.031 ; free physical = 172 ; free virtual = 527
+Finished Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_spmv_csr_0_0/constraints/spmv_csr_ooc.xdc] for cell 'inst'
+Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/design_1_spmv_csr_0_0_synth_1/dont_touch.xdc]
+Finished Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/design_1_spmv_csr_0_0_synth_1/dont_touch.xdc]
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.16 . Memory (MB): peak = 2909.621 ; gain = 0.000 ; free physical = 166 ; free virtual = 525
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 16 instances were transformed.
+  DSP48E1 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 5 instances
+  FDE => FDRE: 11 instances
+
+write_xdc: Time (s): cpu = 00:00:00.11 ; elapsed = 00:00:26 . Memory (MB): peak = 2909.621 ; gain = 0.000 ; free physical = 168 ; free virtual = 524
+Constraint Validation Runtime : Time (s): cpu = 00:00:00.23 ; elapsed = 00:03:54 . Memory (MB): peak = 2909.621 ; gain = 0.000 ; free physical = 232 ; free virtual = 852
+INFO: [Designutils 20-5008] Incremental synthesis strategy off
+get_param: Time (s): cpu = 00:00:00.05 ; elapsed = 00:01:14 . Memory (MB): peak = 2909.621 ; gain = 0.000 ; free physical = 163 ; free virtual = 560

@@ -1,0 +1,651 @@
+--- !Missed
+Pass:            inline
+Name:            NeverInline
+Function:        apatb_spmv_csr_ir
+Args:            
+  - Callee:          'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' not inlined into '
+  - Caller:          apatb_spmv_csr_ir
+  - String:          ' because it should never be inlined (cost=never)'
+...
+--- !Passed
+Pass:            reflow-burst-inference
+Name:            BurstInferred
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 23, Column: 5 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Sequential '
+  - Direction:       read
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length'
+  - String:          ' has been inferred'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        xseq
+  - ArrayName:       x
+  - String:          ' '
+  - BundleName:      gmem3
+  - String:          ' '
+  - LoopName:        READ_X
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:23:5'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      load
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 25, Column: 13 }
+  - OrigDirection:   read
+  - OrigID:          for.inc.load.4
+...
+--- !Passed
+Pass:            reflow-burst-inference
+Name:            BurstInferred
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Sequential '
+  - Direction:       read
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length'
+  - String:          ' has been inferred'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        scevgepseq
+  - ArrayName:       A_values
+  - String:          ' '
+  - BundleName:      gmem2
+  - String:          ' '
+  - LoopName:        L2
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:36:9'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      load
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 39, Column: 14 }
+  - OrigDirection:   read
+  - OrigID:          for.inc23.load.9
+...
+--- !Passed
+Pass:            reflow-burst-inference
+Name:            BurstInferred
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Sequential '
+  - Direction:       read
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length'
+  - String:          ' has been inferred'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        scevgep16seq
+  - ArrayName:       A_col_index
+  - String:          ' '
+  - BundleName:      gmem1
+  - String:          ' '
+  - LoopName:        L2
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:36:9'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      load
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 40, Column: 23 }
+  - OrigDirection:   read
+  - OrigID:          for.inc23.load.15
+...
+--- !Passed
+Pass:            reflow-burst-inference
+Name:            BurstInferred
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 32, Column: 25 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Sequential '
+  - Direction:       read
+  - String:          ' of length '
+  - Length:          '2'
+  - String:          ' has been inferred'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        scevgep17seq
+  - ArrayName:       A_row_index
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - LoopName:        L1
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:29:5'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      load
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 32, Column: 25 }
+  - OrigDirection:   read
+  - OrigID:          L2.load.8
+  - OrigAccess:      load
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 33, Column: 23 }
+  - OrigDirection:   read
+  - OrigID:          L2.load.12
+...
+--- !Passed
+Pass:            reflow-burst-inference
+Name:            BurstInferred
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 29, Column: 5 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Sequential '
+  - Direction:       write
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length'
+  - String:          ' has been inferred'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        yseq
+  - ArrayName:       'y'
+  - String:          ' '
+  - BundleName:      gmem4
+  - String:          ' '
+  - LoopName:        L1
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:29:5'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      store
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 43, Column: 14 }
+  - OrigDirection:   write
+  - OrigID:          for.inc28.store.3
+...
+--- !Missed
+Pass:            reflow-burst-inference
+Name:            IncompatibleStride
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 32, Column: 25 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          Stride is incompatible
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 32, Column: 25 }
+  - OrigDirection:   read
+  - OrigID:          scevgep17seq
+  - ArrayName:       A_row_index
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - LoopName:        L1
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:29:5'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-inference
+Name:            AccessInCondBranch
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Access '
+  - Access:          call
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+  - String:          ' is in the conditional branch'
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+  - OrigDirection:   read
+  - OrigID:          scevgepseq
+  - ArrayName:       A_values
+  - String:          ' '
+  - BundleName:      gmem2
+  - String:          ' '
+  - LoopName:        L1
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:29:5'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-inference
+Name:            AccessInCondBranch
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Access '
+  - Access:          call
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+  - String:          ' is in the conditional branch'
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+  - OrigDirection:   read
+  - OrigID:          scevgep16seq
+  - ArrayName:       A_col_index
+  - String:          ' '
+  - BundleName:      gmem1
+  - String:          ' '
+  - LoopName:        L1
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:29:5'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-widen
+Name:            GreaterOrEqualThreshold
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 29, Column: 5 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Could not widen since type '
+  - Type:            float
+  - String:          ' size is greater than or equal to the max_widen_bitwidth threshold of '
+  - Threshold:       '0'
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 29, Column: 5 }
+  - OrigDirection:   write
+  - OrigID:          yseq
+  - ArrayName:       'y'
+  - String:          ' '
+  - BundleName:      gmem4
+  - String:          ' '
+  - LoopName:        L1
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:29:5'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-widen
+Name:            GreaterOrEqualThreshold
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Could not widen since type '
+  - Type:            float
+  - String:          ' size is greater than or equal to the max_widen_bitwidth threshold of '
+  - Threshold:       '0'
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+  - OrigDirection:   read
+  - OrigID:          scevgepseq
+  - ArrayName:       A_values
+  - String:          ' '
+  - BundleName:      gmem2
+  - String:          ' '
+  - LoopName:        L2
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:36:9'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-widen
+Name:            GreaterOrEqualThreshold
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Could not widen since type '
+  - Type:            i32
+  - String:          ' size is greater than or equal to the max_widen_bitwidth threshold of '
+  - Threshold:       '0'
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+  - OrigDirection:   read
+  - OrigID:          scevgep16seq
+  - ArrayName:       A_col_index
+  - String:          ' '
+  - BundleName:      gmem1
+  - String:          ' '
+  - LoopName:        L2
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:36:9'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-widen
+Name:            GreaterOrEqualThreshold
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 32, Column: 25 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Could not widen since type '
+  - Type:            i32
+  - String:          ' size is greater than or equal to the max_widen_bitwidth threshold of '
+  - Threshold:       '0'
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 32, Column: 25 }
+  - OrigDirection:   read
+  - OrigID:          scevgep17seq
+  - ArrayName:       A_row_index
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-widen
+Name:            GreaterOrEqualThreshold
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 23, Column: 5 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Could not widen since type '
+  - Type:            float
+  - String:          ' size is greater than or equal to the max_widen_bitwidth threshold of '
+  - Threshold:       '0'
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 23, Column: 5 }
+  - OrigDirection:   read
+  - OrigID:          xseq
+  - ArrayName:       x
+  - String:          ' '
+  - BundleName:      gmem3
+  - String:          ' '
+  - LoopName:        READ_X
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:23:5'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-loop-flatten-cost-model
+Name:            FlattenOffInference
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 29, Column: 5 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Automatically disabling loop flattening for loop '''
+  - LoopName:        L1
+  - String:          '''.'
+...
+--- !Passed
+Pass:            reflow-loop-flatten-cost-model
+Name:            AutoParallelPerformanceDrivenVerbosePassed
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 29, Column: 5 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - PragmaType:      loop_flatten
+  - String:          ' '
+  - PragmaOptions:   off
+  - String:          ' '
+  - PragmaIsAuto:    '1'
+  - String:          ' '
+  - PragmaFunction:  spmv_csr
+  - String:          ' '
+  - PragmaSrcLoc:    '../src/spmv_csr.cpp:29:5'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 29, Column: 5 }
+  - LoopName:        L1
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:29:5'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 29, Column: 5 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredVerboseSummary
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 23, Column: 5 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length and bit width '
+  - Width:           '32'
+  - String:          ' has been inferred.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        seq
+  - ArrayName:       ''
+  - String:          ' '
+  - BundleName:      gmem3
+  - String:          ' '
+  - LoopName:        READ_X
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:23:5'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredSummary
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 23, Column: 5 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length and bit width '
+  - Width:           '32'
+  - String:          ' in loop '''
+  - LoopName:        READ_X
+  - String:          '''('
+  - LoopLoc:         '../src/spmv_csr.cpp:23:5'
+  - String:          ')'
+  - String:          ' has been inferred on bundle '''
+  - BundleName:      gmem3
+  - String:          '''.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredVerboseSummary
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 29, Column: 5 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       writes
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length and bit width '
+  - Width:           '32'
+  - String:          ' has been inferred.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        seq1
+  - ArrayName:       ''
+  - String:          ' '
+  - BundleName:      gmem4
+  - String:          ' '
+  - LoopName:        L1
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:29:5'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredSummary
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 29, Column: 5 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       writes
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length and bit width '
+  - Width:           '32'
+  - String:          ' in loop '''
+  - LoopName:        L1
+  - String:          '''('
+  - LoopLoc:         '../src/spmv_csr.cpp:29:5'
+  - String:          ')'
+  - String:          ' has been inferred on bundle '''
+  - BundleName:      gmem4
+  - String:          '''.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredVerboseSummary
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 32, Column: 25 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of length '
+  - Length:          '2'
+  - String:          ' and bit width '
+  - Width:           '32'
+  - String:          ' has been inferred.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        seq2
+  - ArrayName:       ''
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredSummary
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 32, Column: 25 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of length '
+  - Length:          '2'
+  - String:          ' and bit width '
+  - Width:           '32'
+  - String:          ' has been inferred on bundle '''
+  - BundleName:      gmem0
+  - String:          '''.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredVerboseSummary
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length and bit width '
+  - Width:           '32'
+  - String:          ' has been inferred.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        seq3
+  - ArrayName:       ''
+  - String:          ' '
+  - BundleName:      gmem2
+  - String:          ' '
+  - LoopName:        L2
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:36:9'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredSummary
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length and bit width '
+  - Width:           '32'
+  - String:          ' in loop '''
+  - LoopName:        L2
+  - String:          '''('
+  - LoopLoc:         '../src/spmv_csr.cpp:36:9'
+  - String:          ')'
+  - String:          ' has been inferred on bundle '''
+  - BundleName:      gmem2
+  - String:          '''.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredVerboseSummary
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length and bit width '
+  - Width:           '32'
+  - String:          ' has been inferred.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        seq4
+  - ArrayName:       ''
+  - String:          ' '
+  - BundleName:      gmem1
+  - String:          ' '
+  - LoopName:        L2
+  - String:          ' '
+  - LoopLoc:         '../src/spmv_csr.cpp:36:9'
+  - String:          ' '
+  - Function:        'spmv_csr(int, int, int const*, int const*, float const*, float const*, float*)'
+    DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 4, Column: 0 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredSummary
+DebugLoc:        { File: ../src/spmv_csr.cpp, Line: 36, Column: 9 }
+Function:        _Z8spmv_csriiPKiS0_PKfS2_Pf
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of '
+  - Length:          variable
+  - String:          ' length and bit width '
+  - Width:           '32'
+  - String:          ' in loop '''
+  - LoopName:        L2
+  - String:          '''('
+  - LoopLoc:         '../src/spmv_csr.cpp:36:9'
+  - String:          ')'
+  - String:          ' has been inferred on bundle '''
+  - BundleName:      gmem1
+  - String:          '''.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+...

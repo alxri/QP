@@ -1,0 +1,3 @@
+relativeroot=/home/romoirib/QP/spmv/HLS/spmv_csr
+original_argv=--mode hls --package --config /home/romoirib/QP/spmv/HLS/spmv_csr/hls_config.cfg --work_dir spmv_csr 
+

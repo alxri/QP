@@ -1,0 +1,238 @@
+
+
+================================================================
+== Synthesis Summary Report of 'spmv_csr'
+================================================================
++ General Information: 
+    * Date:           Thu Apr  9 10:56:51 2026
+    * Version:        2024.2 (Build 5238294 on Nov  8 2024)
+    * Project:        spmv_csr
+    * Solution:       hls (Vivado IP Flow Target)
+    * Product family: zynquplus
+    * Target device:  xczu7ev-ffvc1156-2-e
+    
+
++ Performance & Resource Estimates: 
+    
+    PS: '+' for module; 'o' for loop; '*' for dataflow
+    +-----------------------------+------+------+---------+--------+----------+---------+------+----------+---------+---------+-----------+-----------+-----+
+    |           Modules           | Issue|      | Latency | Latency| Iteration|         | Trip |          |         |         |           |           |     |
+    |           & Loops           | Type | Slack| (cycles)|  (ns)  |  Latency | Interval| Count| Pipelined|  BRAM   |   DSP   |     FF    |    LUT    | URAM|
+    +-----------------------------+------+------+---------+--------+----------+---------+------+----------+---------+---------+-----------+-----------+-----+
+    |+ spmv_csr                   |     -|  0.00|        -|       -|         -|        -|     -|        no|  12 (1%)|  5 (~0%)|  5404 (1%)|  5707 (2%)|    -|
+    | + spmv_csr_Pipeline_READ_X  |     -|  0.00|        -|       -|         -|        -|     -|        no|        -|        -|   71 (~0%)|  106 (~0%)|    -|
+    |  o READ_X                   |     -|  7.30|        -|       -|         3|        1|     -|       yes|        -|        -|          -|          -|    -|
+    | o L1                        |     -|  7.30|        -|       -|         -|        -|     -|        no|        -|        -|          -|          -|    -|
+    |  + spmv_csr_Pipeline_L2     |     -|  0.00|        -|       -|         -|        -|     -|        no|        -|  5 (~0%)|  721 (~0%)|  627 (~0%)|    -|
+    |   o L2                      |    II|  7.30|        -|       -|        11|        3|     -|       yes|        -|        -|          -|          -|    -|
+    +-----------------------------+------+------+---------+--------+----------+---------+------+----------+---------+---------+-----------+-----------+-----+
+
+
+================================================================
+== HW Interfaces
+================================================================
+* M_AXI
++-------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+| Interface   | Read/Write | Data Width | Address Width | Latency | Offset | Register | Max Widen | Max Read     | Max Write    | Num Read    | Num Write   | Resource Estimate |
+|             |            | (SW->HW)   |               |         |        |          | Bitwidth  | Burst Length | Burst Length | Outstanding | Outstanding |                   |
++-------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+| m_axi_gmem0 | READ_ONLY  | 32 -> 32   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          | BRAM=2            |
+| m_axi_gmem1 | READ_ONLY  | 32 -> 32   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          | BRAM=2            |
+| m_axi_gmem2 | READ_ONLY  | 32 -> 32   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          | BRAM=2            |
+| m_axi_gmem3 | READ_ONLY  | 32 -> 32   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          | BRAM=2            |
+| m_axi_gmem4 | WRITE_ONLY | 32 -> 32   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          | BRAM=2            |
++-------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+
+* S_AXILITE Interfaces
++---------------+------------+---------------+--------+----------+
+| Interface     | Data Width | Address Width | Offset | Register |
++---------------+------------+---------------+--------+----------+
+| s_axi_control | 32         | 7             | 16     | 0        |
++---------------+------------+---------------+--------+----------+
+
+* S_AXILITE Registers
++---------------+---------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| Interface     | Register      | Offset | Width | Access | Description                      | Bit Fields                                                           |
++---------------+---------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| s_axi_control | CTRL          | 0x00   | 32    | RW     | Control signals                  | 0=AP_START 1=AP_DONE 2=AP_IDLE 3=AP_READY 7=AUTO_RESTART 9=INTERRUPT |
+| s_axi_control | GIER          | 0x04   | 32    | RW     | Global Interrupt Enable Register | 0=Enable                                                             |
+| s_axi_control | IP_IER        | 0x08   | 32    | RW     | IP Interrupt Enable Register     | 0=CHAN0_INT_EN 1=CHAN1_INT_EN                                        |
+| s_axi_control | IP_ISR        | 0x0c   | 32    | RW     | IP Interrupt Status Register     | 0=CHAN0_INT_ST 1=CHAN1_INT_ST                                        |
+| s_axi_control | num_rows      | 0x10   | 32    | W      | Data signal of num_rows          |                                                                      |
+| s_axi_control | num_cols      | 0x18   | 32    | W      | Data signal of num_cols          |                                                                      |
+| s_axi_control | A_row_index_1 | 0x20   | 32    | W      | Data signal of A_row_index       |                                                                      |
+| s_axi_control | A_row_index_2 | 0x24   | 32    | W      | Data signal of A_row_index       |                                                                      |
+| s_axi_control | A_col_index_1 | 0x2c   | 32    | W      | Data signal of A_col_index       |                                                                      |
+| s_axi_control | A_col_index_2 | 0x30   | 32    | W      | Data signal of A_col_index       |                                                                      |
+| s_axi_control | A_values_1    | 0x38   | 32    | W      | Data signal of A_values          |                                                                      |
+| s_axi_control | A_values_2    | 0x3c   | 32    | W      | Data signal of A_values          |                                                                      |
+| s_axi_control | x_1           | 0x44   | 32    | W      | Data signal of x                 |                                                                      |
+| s_axi_control | x_2           | 0x48   | 32    | W      | Data signal of x                 |                                                                      |
+| s_axi_control | y_1           | 0x50   | 32    | W      | Data signal of y                 |                                                                      |
+| s_axi_control | y_2           | 0x54   | 32    | W      | Data signal of y                 |                                                                      |
++---------------+---------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+
+* TOP LEVEL CONTROL
++-----------+------------+-----------+
+| Interface | Type       | Ports     |
++-----------+------------+-----------+
+| ap_clk    | clock      | ap_clk    |
+| ap_rst_n  | reset      | ap_rst_n  |
+| interrupt | interrupt  | interrupt |
+| ap_ctrl   | ap_ctrl_hs |           |
++-----------+------------+-----------+
+
+
+================================================================
+== SW I/O Information
+================================================================
+* Top Function Arguments
++-------------+-----------+---------------+
+| Argument    | Direction | Datatype      |
++-------------+-----------+---------------+
+| num_rows    | in        | int           |
+| num_cols    | in        | int           |
+| A_row_index | in        | int const *   |
+| A_col_index | in        | int const *   |
+| A_values    | in        | float const * |
+| x           | in        | float const * |
+| y           | out       | float*        |
++-------------+-----------+---------------+
+
+* SW-to-HW Mapping
++-------------+---------------+-----------+----------+-----------------------------------------+
+| Argument    | HW Interface  | HW Type   | HW Usage | HW Info                                 |
++-------------+---------------+-----------+----------+-----------------------------------------+
+| num_rows    | s_axi_control | register  |          | name=num_rows offset=0x10 range=32      |
+| num_cols    | s_axi_control | register  |          | name=num_cols offset=0x18 range=32      |
+| A_row_index | m_axi_gmem0   | interface |          | channel=0                               |
+| A_row_index | s_axi_control | register  | offset   | name=A_row_index_1 offset=0x20 range=32 |
+| A_row_index | s_axi_control | register  | offset   | name=A_row_index_2 offset=0x24 range=32 |
+| A_col_index | m_axi_gmem1   | interface |          | channel=0                               |
+| A_col_index | s_axi_control | register  | offset   | name=A_col_index_1 offset=0x2c range=32 |
+| A_col_index | s_axi_control | register  | offset   | name=A_col_index_2 offset=0x30 range=32 |
+| A_values    | m_axi_gmem2   | interface |          | channel=0                               |
+| A_values    | s_axi_control | register  | offset   | name=A_values_1 offset=0x38 range=32    |
+| A_values    | s_axi_control | register  | offset   | name=A_values_2 offset=0x3c range=32    |
+| x           | m_axi_gmem3   | interface |          | channel=0                               |
+| x           | s_axi_control | register  | offset   | name=x_1 offset=0x44 range=32           |
+| x           | s_axi_control | register  | offset   | name=x_2 offset=0x48 range=32           |
+| y           | m_axi_gmem4   | interface |          | channel=0                               |
+| y           | s_axi_control | register  | offset   | name=y_1 offset=0x50 range=32           |
+| y           | s_axi_control | register  | offset   | name=y_2 offset=0x54 range=32           |
++-------------+---------------+-----------+----------+-----------------------------------------+
+
+
+================================================================
+== M_AXI Burst Information
+================================================================
+ Note: All burst requests might be further partitioned into multiple requests during RTL generation based on max_read_burst_length or max_write_burst_length settings.
+
+* Inferred Burst Summary
++--------------+-----------+----------+-------+--------+--------------------------+
+| HW Interface | Direction | Length   | Width | Loop   | Loop Location            |
++--------------+-----------+----------+-------+--------+--------------------------+
+| m_axi_gmem0  | read      | 2        | 32    |        |                          |
+| m_axi_gmem1  | read      | variable | 32    | L2     | ../src/spmv_csr.cpp:36:9 |
+| m_axi_gmem2  | read      | variable | 32    | L2     | ../src/spmv_csr.cpp:36:9 |
+| m_axi_gmem3  | read      | variable | 32    | READ_X | ../src/spmv_csr.cpp:23:5 |
+| m_axi_gmem4  | write     | variable | 32    | L1     | ../src/spmv_csr.cpp:29:5 |
++--------------+-----------+----------+-------+--------+--------------------------+
+
+* All M_AXI Variable Accesses
++--------------+-------------+---------------------------+-----------+--------------+----------+--------+--------------------------+------------+---------------------------------------------------------------------------------------------------------+
+| HW Interface | Variable    | Access Location           | Direction | Burst Status | Length   | Loop   | Loop Location            | Resolution | Problem                                                                                                 |
++--------------+-------------+---------------------------+-----------+--------------+----------+--------+--------------------------+------------+---------------------------------------------------------------------------------------------------------+
+| m_axi_gmem0  | A_row_index | ../src/spmv_csr.cpp:32:25 | read      | Widen Fail   |          |        |                          | 214-353    | Could not widen since type i32 size is greater than or equal to the max_widen_bitwidth threshold of 0   |
+| m_axi_gmem0  | A_row_index | ../src/spmv_csr.cpp:32:25 | read      | Fail         |          | L1     | ../src/spmv_csr.cpp:29:5 | 214-230    | Stride is incompatible                                                                                  |
+| m_axi_gmem0  | A_row_index | ../src/spmv_csr.cpp:32:25 | read      | Inferred     | 2        | L1     | ../src/spmv_csr.cpp:29:5 |            |                                                                                                         |
+| m_axi_gmem0  | A_row_index | ../src/spmv_csr.cpp:33:23 | read      | Widen Fail   |          |        |                          | 214-353    | Could not widen since type i32 size is greater than or equal to the max_widen_bitwidth threshold of 0   |
+| m_axi_gmem0  | A_row_index | ../src/spmv_csr.cpp:33:23 | read      | Fail         |          | L1     | ../src/spmv_csr.cpp:29:5 | 214-230    | Stride is incompatible                                                                                  |
+| m_axi_gmem0  | A_row_index | ../src/spmv_csr.cpp:33:23 | read      | Inferred     | 2        | L1     | ../src/spmv_csr.cpp:29:5 |            |                                                                                                         |
+| m_axi_gmem1  | A_col_index | ../src/spmv_csr.cpp:40:23 | read      | Widen Fail   |          | L2     | ../src/spmv_csr.cpp:36:9 | 214-353    | Could not widen since type i32 size is greater than or equal to the max_widen_bitwidth threshold of 0   |
+| m_axi_gmem1  | A_col_index | ../src/spmv_csr.cpp:40:23 | read      | Fail         |          | L1     | ../src/spmv_csr.cpp:29:5 | 214-232    | Access call is in the conditional branch                                                                |
+| m_axi_gmem1  | A_col_index | ../src/spmv_csr.cpp:40:23 | read      | Inferred     | variable | L2     | ../src/spmv_csr.cpp:36:9 |            |                                                                                                         |
+| m_axi_gmem2  | A_values    | ../src/spmv_csr.cpp:39:14 | read      | Widen Fail   |          | L2     | ../src/spmv_csr.cpp:36:9 | 214-353    | Could not widen since type float size is greater than or equal to the max_widen_bitwidth threshold of 0 |
+| m_axi_gmem2  | A_values    | ../src/spmv_csr.cpp:39:14 | read      | Fail         |          | L1     | ../src/spmv_csr.cpp:29:5 | 214-232    | Access call is in the conditional branch                                                                |
+| m_axi_gmem2  | A_values    | ../src/spmv_csr.cpp:39:14 | read      | Inferred     | variable | L2     | ../src/spmv_csr.cpp:36:9 |            |                                                                                                         |
+| m_axi_gmem3  | x           | ../src/spmv_csr.cpp:25:13 | read      | Widen Fail   |          | READ_X | ../src/spmv_csr.cpp:23:5 | 214-353    | Could not widen since type float size is greater than or equal to the max_widen_bitwidth threshold of 0 |
+| m_axi_gmem3  | x           | ../src/spmv_csr.cpp:25:13 | read      | Inferred     | variable | READ_X | ../src/spmv_csr.cpp:23:5 |            |                                                                                                         |
+| m_axi_gmem4  | y           | ../src/spmv_csr.cpp:43:14 | write     | Widen Fail   |          | L1     | ../src/spmv_csr.cpp:29:5 | 214-353    | Could not widen since type float size is greater than or equal to the max_widen_bitwidth threshold of 0 |
+| m_axi_gmem4  | y           | ../src/spmv_csr.cpp:43:14 | write     | Inferred     | variable | L1     | ../src/spmv_csr.cpp:29:5 |            |                                                                                                         |
++--------------+-------------+---------------------------+-----------+--------------+----------+--------+--------------------------+------------+---------------------------------------------------------------------------------------------------------+
+
+    * Resolution URL: docs.xilinx.com/access/sources/dita/topic?Doc_Version=2024.2%20English&url=ug1448-hls-guidance&resourceid=XXX-YYY.html (replace XXX-YYY with column value)
+
+================================================================
+== Bind Op Report
+================================================================
++--------------------------------------+-----+--------+-------------+--------+----------+---------+
+| Name                                 | DSP | Pragma | Variable    | Op     | Impl     | Latency |
++--------------------------------------+-----+--------+-------------+--------+----------+---------+
+| + spmv_csr                           | 5   |        |             |        |          |         |
+|   icmp_ln23_fu_248_p2                |     |        | icmp_ln23   | setgt  | auto     | 0       |
+|   empty_fu_268_p3                    |     |        | empty       | select | auto_sel | 0       |
+|   icmp_ln29_fu_276_p2                |     |        | icmp_ln29   | setgt  | auto     | 0       |
+|   empty_29_fu_306_p3                 |     |        | empty_29    | select | auto_sel | 0       |
+|   icmp_ln29_1_fu_344_p2              |     |        | icmp_ln29_1 | setlt  | auto     | 0       |
+|   add_ln33_fu_349_p2                 |     |        | add_ln33    | add    | fabric   | 0       |
+|   add_ln32_fu_367_p2                 |     |        | add_ln32    | add    | fabric   | 0       |
+|   icmp_ln36_fu_438_p2                |     |        | icmp_ln36   | setlt  | auto     | 0       |
+|   sub_ln36_fu_448_p2                 |     |        | sub_ln36    | sub    | fabric   | 0       |
+|   add_ln36_fu_408_p2                 |     |        | add_ln36    | add    | fabric   | 0       |
+|   empty_32_fu_454_p3                 |     |        | empty_32    | select | auto_sel | 0       |
+|   add_ln36_1_fu_423_p2               |     |        | add_ln36_1  | add    | fabric   | 0       |
+|  + spmv_csr_Pipeline_READ_X          | 0   |        |             |        |          |         |
+|    icmp_ln23_fu_96_p2                |     |        | icmp_ln23   | setlt  | auto     | 0       |
+|    add_ln23_fu_102_p2                |     |        | add_ln23    | add    | fabric   | 0       |
+|  + spmv_csr_Pipeline_L2              | 5   |        |             |        |          |         |
+|    icmp_ln36_fu_157_p2               |     |        | icmp_ln36   | setlt  | auto     | 0       |
+|    fmul_32ns_32ns_32_3_max_dsp_1_U6  | 3   |        | mul         | fmul   | maxdsp   | 2       |
+|    fadd_32ns_32ns_32_4_full_dsp_1_U5 | 2   |        | sum_1       | fadd   | fulldsp  | 3       |
+|    add_ln36_fu_162_p2                |     |        | add_ln36    | add    | fabric   | 0       |
++--------------------------------------+-----+--------+-------------+--------+----------+---------+
+
+
+================================================================
+== Storage Report
+================================================================
++-------------------+--------------+-----------+------+------+--------+----------+------+---------+------------------+
+| Name              | Usage        | Type      | BRAM | URAM | Pragma | Variable | Impl | Latency | Bitwidth, Depth, |
+|                   |              |           |      |      |        |          |      |         | Banks            |
++-------------------+--------------+-----------+------+------+--------+----------+------+---------+------------------+
+| + spmv_csr        |              |           | 12   | 0    |        |          |      |         |                  |
+|   control_s_axi_U | interface    | s_axilite |      |      |        |          |      |         |                  |
+|   gmem0_m_axi_U   | interface    | m_axi     | 2    |      |        |          |      |         |                  |
+|   gmem1_m_axi_U   | interface    | m_axi     | 2    |      |        |          |      |         |                  |
+|   gmem2_m_axi_U   | interface    | m_axi     | 2    |      |        |          |      |         |                  |
+|   gmem3_m_axi_U   | interface    | m_axi     | 2    |      |        |          |      |         |                  |
+|   gmem4_m_axi_U   | interface    | m_axi     | 2    |      |        |          |      |         |                  |
+|   x_buf_U         | ram_1p array |           | 2    |      |        | x_buf    | auto | 1       | 32, 1024, 1      |
++-------------------+--------------+-----------+------+------+--------+----------+------+---------+------------------+
+
+
+================================================================
+== Pragma Report
+================================================================
+* Valid Pragma Syntax
++-----------+--------------------------------------------------+-------------------------------------------------+
+| Type      | Options                                          | Location                                        |
++-----------+--------------------------------------------------+-------------------------------------------------+
+| interface | m_axi port=A_row_index offset=slave bundle=gmem0 | ../src/spmv_csr.cpp:5 in spmv_csr, A_row_index  |
+| interface | m_axi port=A_col_index offset=slave bundle=gmem1 | ../src/spmv_csr.cpp:6 in spmv_csr, A_col_index  |
+| interface | m_axi port=A_values offset=slave bundle=gmem2    | ../src/spmv_csr.cpp:7 in spmv_csr, A_values     |
+| interface | m_axi port=x offset=slave bundle=gmem3           | ../src/spmv_csr.cpp:8 in spmv_csr, x            |
+| interface | m_axi port=y offset=slave bundle=gmem4           | ../src/spmv_csr.cpp:9 in spmv_csr, y            |
+| interface | s_axilite port=num_rows bundle=control           | ../src/spmv_csr.cpp:11 in spmv_csr, num_rows    |
+| interface | s_axilite port=num_cols bundle=control           | ../src/spmv_csr.cpp:12 in spmv_csr, num_cols    |
+| interface | s_axilite port=A_row_index bundle=control        | ../src/spmv_csr.cpp:13 in spmv_csr, A_row_index |
+| interface | s_axilite port=A_col_index bundle=control        | ../src/spmv_csr.cpp:14 in spmv_csr, A_col_index |
+| interface | s_axilite port=A_values bundle=control           | ../src/spmv_csr.cpp:15 in spmv_csr, A_values    |
+| interface | s_axilite port=x bundle=control                  | ../src/spmv_csr.cpp:16 in spmv_csr, x           |
+| interface | s_axilite port=y bundle=control                  | ../src/spmv_csr.cpp:17 in spmv_csr, y           |
+| interface | s_axilite port=return bundle=control             | ../src/spmv_csr.cpp:18 in spmv_csr, return      |
+| pipeline  | II=1                                             | ../src/spmv_csr.cpp:24 in spmv_csr              |
+| pipeline  | II=1                                             | ../src/spmv_csr.cpp:37 in spmv_csr              |
++-----------+--------------------------------------------------+-------------------------------------------------+
+
+

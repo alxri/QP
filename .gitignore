@@ -1,0 +1,22 @@
+# --- Xilinx / Vivado / Vitis HLS Build Directories ---
+*HW_HLS/
+*HW_Vivado/
+vivado_build/
+IP-catalog/
+_ide/
+.Xil/
+NA/
+logs/
+
+# --- Log and Journal files ---
+*.log
+*.jou
+*.str
+
+# --- Bitstreams and Hardware Handoffs ---
+# (Remove these two lines if you WANT to keep the final .bit and .hwh files on GitHub)
+*.bit
+*.hwh
+
+# --- Jupyter Checkpoints (since I saw a jupyter folder earlier) ---
+.ipynb_checkpoints/

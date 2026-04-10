@@ -1,0 +1,351 @@
+#-----------------------------------------------------------
+# Vivado v2024.2 (64-bit)
+# SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+# IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+# SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+# Start of session at: Thu Apr  9 12:26:08 2026
+# Process ID         : 3695
+# Current directory  : /home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1
+# Command line       : vivado -log design_1_wrapper.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source design_1_wrapper.tcl
+# Log file           : /home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/design_1_wrapper.vds
+# Journal file       : /home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/vivado.jou
+# Running On         : eslpc53
+# Platform           : Ubuntu
+# Operating System   : Ubuntu 20.04.3 LTS
+# Processor Detail   : Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz
+# CPU Frequency      : 4332.272 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 16550 MB
+# Swap memory        : 1487 MB
+# Total Virtual      : 18037 MB
+# Available Virtual  : 15771 MB
+#-----------------------------------------------------------
+source design_1_wrapper.tcl -notrace
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/romoirib/QP/spmv/HLS/spmv_csr/spmv_csr/hls/impl/ip'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx/Vivado/2024.2/data/ip'.
+Command: synth_design -top design_1_wrapper -part xczu7ev-ffvc1156-2-e
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xczu7ev'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xczu7ev'
+INFO: [Device 21-403] Loading part xczu7ev-ffvc1156-2-e
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 7 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 3739
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 2683.949 ; gain = 131.688 ; free physical = 10776 ; free virtual = 13262
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'design_1_wrapper' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/hdl/design_1_wrapper.v:13]
+INFO: [Synth 8-6157] synthesizing module 'design_1' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:13]
+INFO: [Synth 8-6157] synthesizing module 'design_1_axi_smc_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/.Xil/Vivado-3695-eslpc53/realtime/design_1_axi_smc_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'design_1_axi_smc_0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/.Xil/Vivado-3695-eslpc53/realtime/design_1_axi_smc_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'M00_AXI_awprot' of module 'design_1_axi_smc_0' is unconnected for instance 'axi_smc' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:237]
+WARNING: [Synth 8-7071] port 'M00_AXI_arprot' of module 'design_1_axi_smc_0' is unconnected for instance 'axi_smc' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:237]
+WARNING: [Synth 8-7023] instance 'axi_smc' of module 'design_1_axi_smc_0' has 99 connections declared, but only 97 given [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:237]
+INFO: [Synth 8-6157] synthesizing module 'design_1_axi_smc_1_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/.Xil/Vivado-3695-eslpc53/realtime/design_1_axi_smc_1_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'design_1_axi_smc_1_0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/.Xil/Vivado-3695-eslpc53/realtime/design_1_axi_smc_1_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'design_1_rst_ps8_0_100M_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/.Xil/Vivado-3695-eslpc53/realtime/design_1_rst_ps8_0_100M_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'design_1_rst_ps8_0_100M_0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/.Xil/Vivado-3695-eslpc53/realtime/design_1_rst_ps8_0_100M_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'mb_reset' of module 'design_1_rst_ps8_0_100M_0' is unconnected for instance 'rst_ps8_0_100M' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:459]
+WARNING: [Synth 8-7071] port 'bus_struct_reset' of module 'design_1_rst_ps8_0_100M_0' is unconnected for instance 'rst_ps8_0_100M' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:459]
+WARNING: [Synth 8-7071] port 'peripheral_reset' of module 'design_1_rst_ps8_0_100M_0' is unconnected for instance 'rst_ps8_0_100M' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:459]
+WARNING: [Synth 8-7071] port 'interconnect_aresetn' of module 'design_1_rst_ps8_0_100M_0' is unconnected for instance 'rst_ps8_0_100M' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:459]
+WARNING: [Synth 8-7023] instance 'rst_ps8_0_100M' of module 'design_1_rst_ps8_0_100M_0' has 10 connections declared, but only 6 given [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:459]
+INFO: [Synth 8-6157] synthesizing module 'design_1_spmv_csr_0_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/.Xil/Vivado-3695-eslpc53/realtime/design_1_spmv_csr_0_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'design_1_spmv_csr_0_0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/.Xil/Vivado-3695-eslpc53/realtime/design_1_spmv_csr_0_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'interrupt' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_ARREGION' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_AWADDR' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_AWBURST' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_AWCACHE' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_AWID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_AWLEN' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_AWLOCK' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_AWPROT' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_AWQOS' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_AWREGION' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_AWSIZE' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_AWVALID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_BREADY' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_WDATA' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_WID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_WLAST' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_WSTRB' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem0_WVALID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_ARREGION' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_AWADDR' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_AWBURST' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_AWCACHE' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_AWID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_AWLEN' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_AWLOCK' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_AWPROT' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_AWQOS' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_AWREGION' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_AWSIZE' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_AWVALID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_BREADY' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_WDATA' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_WID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_WLAST' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_WSTRB' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem1_WVALID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_ARREGION' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_AWADDR' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_AWBURST' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_AWCACHE' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_AWID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_AWLEN' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_AWLOCK' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_AWPROT' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_AWQOS' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_AWREGION' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_AWSIZE' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_AWVALID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_BREADY' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_WDATA' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_WID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_WLAST' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_WSTRB' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem2_WVALID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_ARREGION' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_AWADDR' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_AWBURST' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_AWCACHE' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_AWID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_AWLEN' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_AWLOCK' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_AWPROT' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_AWQOS' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_AWREGION' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_AWSIZE' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_AWVALID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_BREADY' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_WDATA' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_WID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_WLAST' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_WSTRB' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem3_WVALID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_ARADDR' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_ARBURST' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_ARCACHE' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_ARID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_ARLEN' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_ARLOCK' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_ARPROT' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_ARQOS' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_ARREGION' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_ARSIZE' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_ARVALID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_AWREGION' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_RREADY' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7071] port 'm_axi_gmem4_WID' of module 'design_1_spmv_csr_0_0' is unconnected for instance 'spmv_csr_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+WARNING: [Synth 8-7023] instance 'spmv_csr_0' of module 'design_1_spmv_csr_0_0' has 220 connections declared, but only 133 given [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:466]
+INFO: [Synth 8-6157] synthesizing module 'design_1_zynq_ultra_ps_e_0_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/.Xil/Vivado-3695-eslpc53/realtime/design_1_zynq_ultra_ps_e_0_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'design_1_zynq_ultra_ps_e_0_0' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/.Xil/Vivado-3695-eslpc53/realtime/design_1_zynq_ultra_ps_e_0_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'saxigp0_bid' of module 'design_1_zynq_ultra_ps_e_0_0' is unconnected for instance 'zynq_ultra_ps_e_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:600]
+WARNING: [Synth 8-7071] port 'saxigp0_rid' of module 'design_1_zynq_ultra_ps_e_0_0' is unconnected for instance 'zynq_ultra_ps_e_0' [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:600]
+WARNING: [Synth 8-7023] instance 'zynq_ultra_ps_e_0' of module 'design_1_zynq_ultra_ps_e_0_0' has 123 connections declared, but only 121 given [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:600]
+INFO: [Synth 8-6155] done synthesizing module 'design_1' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/synth/design_1.v:13]
+INFO: [Synth 8-6155] done synthesizing module 'design_1_wrapper' (0#1) [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/hdl/design_1_wrapper.v:13]
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 2764.918 ; gain = 212.656 ; free physical = 10672 ; free virtual = 13161
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 2764.918 ; gain = 212.656 ; free physical = 10672 ; free virtual = 13161
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 2764.918 ; gain = 212.656 ; free physical = 10672 ; free virtual = 13161
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 2764.918 ; gain = 0.000 ; free physical = 10672 ; free virtual = 13161
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_zynq_ultra_ps_e_0_0/design_1_zynq_ultra_ps_e_0_0/design_1_zynq_ultra_ps_e_0_0_in_context.xdc] for cell 'design_1_i/zynq_ultra_ps_e_0'
+Finished Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_zynq_ultra_ps_e_0_0/design_1_zynq_ultra_ps_e_0_0/design_1_zynq_ultra_ps_e_0_0_in_context.xdc] for cell 'design_1_i/zynq_ultra_ps_e_0'
+Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_spmv_csr_0_0/design_1_spmv_csr_0_0/design_1_spmv_csr_0_0_in_context.xdc] for cell 'design_1_i/spmv_csr_0'
+Finished Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_spmv_csr_0_0/design_1_spmv_csr_0_0/design_1_spmv_csr_0_0_in_context.xdc] for cell 'design_1_i/spmv_csr_0'
+Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_axi_smc_0/design_1_axi_smc_0/design_1_axi_smc_0_in_context.xdc] for cell 'design_1_i/axi_smc'
+Finished Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_axi_smc_0/design_1_axi_smc_0/design_1_axi_smc_0_in_context.xdc] for cell 'design_1_i/axi_smc'
+Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_rst_ps8_0_100M_0/design_1_rst_ps8_0_100M_0/design_1_rst_ps8_0_100M_0_in_context.xdc] for cell 'design_1_i/rst_ps8_0_100M'
+Finished Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_rst_ps8_0_100M_0/design_1_rst_ps8_0_100M_0/design_1_rst_ps8_0_100M_0_in_context.xdc] for cell 'design_1_i/rst_ps8_0_100M'
+Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_axi_smc_1_0/design_1_axi_smc_1_0/design_1_axi_smc_1_0_in_context.xdc] for cell 'design_1_i/axi_smc_1'
+Finished Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.gen/sources_1/bd/design_1/ip/design_1_axi_smc_1_0/design_1_axi_smc_1_0/design_1_axi_smc_1_0_in_context.xdc] for cell 'design_1_i/axi_smc_1'
+Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/dont_touch.xdc]
+Finished Parsing XDC File [/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/dont_touch.xdc]
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2818.508 ; gain = 0.000 ; free physical = 10674 ; free virtual = 13153
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.01 . Memory (MB): peak = 2818.508 ; gain = 0.000 ; free physical = 10674 ; free virtual = 13153
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:14 ; elapsed = 00:00:14 . Memory (MB): peak = 2818.508 ; gain = 266.246 ; free physical = 10669 ; free virtual = 13148
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xczu7ev-ffvc1156-2-e
+INFO: [Synth 8-6742] Reading net delay rules and data
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:14 ; elapsed = 00:00:14 . Memory (MB): peak = 2826.512 ; gain = 274.250 ; free physical = 10669 ; free virtual = 13148
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+Applied set_property KEEP_HIERARCHY = SOFT for design_1_i. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for design_1_i/zynq_ultra_ps_e_0. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for design_1_i/spmv_csr_0. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for design_1_i/axi_smc. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for design_1_i/rst_ps8_0_100M. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for design_1_i/axi_smc_1. (constraint file  auto generated constraint).
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:14 ; elapsed = 00:00:14 . Memory (MB): peak = 2826.512 ; gain = 274.250 ; free physical = 10669 ; free virtual = 13148
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:14 ; elapsed = 00:00:14 . Memory (MB): peak = 2826.512 ; gain = 274.250 ; free physical = 10667 ; free virtual = 13147
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 1728 (col length:144)
+BRAMs: 624 (col length: RAMB18 144 RAMB36 72)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-7080] Parallel synthesis criteria is not met
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:15 ; elapsed = 00:00:15 . Memory (MB): peak = 2826.512 ; gain = 274.250 ; free physical = 10663 ; free virtual = 13148
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:23 ; elapsed = 00:00:23 . Memory (MB): peak = 3469.117 ; gain = 916.855 ; free physical = 10094 ; free virtual = 12581
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:23 ; elapsed = 00:00:23 . Memory (MB): peak = 3469.117 ; gain = 916.855 ; free physical = 10094 ; free virtual = 12581
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:23 ; elapsed = 00:00:23 . Memory (MB): peak = 3480.125 ; gain = 927.863 ; free physical = 10082 ; free virtual = 12570
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:26 ; elapsed = 00:00:26 . Memory (MB): peak = 3640.938 ; gain = 1088.676 ; free physical = 9942 ; free virtual = 12430
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:26 ; elapsed = 00:00:26 . Memory (MB): peak = 3640.938 ; gain = 1088.676 ; free physical = 9942 ; free virtual = 12430
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:26 ; elapsed = 00:00:26 . Memory (MB): peak = 3640.938 ; gain = 1088.676 ; free physical = 9942 ; free virtual = 12429
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:26 ; elapsed = 00:00:26 . Memory (MB): peak = 3640.938 ; gain = 1088.676 ; free physical = 9942 ; free virtual = 12429
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:26 ; elapsed = 00:00:26 . Memory (MB): peak = 3640.938 ; gain = 1088.676 ; free physical = 9942 ; free virtual = 12429
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:26 ; elapsed = 00:00:26 . Memory (MB): peak = 3640.938 ; gain = 1088.676 ; free physical = 9942 ; free virtual = 12429
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++------+-----------------------------+----------+
+|      |BlackBox name                |Instances |
++------+-----------------------------+----------+
+|1     |design_1_axi_smc_0           |         1|
+|2     |design_1_axi_smc_1_0         |         1|
+|3     |design_1_rst_ps8_0_100M_0    |         1|
+|4     |design_1_spmv_csr_0_0        |         1|
+|5     |design_1_zynq_ultra_ps_e_0_0 |         1|
++------+-----------------------------+----------+
+
+Report Cell Usage: 
++------+---------------------------+------+
+|      |Cell                       |Count |
++------+---------------------------+------+
+|1     |design_1_axi_smc           |     1|
+|2     |design_1_axi_smc_1         |     1|
+|3     |design_1_rst_ps8_0_100M    |     1|
+|4     |design_1_spmv_csr_0        |     1|
+|5     |design_1_zynq_ultra_ps_e_0 |     1|
++------+---------------------------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:26 ; elapsed = 00:00:26 . Memory (MB): peak = 3640.938 ; gain = 1088.676 ; free physical = 9942 ; free virtual = 12429
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 1 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:21 ; elapsed = 00:00:21 . Memory (MB): peak = 3640.938 ; gain = 1035.086 ; free physical = 9941 ; free virtual = 12427
+Synthesis Optimization Complete : Time (s): cpu = 00:00:26 ; elapsed = 00:00:26 . Memory (MB): peak = 3640.938 ; gain = 1088.676 ; free physical = 9941 ; free virtual = 12427
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:02 ; elapsed = 00:00:00 . Memory (MB): peak = 3640.938 ; gain = 0.000 ; free physical = 10107 ; free virtual = 12593
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3640.938 ; gain = 0.000 ; free physical = 10106 ; free virtual = 12591
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Synth Design complete | Checksum: 1c331553
+INFO: [Common 17-83] Releasing license: Synthesis
+30 Infos, 100 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:35 ; elapsed = 00:00:34 . Memory (MB): peak = 3640.938 ; gain = 2284.871 ; free physical = 10106 ; free virtual = 12591
+INFO: [Common 17-2834] synth_design peak Physical Memory [PSS] (MB): overall = 2958.875; main = 2958.875; forked = 319.577
+INFO: [Common 17-2834] synth_design peak Virtual Memory [VSS] (MB): overall = 4122.934; main = 3567.109; forked = 915.766
+INFO: [Common 17-1381] The checkpoint '/home/romoirib/QP/spmv/spmv_csr_vivado/spmv_csr_vivado.runs/synth_1/design_1_wrapper.dcp' has been generated.
+INFO: [Vivado 12-24828] Executing command : report_utilization -file design_1_wrapper_utilization_synth.rpt -pb design_1_wrapper_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Thu Apr  9 12:26:52 2026...
