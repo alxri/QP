@@ -1,5 +1,5 @@
 .PHONY: hls_project hls_sim hls_synth ip vivado_project bitstream clean cleanall help
-PROJECT_NAME := spmv_csr_optimized
+PROJECT_NAME := spmv_csc
 
 help:
 	@echo "VITIS HLS targets"
@@ -22,6 +22,7 @@ hls_project:
 # 2. Run Synthesis (CSYNTH)
 hls_synth:
 	vitis_hls -f scripts/$(PROJECT_NAME)_HLS_csynth.tcl
+	cp spmv_csc_HW_HLS/solution1/syn/report/spmv_csc_csynth.rpt reports/
 
 # 3. Run Simulation (CSIM)
 hls_sim:
@@ -29,10 +30,14 @@ hls_sim:
 
 hls_cosim:
 	vitis_hls -f scripts/$(PROJECT_NAME)_HLS_cosim.tcl
+	cp spmv_csc_HW_HLS/solution1/syn/report/spmv_csc_csynth.rpt reports/
+	cp spmv_csc_HW_HLS/solution1/sim/report/spmv_csc_cosim.rpt reports/
 
 # 4. Packaging (EXPORT)
 ip: hls_synth
 	vitis_hls -f scripts/$(PROJECT_NAME)_HLS_export.tcl
+	cp spmv_csc_HW_HLS/solution1/syn/report/spmv_csc_csynth.rpt reports/
+
 
 # --- VIVADO ---
 

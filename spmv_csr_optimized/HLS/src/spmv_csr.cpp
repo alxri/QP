@@ -1,6 +1,7 @@
 #include "spmv_csr.h"
  
 
+// Number of 512 bit packets read per burst
 #define BURST_SIZE 16
 
 
@@ -10,7 +11,7 @@ void fetch_matrix(int nnz, const float16 *A_values, const int16 *A_col_index, hl
    // Total number of 16-element chunks in the whole matrix
     int total_chunks = (nnz + PACK_SIZE - 1) / PACK_SIZE;
 
-    // Outer Loop: Request one small burst at a time
+    // Outer Loop: Request one burst of data at a time
     for (int chunk = 0; chunk < total_chunks; chunk += BURST_SIZE) {
         
         // Calculate how many elements to read in this specific burst
@@ -58,6 +59,7 @@ void compute_spmv(int num_rows, const int *A_row_index, const float *x_buf, hls:
         int row_start = A_row_index[i];
         int row_end = A_row_index[i + 1];
 
+        // For each non-zero in the row, read from the streams and perform the multiply-add
         for (int j = row_start; j < row_end; j++) {
             #pragma HLS PIPELINE II=1
             // CRITICAL: Force compiler to ignore the loop dependency
@@ -86,11 +88,12 @@ void compute_spmv(int num_rows, const int *A_row_index, const float *x_buf, hls:
 void spmv_csr(int num_rows, int num_cols, int nnz, const int *A_row_index, const int16 *A_col_index, const float16 *A_values, const float16 *x, float *y)
 {
     // AXI Master Interfaces
-    #pragma HLS INTERFACE m_axi port=A_row_index offset=slave bundle=gmem0
-    #pragma HLS INTERFACE m_axi port=A_col_index offset=slave bundle=gmem1
-    #pragma HLS INTERFACE m_axi port=A_values    offset=slave bundle=gmem2
-    #pragma HLS INTERFACE m_axi port=x           offset=slave bundle=gmem3
-    #pragma HLS INTERFACE m_axi port=y           offset=slave bundle=gmem4
+    // Depth only for cosim!!!!!
+    #pragma HLS INTERFACE m_axi port=A_row_index offset=slave bundle=gmem0 depth=1025
+    #pragma HLS INTERFACE m_axi port=A_col_index offset=slave bundle=gmem1 depth=8000
+    #pragma HLS INTERFACE m_axi port=A_values    offset=slave bundle=gmem2 depth=8000
+    #pragma HLS INTERFACE m_axi port=x           offset=slave bundle=gmem3 depth=64
+    #pragma HLS INTERFACE m_axi port=y           offset=slave bundle=gmem4 depth=1024
 
     // AXI Lite Control Interfaces
     #pragma HLS INTERFACE s_axilite port=num_rows bundle=control
