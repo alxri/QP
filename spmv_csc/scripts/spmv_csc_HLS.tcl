@@ -6,7 +6,12 @@ add_files HLS/include/spmv_csc.h
 add_files HLS/src/spmv_csc.cpp -cflags "-I HLS/include"
 
 # Testbench Files - Adding it here makes it available for hls_sim
-add_files -tb HLS/test/tb_spmv_csc.cpp -cflags "-I HLS/include"
+add_files -tb HLS/test/tb_spmv_csc.cpp -cflags "-I HLS/include -I HLS/test"
+
+add_files -tb HLS/test/cols.dat
+add_files -tb HLS/test/data.dat
+add_files -tb HLS/test/matrix.dat
+add_files -tb HLS/test/rows.dat
 
 open_solution "solution1" -flow_target vivado
 set_part {xczu7ev-ffvc1156-2-e}
