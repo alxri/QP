@@ -23,6 +23,20 @@ struct NnzPkt
     bool last;
 };
 
+static void read_col_nnz(int num_cols, const int *A_col_ptr, hls::stream<int> &col_nnz_stream)
+{
+#pragma HLS INLINE off
+    int prev = A_col_ptr[0];
+
+    for (int col = 0; col < num_cols; ++col)
+    {
+#pragma HLS PIPELINE II = 1
+        int next = A_col_ptr[col + 1];
+        col_nnz_stream.write(next - prev);
+        prev = next;
+    }
+}
+
 static void read_x_packed(int num_cols, const float16 *x_in, hls::stream<float> &x_stream)
 {
 #pragma HLS INLINE off
@@ -96,13 +110,12 @@ static void read_nnz_packed(int nnz,
 }
 
 static void distribute_to_pe(int num_cols,
-                          const int *A_col_ptr,
+                          hls::stream<int> &col_nnz_stream,
                           hls::stream<float> &x_stream,
                           hls::stream<NnzPack> &nnz_stream,
                           hls::stream<NnzPkt> pe_streams[NUM_PES])
 {
 #pragma HLS INLINE off
-    int prev = A_col_ptr[0];
     int pe = 0;
 
     NnzPack pack;
@@ -113,9 +126,7 @@ static void distribute_to_pe(int num_cols,
 
     for (int col = 0; col < num_cols; ++col)
     {
-        int next = A_col_ptr[col + 1];
-        int col_nnz = next - prev;
-        prev = next;
+        int col_nnz = col_nnz_stream.read();
 
         float x_i = x_stream.read();
 
@@ -257,17 +268,20 @@ static void spmv_csc_dataflow(int num_rows,
 #pragma HLS INLINE off
 
     hls::stream<float> x_stream("x_stream");
+    hls::stream<int> col_nnz_stream("col_nnz_stream");
     hls::stream<NnzPack> nnz_stream("nnz_stream");
     hls::stream<NnzPkt> pe_streams[NUM_PES];
 
 #pragma HLS STREAM variable = x_stream depth = 64
+#pragma HLS STREAM variable = col_nnz_stream depth = 64
 #pragma HLS STREAM variable = nnz_stream depth = 256
 #pragma HLS STREAM variable = pe_streams depth = 256
 
 #pragma HLS DATAFLOW
     read_x_packed(num_cols, x, x_stream);
     read_nnz_packed(nnz, A_row_idx, A_values, nnz_stream);
-    distribute_to_pe(num_cols, A_col_ptr, x_stream, nnz_stream, pe_streams);
+    read_col_nnz(num_cols, A_col_ptr, col_nnz_stream);
+    distribute_to_pe(num_cols, col_nnz_stream, x_stream, nnz_stream, pe_streams);
 
     for (int pe = 0; pe < NUM_PES; ++pe)
     {
