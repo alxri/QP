@@ -32,7 +32,7 @@ int main() {
     // Set matrix dimensions and density
     int num_rows = 1024;
     int num_cols = 1024;
-    float density = 0.10f; // 10%
+    float density = 0.0001f; // 10%
 
     std::vector<float> A_values;
     std::vector<int>   A_row_idx;

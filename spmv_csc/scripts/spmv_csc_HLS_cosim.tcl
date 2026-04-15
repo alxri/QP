@@ -8,6 +8,6 @@ csynth_design
 
 # Step 2: Run C/RTL Co-simulation
 # The -trace_level all flag saves the waveforms so you can view the pipeline execution
-cosim_design -trace_level all
+cosim_design -trace_level all -tool xsim
 
 quit

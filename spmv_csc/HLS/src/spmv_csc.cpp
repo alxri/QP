@@ -1,13 +1,18 @@
 #include "spmv_csc.h"
 
+#include "ap_int.h"
+
 #ifndef NUM_PES
 #define NUM_PES 8
 #endif
 
-struct NnzPair
+static constexpr int NNZ_LANES = (NUM_PES < PACK_SIZE) ? NUM_PES : PACK_SIZE;
+
+struct NnzPack
 {
-    int row;
-    float val;
+    int row[NNZ_LANES];
+    float val[NNZ_LANES];
+    ap_uint<8> n;
 };
 
 struct NnzPkt
@@ -42,7 +47,7 @@ static void read_x_packed(int num_cols, const float16 *x_in, hls::stream<float> 
 static void read_nnz_packed(int nnz,
                             const int16 *row_in,
                             const float16 *val_in,
-                            hls::stream<NnzPair> &nnz_stream)
+                            hls::stream<NnzPack> &nnz_stream)
 {
 #pragma HLS INLINE off
     const int words = CEIL_DIV(nnz, PACK_SIZE);
@@ -52,16 +57,39 @@ static void read_nnz_packed(int nnz,
     {
         int16 rows = row_in[w];
         float16 vals = val_in[w];
-        for (int lane = 0; lane < PACK_SIZE; ++lane)
+
+        for (int base = 0; base < PACK_SIZE; base += NNZ_LANES)
         {
 #pragma HLS PIPELINE II = 1
             if (idx < nnz)
             {
-                NnzPair p;
-                p.row = rows[lane];
-                p.val = vals[lane];
-                nnz_stream.write(p);
-                ++idx;
+                NnzPack pack;
+                int count = nnz - idx;
+                if (count > NNZ_LANES)
+                    count = NNZ_LANES;
+                const int remaining_in_word = PACK_SIZE - base;
+                if (count > remaining_in_word)
+                    count = remaining_in_word;
+
+                pack.n = (ap_uint<8>)count;
+
+                for (int i = 0; i < NNZ_LANES; ++i)
+                {
+#pragma HLS UNROLL
+                    if (i < count)
+                    {
+                        pack.row[i] = rows[base + i];
+                        pack.val[i] = vals[base + i];
+                    }
+                    else
+                    {
+                        pack.row[i] = 0;
+                        pack.val[i] = 0.0f;
+                    }
+                }
+
+                nnz_stream.write(pack);
+                idx += count;
             }
         }
     }
@@ -70,12 +98,18 @@ static void read_nnz_packed(int nnz,
 static void distribute_to_pe(int num_cols,
                           const int *A_col_ptr,
                           hls::stream<float> &x_stream,
-                          hls::stream<NnzPair> &nnz_stream,
+                          hls::stream<NnzPack> &nnz_stream,
                           hls::stream<NnzPkt> pe_streams[NUM_PES])
 {
 #pragma HLS INLINE off
     int prev = A_col_ptr[0];
     int pe = 0;
+
+    NnzPack pack;
+#pragma HLS ARRAY_PARTITION variable = pack.row complete
+#pragma HLS ARRAY_PARTITION variable = pack.val complete
+    int pack_pos = 0;
+    int pack_n = 0;
 
     for (int col = 0; col < num_cols; ++col)
     {
@@ -85,19 +119,60 @@ static void distribute_to_pe(int num_cols,
 
         float x_i = x_stream.read();
 
-        for (int t = 0; t < col_nnz; ++t)
+        while (col_nnz > 0)
         {
 #pragma HLS PIPELINE II = 1
-            NnzPair pair = nnz_stream.read();
+            if (pack_pos >= pack_n)
+            {
+                pack = nnz_stream.read();
+                pack_n = (int)pack.n;
+                pack_pos = 0;
+            }
 
-            NnzPkt pkt;
-            pkt.row = pair.row;
-            pkt.val = pair.val;
-            pkt.x = x_i;
-            pkt.last = false;
+            int available = pack_n - pack_pos;
+            int send = (available < col_nnz) ? available : col_nnz;
+            if (send > NNZ_LANES)
+                send = NNZ_LANES;
 
-            pe_streams[pe].write(pkt);
-            pe = (pe == (NUM_PES - 1)) ? 0 : (pe + 1);
+            NnzPkt pkts[NNZ_LANES];
+#pragma HLS ARRAY_PARTITION variable = pkts complete
+
+            for (int i = 0; i < NNZ_LANES; ++i)
+            {
+#pragma HLS UNROLL
+                if (i < send)
+                {
+                    pkts[i].row = pack.row[pack_pos + i];
+                    pkts[i].val = pack.val[pack_pos + i];
+                    pkts[i].x = x_i;
+                    pkts[i].last = false;
+                }
+                else
+                {
+                    pkts[i].row = 0;
+                    pkts[i].val = 0.0f;
+                    pkts[i].x = 0.0f;
+                    pkts[i].last = false;
+                }
+            }
+
+            for (int j = 0; j < NUM_PES; ++j)
+            {
+#pragma HLS UNROLL
+                int rel = j - pe;
+                if (rel < 0)
+                    rel += NUM_PES;
+                if (rel < send)
+                {
+                    pe_streams[j].write(pkts[rel]);
+                }
+            }
+
+            pe += send;
+            if (pe >= NUM_PES)
+                pe -= NUM_PES;
+            pack_pos += send;
+            col_nnz -= send;
         }
     }
 
@@ -182,7 +257,7 @@ static void spmv_csc_dataflow(int num_rows,
 #pragma HLS INLINE off
 
     hls::stream<float> x_stream("x_stream");
-    hls::stream<NnzPair> nnz_stream("nnz_stream");
+    hls::stream<NnzPack> nnz_stream("nnz_stream");
     hls::stream<NnzPkt> pe_streams[NUM_PES];
 
 #pragma HLS STREAM variable = x_stream depth = 64
