@@ -23,36 +23,39 @@ struct NnzPkt
     bool last;
 };
 
-static void read_col_nnz(int num_cols, const int *A_col_ptr, hls::stream<int> &col_nnz_stream)
+struct ColMeta
+{
+    int nnz;
+    float x;
+};
+
+static void read_col_meta(int num_cols,
+                          const int *A_col_ptr,
+                          const float16 *x_in,
+                          hls::stream<ColMeta> &col_meta_stream)
 {
 #pragma HLS INLINE off
     int prev = A_col_ptr[0];
 
-    for (int col = 0; col < num_cols; ++col)
-    {
-#pragma HLS PIPELINE II = 1
-        int next = A_col_ptr[col + 1];
-        col_nnz_stream.write(next - prev);
-        prev = next;
-    }
-}
-
-static void read_x_packed(int num_cols, const float16 *x_in, hls::stream<float> &x_stream)
-{
-#pragma HLS INLINE off
     const int words = CEIL_DIV(num_cols, PACK_SIZE);
-    int idx = 0;
-
+    int col = 0;
     for (int w = 0; w < words; ++w)
     {
         float16 xw = x_in[w];
         for (int lane = 0; lane < PACK_SIZE; ++lane)
         {
 #pragma HLS PIPELINE II = 1
-            if (idx < num_cols)
+            if (col < num_cols)
             {
-                x_stream.write(xw[lane]);
-                ++idx;
+                int next = A_col_ptr[col + 1];
+
+                ColMeta meta;
+                meta.nnz = next - prev;
+                meta.x = xw[lane];
+                col_meta_stream.write(meta);
+
+                prev = next;
+                ++col;
             }
         }
     }
@@ -110,10 +113,9 @@ static void read_nnz_packed(int nnz,
 }
 
 static void distribute_to_pe(int num_cols,
-                          hls::stream<int> &col_nnz_stream,
-                          hls::stream<float> &x_stream,
-                          hls::stream<NnzPack> &nnz_stream,
-                          hls::stream<NnzPkt> pe_streams[NUM_PES])
+                             hls::stream<ColMeta> &col_meta_stream,
+                             hls::stream<NnzPack> &nnz_stream,
+                             hls::stream<NnzPkt> pe_streams[NUM_PES])
 {
 #pragma HLS INLINE off
     int pe = 0;
@@ -124,66 +126,89 @@ static void distribute_to_pe(int num_cols,
     int pack_pos = 0;
     int pack_n = 0;
 
-    for (int col = 0; col < num_cols; ++col)
+    int cols_loaded = 0;
+    int col_nnz = 0;
+    float x_i = 0.0f;
+
+    // Flattened control: one pipelined loop handles both
+    // (a) loading per-column metadata and (b) distributing NNZs.
+    // Tail-chaining the next column meta hides the boundary bubble when
+    // columns have few NNZs.
+    while ((cols_loaded < num_cols) || (col_nnz > 0))
     {
-        int col_nnz = col_nnz_stream.read();
-
-        float x_i = x_stream.read();
-
-        while (col_nnz > 0)
-        {
 #pragma HLS PIPELINE II = 1
-            if (pack_pos >= pack_n)
-            {
-                pack = nnz_stream.read();
-                pack_n = (int)pack.n;
-                pack_pos = 0;
-            }
+        if (col_nnz == 0)
+        {
+            ColMeta meta = col_meta_stream.read();
+            ++cols_loaded;
+            col_nnz = meta.nnz;
+            x_i = meta.x;
+            continue;
+        }
 
-            int available = pack_n - pack_pos;
-            int send = (available < col_nnz) ? available : col_nnz;
-            if (send > NNZ_LANES)
-                send = NNZ_LANES;
+        const float x_cur = x_i;
 
-            NnzPkt pkts[NNZ_LANES];
+        if (pack_pos >= pack_n)
+        {
+            pack = nnz_stream.read();
+            pack_n = (int)pack.n;
+            pack_pos = 0;
+        }
+
+        int available = pack_n - pack_pos;
+        int send = (available < col_nnz) ? available : col_nnz;
+        if (send > NNZ_LANES)
+            send = NNZ_LANES;
+
+        NnzPkt pkts[NNZ_LANES];
 #pragma HLS ARRAY_PARTITION variable = pkts complete
 
-            for (int i = 0; i < NNZ_LANES; ++i)
-            {
+        for (int i = 0; i < NNZ_LANES; ++i)
+        {
 #pragma HLS UNROLL
-                if (i < send)
-                {
-                    pkts[i].row = pack.row[pack_pos + i];
-                    pkts[i].val = pack.val[pack_pos + i];
-                    pkts[i].x = x_i;
-                    pkts[i].last = false;
-                }
-                else
-                {
-                    pkts[i].row = 0;
-                    pkts[i].val = 0.0f;
-                    pkts[i].x = 0.0f;
-                    pkts[i].last = false;
-                }
-            }
-
-            for (int j = 0; j < NUM_PES; ++j)
+            if (i < send)
             {
-#pragma HLS UNROLL
-                int rel = j - pe;
-                if (rel < 0)
-                    rel += NUM_PES;
-                if (rel < send)
-                {
-                    pe_streams[j].write(pkts[rel]);
-                }
+                pkts[i].row = pack.row[pack_pos + i];
+                pkts[i].val = pack.val[pack_pos + i];
+                pkts[i].x = x_cur;
+                pkts[i].last = false;
             }
+            else
+            {
+                pkts[i].row = 0;
+                pkts[i].val = 0.0f;
+                pkts[i].x = 0.0f;
+                pkts[i].last = false;
+            }
+        }
 
-            pe += send;
-            if (pe >= NUM_PES)
-                pe -= NUM_PES;
-            pack_pos += send;
-            col_nnz -= send;
+        for (int j = 0; j < NUM_PES; ++j)
+        {
+#pragma HLS UNROLL
+            int rel = j - pe;
+            if (rel < 0)
+                rel += NUM_PES;
+            if (rel < send)
+            {
+                pe_streams[j].write(pkts[rel]);
+            }
+        }
+
+        pe += send;
+        if (pe >= NUM_PES)
+            pe -= NUM_PES;
+        pack_pos += send;
+        col_nnz -= send;
+
+        // Tail-chain: if we just finished this column, load the next column's
+        // metadata in the same cycle so the next iteration can immediately
+        // start distributing.
+        if ((col_nnz == 0) && (cols_loaded < num_cols))
+        {
+            ColMeta meta = col_meta_stream.read();
+            ++cols_loaded;
+            col_nnz = meta.nnz;
+            x_i = meta.x;
         }
     }
 
@@ -267,21 +292,18 @@ static void spmv_csc_dataflow(int num_rows,
 {
 #pragma HLS INLINE off
 
-    hls::stream<float> x_stream("x_stream");
-    hls::stream<int> col_nnz_stream("col_nnz_stream");
+    hls::stream<ColMeta> col_meta_stream("col_meta_stream");
     hls::stream<NnzPack> nnz_stream("nnz_stream");
     hls::stream<NnzPkt> pe_streams[NUM_PES];
 
-#pragma HLS STREAM variable = x_stream depth = 64
-#pragma HLS STREAM variable = col_nnz_stream depth = 64
+#pragma HLS STREAM variable = col_meta_stream depth = 64
 #pragma HLS STREAM variable = nnz_stream depth = 256
 #pragma HLS STREAM variable = pe_streams depth = 256
 
 #pragma HLS DATAFLOW
-    read_x_packed(num_cols, x, x_stream);
+    read_col_meta(num_cols, A_col_ptr, x, col_meta_stream);
     read_nnz_packed(nnz, A_row_idx, A_values, nnz_stream);
-    read_col_nnz(num_cols, A_col_ptr, col_nnz_stream);
-    distribute_to_pe(num_cols, col_nnz_stream, x_stream, nnz_stream, pe_streams);
+    distribute_to_pe(num_cols, col_meta_stream, nnz_stream, pe_streams);
 
     for (int pe = 0; pe < NUM_PES; ++pe)
     {
