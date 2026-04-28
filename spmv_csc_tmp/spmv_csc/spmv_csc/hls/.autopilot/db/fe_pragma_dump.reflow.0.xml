@@ -1,0 +1,67 @@
+<pragmas>
+<pragma file="../HLS/src/spmv_csc.cpp" line="339" pragmaType="aggregate" parentfunction="spmv_csc" compact="3" variable="A_row_idx"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="341" pragmaType="aggregate" parentfunction="spmv_csc" compact="3" variable="A_values"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="343" pragmaType="aggregate" parentfunction="spmv_csc" compact="3" variable="y"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="339" pragmaType="interface" parentfunction="spmv_csc" mode="m_axi" port="A_row_idx" bundle="gmem0" offset="slave" name="" depth="12500" num_read_outstanding="-1" num_write_outstanding="-1" max_burst_read_length="-1" max_burst_write_length="-1" latency="-1" max_widen_bitwidth="-1" channel=""/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="340" pragmaType="interface" parentfunction="spmv_csc" mode="m_axi" port="A_col_ptr" bundle="gmem1" offset="slave" name="" depth="1025" num_read_outstanding="-1" num_write_outstanding="-1" max_burst_read_length="-1" max_burst_write_length="-1" latency="-1" max_widen_bitwidth="-1" channel=""/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="341" pragmaType="interface" parentfunction="spmv_csc" mode="m_axi" port="A_values" bundle="gmem2" offset="slave" name="" depth="12500" num_read_outstanding="-1" num_write_outstanding="-1" max_burst_read_length="-1" max_burst_write_length="-1" latency="-1" max_widen_bitwidth="-1" channel=""/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="342" pragmaType="interface" parentfunction="spmv_csc" mode="m_axi" port="x" bundle="gmem3" offset="slave" name="" depth="1024" num_read_outstanding="-1" num_write_outstanding="-1" max_burst_read_length="-1" max_burst_write_length="-1" latency="-1" max_widen_bitwidth="-1" channel=""/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="343" pragmaType="interface" parentfunction="spmv_csc" mode="m_axi" port="y" bundle="gmem4" offset="slave" name="" depth="64" num_read_outstanding="-1" num_write_outstanding="-1" max_burst_read_length="-1" max_burst_write_length="-1" latency="-1" max_widen_bitwidth="-1" channel=""/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="345" pragmaType="interface" parentfunction="spmv_csc" mode="s_axilite" port="num_rows" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="346" pragmaType="interface" parentfunction="spmv_csc" mode="s_axilite" port="num_cols" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="347" pragmaType="interface" parentfunction="spmv_csc" mode="s_axilite" port="nnz" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="348" pragmaType="interface" parentfunction="spmv_csc" mode="s_axilite" port="A_row_idx" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="349" pragmaType="interface" parentfunction="spmv_csc" mode="s_axilite" port="A_col_ptr" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="350" pragmaType="interface" parentfunction="spmv_csc" mode="s_axilite" port="A_values" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="351" pragmaType="interface" parentfunction="spmv_csc" mode="s_axilite" port="x" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="352" pragmaType="interface" parentfunction="spmv_csc" mode="s_axilite" port="y" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="353" pragmaType="interface" parentfunction="spmv_csc" mode="s_axilite" port="" bundle="control" offset="-1" name="" clock="" impl="" register="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="361" pragmaType="array_partition" parentfunction="spmv_csc" dim="1" factor="0" mode="complete" dynamic="0" variable="y_partial"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="362" pragmaType="bind_storage" parentfunction="spmv_csc" op="666" impl="31" latency="-1" variable="y_partial"/>
+<pragma file="/opt/Xilinx/Vitis/2024.2/common/technology/autopilot/etc/ap_common.h" line="523" pragmaType="inline" parentfunction="ssdm_int<8, false>::ssdm_int(unsigned char)" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="write" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="ap_int_base<8, false>::ap_int_base(int)" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="pragma" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="aggregate" parentfunction="pragma" compact="3" variable="this"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="ap_uint<8>::ap_uint(int)" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="hls::vector<int, 16ul>::operator[](unsigned long)" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="write" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="read" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="write" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="read" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="read" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="read" off="0" region="0" recursive="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="153" pragmaType="inline" parentfunction="distribute_to_pe" off="1" region="0" recursive="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="232" pragmaType="pipeline" parentfunction="distribute_to_pe" off="0" ii="1" rewind="0" style=""/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="174" pragmaType="pipeline" parentfunction="distribute_to_pe" off="0" ii="1" rewind="0" style=""/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="201" pragmaType="unroll" parentfunction="distribute_to_pe" factor="-1" skip_exit_check="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="158" pragmaType="array_partition" parentfunction="distribute_to_pe" dim="1" factor="0" mode="complete" dynamic="0" variable="row"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="159" pragmaType="array_partition" parentfunction="distribute_to_pe" dim="1" factor="0" mode="complete" dynamic="0" variable="val"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="244" pragmaType="inline" parentfunction="compute_pe" off="1" region="0" recursive="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="253" pragmaType="pipeline" parentfunction="compute_pe" off="0" ii="1" rewind="0" style=""/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="247" pragmaType="pipeline" parentfunction="compute_pe" off="0" ii="1" rewind="0" style=""/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="read" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="read" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="checkOverflowBaseC" off="0" region="0" recursive="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="41" pragmaType="inline" parentfunction="read_col_info" off="1" region="0" recursive="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="48" pragmaType="pipeline" parentfunction="read_col_info" off="0" ii="1" rewind="0" style=""/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="85" pragmaType="inline" parentfunction="read_nnz_packed" off="1" region="0" recursive="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="96" pragmaType="pipeline" parentfunction="read_nnz_packed" off="0" ii="1" rewind="0" style=""/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="116" pragmaType="unroll" parentfunction="read_nnz_packed" factor="-1" skip_exit_check="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="ap_int_base<8, false>::operator unsigned long long() const" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="hls::stream<NnzPack, 0>::stream(char const*)" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="hls::stream<NnzPkt, 0>::stream()" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="hls::vector<float, 16ul>::operator[](unsigned long)" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="pragma" off="0" region="0" recursive="0"/>
+<pragma file="" line="0" pragmaType="aggregate" parentfunction="pragma" compact="3" variable="this"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="270" pragmaType="inline" parentfunction="reduce_and_write_packed" off="1" region="0" recursive="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="279" pragmaType="pipeline" parentfunction="reduce_and_write_packed" off="0" ii="1" rewind="0" style=""/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="287" pragmaType="unroll" parentfunction="reduce_and_write_packed" factor="-1" skip_exit_check="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="308" pragmaType="inline" parentfunction="spmv_csc_dataflow" off="1" region="0" recursive="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="318" pragmaType="dataflow" parentfunction="spmv_csc_dataflow" disable_start_propagation="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="325" pragmaType="unroll" parentfunction="spmv_csc_dataflow" factor="-1" skip_exit_check="0"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="314" pragmaType="stream" parentfunction="spmv_csc_dataflow" depth="64" type="fifo" variable="col_info_stream"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="315" pragmaType="stream" parentfunction="spmv_csc_dataflow" depth="256" type="fifo" variable="nnz_stream"/>
+<pragma file="../HLS/src/spmv_csc.cpp" line="316" pragmaType="stream" parentfunction="spmv_csc_dataflow" depth="256" type="fifo" variable="pe_streams"/>
+<pragma file="" line="0" pragmaType="inline" parentfunction="hls::stream<ColInfo, 0>::stream(char const*)" off="0" region="0" recursive="0"/>
+</pragmas>

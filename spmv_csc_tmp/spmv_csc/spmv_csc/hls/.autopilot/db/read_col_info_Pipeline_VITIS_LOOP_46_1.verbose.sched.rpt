@@ -1,0 +1,188 @@
+
+
+================================================================
+== Vitis HLS Report for 'read_col_info_Pipeline_VITIS_LOOP_46_1'
+================================================================
+* Date:           Thu Apr 23 17:41:58 2026
+
+* Version:        2024.2 (Build 5238294 on Nov  8 2024)
+* Project:        spmv_csc
+* Solution:       hls (Vivado IP Flow Target)
+* Product family: zynquplus
+* Target device:  xczu7ev-ffvc1156-2-e
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+---------+----------+------------+
+    |  Clock |  Target | Estimated| Uncertainty|
+    +--------+---------+----------+------------+
+    |ap_clk  |  5.00 ns|  4.000 ns|     1.00 ns|
+    +--------+---------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |  Latency (cycles) |  Latency (absolute) |  Interval |                    Pipeline                    |
+    |   min   |   max   |    min   |    max   | min | max |                      Type                      |
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |        ?|        ?|         ?|         ?|    0|    0|  loop auto-rewind stp (delay=0 clock cycles(s))|
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+
+    + Detail: 
+        * Instance: 
+        N/A
+
+        * Loop: 
+        +-------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |                   |  Latency (cycles) | Iteration|  Initiation Interval  | Trip |          |
+        |     Loop Name     |   min   |   max   |  Latency |  achieved |   target  | Count| Pipelined|
+        +-------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |- VITIS_LOOP_46_1  |        ?|        ?|         4|          1|          1|     ?|       yes|
+        +-------------------+---------+---------+----------+-----------+-----------+------+----------+
+
+============================================================
++ Verbose Summary: Synthesis Manager
+============================================================
+InlineROM: 1
+ExposeGlobal: 0
+============================================================
++ Verbose Summary: CDFG Model
+============================================================
+IsTopModel: 0
+ResetActiveHigh: 1
+IsCombinational: 0
+IsDatapathOnly: 0
+HasWiredReturn: 1
+HasMFsm: 2
+HasVarLatency: 1
+IsPipeline: 0
+IsRtlPipelined: 0
+IsInstanceOverlapped: 0
+IsDontTouch: 0
+HasImplIP: 0
+IsGatedGlobalClock: 0
+
++ Individual pipeline summary: 
+  * Pipeline-0: initiation interval (II) = 1, depth = 4
+
+
+============================================================
++ Verbose Summary: Schedule
+============================================================
+* Number of FSM states : 4
+* Pipeline : 1
+  Pipeline-0 : II = 1, D = 4, States = { 1 2 3 4 }
+* Dataflow Pipeline: 0
+
+* FSM state transitions: 
+1 --> 2 
+2 --> 3 
+3 --> 4 
+4 --> 
+
+* FSM state operations: 
+
+State 1 <SV = 0> <Delay = 1.87>
+ST_1 : Operation 7 [1/1] (0.00ns)   --->   "%prev_1 = alloca i32 1" [../HLS/src/spmv_csc.cpp:42]   --->   Operation 7 'alloca' 'prev_1' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 8 [1/1] (0.00ns)   --->   "%empty = alloca i32 1"   --->   Operation 8 'alloca' 'empty' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 9 [1/1] (0.00ns)   --->   "%col = alloca i32 1"   --->   Operation 9 'alloca' 'col' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 10 [1/1] (0.00ns)   --->   "%sext_ln46_read = read i62 @_ssdm_op_Read.ap_auto.i62, i62 %sext_ln46"   --->   Operation 10 'read' 'sext_ln46_read' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 11 [1/1] (0.00ns)   --->   "%sext_ln46_1_read = read i62 @_ssdm_op_Read.ap_auto.i62, i62 %sext_ln46_1"   --->   Operation 11 'read' 'sext_ln46_1_read' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 12 [1/1] (0.00ns)   --->   "%sub_read = read i32 @_ssdm_op_Read.ap_auto.i32, i32 %sub"   --->   Operation 12 'read' 'sub_read' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 13 [1/1] (0.00ns)   --->   "%prev_read = read i32 @_ssdm_op_Read.ap_auto.i32, i32 %prev"   --->   Operation 13 'read' 'prev_read' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 14 [1/1] (0.00ns)   --->   "%x_element_read = read i32 @_ssdm_op_Read.ap_auto.i32, i32 %x_element"   --->   Operation 14 'read' 'x_element_read' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 15 [1/1] (0.00ns)   --->   "%sext_ln46_cast = sext i62 %sext_ln46_read"   --->   Operation 15 'sext' 'sext_ln46_cast' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 16 [1/1] (0.00ns)   --->   "%sext_ln46_1_cast = sext i62 %sext_ln46_1_read"   --->   Operation 16 'sext' 'sext_ln46_1_cast' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 17 [1/1] (0.00ns)   --->   "%specinterface_ln0 = specinterface void @_ssdm_op_SpecInterface, i32 %gmem3, void @empty_24, i32 0, i32 0, void @empty_25, i32 0, i32 1024, void @empty_10, void @empty_0, void @empty_25, i32 16, i32 16, i32 16, i32 16, void @empty_25, void @empty_25, i32 4294967295, i32 0, i32 0"   --->   Operation 17 'specinterface' 'specinterface_ln0' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 18 [1/1] (0.00ns)   --->   "%specinterface_ln0 = specinterface void @_ssdm_op_SpecInterface, i32 %gmem1, void @empty_24, i32 0, i32 0, void @empty_25, i32 0, i32 1025, void @empty_26, void @empty_0, void @empty_25, i32 16, i32 16, i32 16, i32 16, void @empty_25, void @empty_25, i32 4294967295, i32 0, i32 0"   --->   Operation 18 'specinterface' 'specinterface_ln0' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 19 [1/1] (0.00ns)   --->   "%specinterface_ln0 = specinterface void @_ssdm_op_SpecInterface, i64 %col_info_stream, void @empty_16, i32 0, i32 0, void @empty_25, i32 0, i32 0, void @empty_25, void @empty_25, void @empty_25, i32 0, i32 0, i32 0, i32 0, void @empty_25, void @empty_25, i32 4294967295, i32 0, i32 0"   --->   Operation 19 'specinterface' 'specinterface_ln0' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 20 [1/1] (0.42ns)   --->   "%store_ln0 = store i31 0, i31 %col"   --->   Operation 20 'store' 'store_ln0' <Predicate = true> <Delay = 0.42>
+ST_1 : Operation 21 [1/1] (0.42ns)   --->   "%store_ln0 = store i32 %x_element_read, i32 %empty"   --->   Operation 21 'store' 'store_ln0' <Predicate = true> <Delay = 0.42>
+ST_1 : Operation 22 [1/1] (0.42ns)   --->   "%store_ln42 = store i32 %prev_read, i32 %prev_1" [../HLS/src/spmv_csc.cpp:42]   --->   Operation 22 'store' 'store_ln42' <Predicate = true> <Delay = 0.42>
+ST_1 : Operation 23 [1/1] (0.00ns)   --->   "%br_ln0 = br void %for.body"   --->   Operation 23 'br' 'br_ln0' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 24 [1/1] (0.00ns)   --->   "%col_load = load i31 %col" [../HLS/src/spmv_csc.cpp:46]   --->   Operation 24 'load' 'col_load' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 25 [1/1] (0.00ns)   --->   "%zext_ln46 = zext i31 %col_load" [../HLS/src/spmv_csc.cpp:46]   --->   Operation 25 'zext' 'zext_ln46' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 26 [1/1] (1.01ns)   --->   "%icmp_ln46 = icmp_slt  i32 %zext_ln46, i32 %sub_read" [../HLS/src/spmv_csc.cpp:46]   --->   Operation 26 'icmp' 'icmp_ln46' <Predicate = true> <Delay = 1.01> <CoreInst = "Cmp">   --->   Core 9 'Cmp' <Latency = 0> <II = 1> <Delay = 1.01> <FuncUnit> <Opcode : 'seteq' 'setne' 'setle' 'setge' 'setlt' 'setgt'> <InPorts = 2> <OutPorts = 1>
+ST_1 : Operation 27 [1/1] (1.00ns)   --->   "%add_ln46 = add i31 %col_load, i31 1" [../HLS/src/spmv_csc.cpp:46]   --->   Operation 27 'add' 'add_ln46' <Predicate = true> <Delay = 1.00> <CoreInst = "Adder">   --->   Core 1 'Adder' <Latency = 0> <II = 1> <Delay = 1.00> <FuncUnit> <Opcode : 'add' 'sub'> <InPorts = 2> <OutPorts = 1>
+ST_1 : Operation 28 [1/1] (0.00ns)   --->   "%br_ln46 = br i1 %icmp_ln46, void %for.end.loopexit.exitStub, void %for.body.split" [../HLS/src/spmv_csc.cpp:46]   --->   Operation 28 'br' 'br_ln46' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 29 [1/1] (0.42ns)   --->   "%store_ln46 = store i31 %add_ln46, i31 %col" [../HLS/src/spmv_csc.cpp:46]   --->   Operation 29 'store' 'store_ln46' <Predicate = (icmp_ln46)> <Delay = 0.42>
+
+State 2 <SV = 1> <Delay = 4.00>
+ST_2 : Operation 30 [1/1] (0.00ns)   --->   "%gmem1_addr = getelementptr i32 %gmem1, i64 %sext_ln46_cast" [../HLS/src/spmv_csc.cpp:46]   --->   Operation 30 'getelementptr' 'gmem1_addr' <Predicate = true> <Delay = 0.00>
+ST_2 : Operation 31 [1/1] (4.00ns)   --->   "%prev_2 = read i32 @_ssdm_op_Read.m_axi.p1i32, i32 %gmem1_addr" [../HLS/src/spmv_csc.cpp:49]   --->   Operation 31 'read' 'prev_2' <Predicate = true> <Delay = 4.00> <CoreInst = "m_axi">   --->   Core 119 'm_axi' <Latency = 3> <II = 1> <Delay = 1.00> <Adapter> <Opcode : 'read' 'write' 'readreq' 'writereq' 'writeresp'>
+
+State 3 <SV = 2> <Delay = 4.00>
+ST_3 : Operation 32 [1/1] (0.00ns)   --->   "%prev_1_load_1 = load i32 %prev_1" [../HLS/src/spmv_csc.cpp:51]   --->   Operation 32 'load' 'prev_1_load_1' <Predicate = true> <Delay = 0.00>
+ST_3 : Operation 33 [1/1] (0.00ns)   --->   "%gmem3_addr = getelementptr i32 %gmem3, i64 %sext_ln46_1_cast" [../HLS/src/spmv_csc.cpp:46]   --->   Operation 33 'getelementptr' 'gmem3_addr' <Predicate = true> <Delay = 0.00>
+ST_3 : Operation 34 [1/1] (0.00ns)   --->   "%specpipeline_ln48 = specpipeline void @_ssdm_op_SpecPipeline, i32 1, i32 0, i32 0, i32 0, void @empty_25" [../HLS/src/spmv_csc.cpp:48]   --->   Operation 34 'specpipeline' 'specpipeline_ln48' <Predicate = true> <Delay = 0.00>
+ST_3 : Operation 35 [1/1] (0.00ns)   --->   "%specloopname_ln46 = specloopname void @_ssdm_op_SpecLoopName, void @empty_6" [../HLS/src/spmv_csc.cpp:46]   --->   Operation 35 'specloopname' 'specloopname_ln46' <Predicate = true> <Delay = 0.00>
+ST_3 : Operation 36 [1/1] (1.01ns)   --->   "%col_nnz = sub i32 %prev_2, i32 %prev_1_load_1" [../HLS/src/spmv_csc.cpp:51]   --->   Operation 36 'sub' 'col_nnz' <Predicate = true> <Delay = 1.01> <CoreInst = "Adder">   --->   Core 1 'Adder' <Latency = 0> <II = 1> <Delay = 1.01> <FuncUnit> <Opcode : 'add' 'sub'> <InPorts = 2> <OutPorts = 1>
+ST_3 : Operation 37 [1/1] (1.01ns)   --->   "%icmp_ln53 = icmp_sgt  i32 %col_nnz, i32 0" [../HLS/src/spmv_csc.cpp:53]   --->   Operation 37 'icmp' 'icmp_ln53' <Predicate = true> <Delay = 1.01> <CoreInst = "Cmp">   --->   Core 9 'Cmp' <Latency = 0> <II = 1> <Delay = 1.01> <FuncUnit> <Opcode : 'seteq' 'setne' 'setle' 'setge' 'setlt' 'setgt'> <InPorts = 2> <OutPorts = 1>
+ST_3 : Operation 38 [1/1] (0.00ns)   --->   "%br_ln53 = br i1 %icmp_ln53, void %for.inc, void %if.then" [../HLS/src/spmv_csc.cpp:53]   --->   Operation 38 'br' 'br_ln53' <Predicate = true> <Delay = 0.00>
+ST_3 : Operation 39 [1/1] (4.00ns)   --->   "%x_element_1 = read i32 @_ssdm_op_Read.m_axi.p1i32, i32 %gmem3_addr" [../HLS/src/spmv_csc.cpp:61]   --->   Operation 39 'read' 'x_element_1' <Predicate = true> <Delay = 4.00> <CoreInst = "m_axi">   --->   Core 119 'm_axi' <Latency = 3> <II = 1> <Delay = 1.00> <Adapter> <Opcode : 'read' 'write' 'readreq' 'writereq' 'writeresp'>
+ST_3 : Operation 40 [1/1] (0.42ns)   --->   "%store_ln42 = store i32 %prev_2, i32 %prev_1" [../HLS/src/spmv_csc.cpp:42]   --->   Operation 40 'store' 'store_ln42' <Predicate = true> <Delay = 0.42>
+ST_3 : Operation 47 [1/1] (0.00ns)   --->   "%prev_1_load = load i32 %prev_1"   --->   Operation 47 'load' 'prev_1_load' <Predicate = (!icmp_ln46)> <Delay = 0.00>
+ST_3 : Operation 48 [1/1] (0.00ns)   --->   "%p_load = load i32 %empty"   --->   Operation 48 'load' 'p_load' <Predicate = (!icmp_ln46)> <Delay = 0.00>
+ST_3 : Operation 49 [1/1] (0.00ns)   --->   "%write_ln0 = write void @_ssdm_op_Write.ap_auto.i32P0A, i32 %p_out, i32 %p_load"   --->   Operation 49 'write' 'write_ln0' <Predicate = (!icmp_ln46)> <Delay = 0.00>
+ST_3 : Operation 50 [1/1] (0.00ns)   --->   "%write_ln0 = write void @_ssdm_op_Write.ap_auto.i32P0A, i32 %prev_1_out, i32 %prev_1_load"   --->   Operation 50 'write' 'write_ln0' <Predicate = (!icmp_ln46)> <Delay = 0.00>
+ST_3 : Operation 51 [1/1] (0.42ns)   --->   "%ret_ln0 = ret"   --->   Operation 51 'ret' 'ret_ln0' <Predicate = (!icmp_ln46)> <Delay = 0.42>
+
+State 4 <SV = 3> <Delay = 1.55>
+ST_4 : Operation 41 [1/1] (0.00ns)   --->   "%p_load9 = load i32 %empty" [../HLS/src/spmv_csc.cpp:58]   --->   Operation 41 'load' 'p_load9' <Predicate = (icmp_ln53)> <Delay = 0.00>
+ST_4 : Operation 42 [1/1] (0.00ns)   --->   "%p_0 = bitconcatenate i64 @_ssdm_op_BitConcatenate.i64.i32.i32, i32 %p_load9, i32 %col_nnz" [../HLS/src/spmv_csc.cpp:58]   --->   Operation 42 'bitconcatenate' 'p_0' <Predicate = (icmp_ln53)> <Delay = 0.00>
+ST_4 : Operation 43 [1/1] ( I:1.55ns O:1.55ns )   --->   "%write_ln58 = write void @_ssdm_op_Write.ap_fifo.volatile.i64P0A, i64 %col_info_stream, i64 %p_0" [../HLS/src/spmv_csc.cpp:58]   --->   Operation 43 'write' 'write_ln58' <Predicate = (icmp_ln53)> <Delay = 1.55> <CoreInst = "FIFO">   --->   Core 77 'FIFO' <Latency = 0> <II = 1> <Delay = 1.55> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 64> <Depth = 64> <FIFO>
+ST_4 : Operation 44 [1/1] (0.00ns)   --->   "%br_ln59 = br void %for.inc" [../HLS/src/spmv_csc.cpp:59]   --->   Operation 44 'br' 'br_ln59' <Predicate = (icmp_ln53)> <Delay = 0.00>
+ST_4 : Operation 45 [1/1] (0.42ns)   --->   "%store_ln61 = store i32 %x_element_1, i32 %empty" [../HLS/src/spmv_csc.cpp:61]   --->   Operation 45 'store' 'store_ln61' <Predicate = true> <Delay = 0.42>
+ST_4 : Operation 46 [1/1] (0.00ns)   --->   "%br_ln46 = br void %for.body" [../HLS/src/spmv_csc.cpp:46]   --->   Operation 46 'br' 'br_ln46' <Predicate = true> <Delay = 0.00>
+
+
+============================================================
++ Verbose Summary: Timing violations
+============================================================
+Target clock period: 5.000ns, clock uncertainty: 1.000ns.
+
+ <State 1>: 1.870ns
+The critical path consists of the following:
+	'store' operation 0 bit ('store_ln0') of constant 0 on local variable 'col' [24]  (0.427 ns)
+	'load' operation 31 bit ('col_load', ../HLS/src/spmv_csc.cpp:46) on local variable 'col' [29]  (0.000 ns)
+	'icmp' operation 1 bit ('icmp_ln46', ../HLS/src/spmv_csc.cpp:46) [31]  (1.016 ns)
+	'store' operation 0 bit ('store_ln46', ../HLS/src/spmv_csc.cpp:46) of variable 'add_ln46', ../HLS/src/spmv_csc.cpp:46 on local variable 'col' [51]  (0.427 ns)
+
+ <State 2>: 4.000ns
+The critical path consists of the following:
+	'getelementptr' operation 32 bit ('gmem1_addr', ../HLS/src/spmv_csc.cpp:46) [37]  (0.000 ns)
+	bus read operation ('next', ../HLS/src/spmv_csc.cpp:49) on port 'gmem1' (../HLS/src/spmv_csc.cpp:49) [40]  (4.000 ns)
+
+ <State 3>: 4.000ns
+The critical path consists of the following:
+	'getelementptr' operation 32 bit ('gmem3_addr', ../HLS/src/spmv_csc.cpp:46) [36]  (0.000 ns)
+	bus read operation ('x_element', ../HLS/src/spmv_csc.cpp:61) on port 'gmem3' (../HLS/src/spmv_csc.cpp:61) [50]  (4.000 ns)
+
+ <State 4>: 1.557ns
+The critical path consists of the following:
+	'load' operation 32 bit ('p_load9', ../HLS/src/spmv_csc.cpp:58) on local variable 'empty' [45]  (0.000 ns)
+	fifo write operation ('write_ln58', ../HLS/src/spmv_csc.cpp:58) on port 'col_info_stream' (../HLS/src/spmv_csc.cpp:58) [47]  (1.557 ns)
+
+
+============================================================
++ Verbose Summary: Binding
+============================================================
+N/A
+* FSMD analyzer results:
+  - Output states:
+ - Input state : 
+  - Chain level:
+	State 1
+	State 2
+	State 3
+	State 4
+
+
+============================================================
++ Verbose Summary: Datapath Resource usage 
+============================================================
+N/A

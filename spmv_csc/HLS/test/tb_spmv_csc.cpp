@@ -32,7 +32,7 @@ int main() {
     // Set matrix dimensions and density
     int num_rows = 1024;
     int num_cols = 1024;
-    float density = 0.0001f; // 10%
+    float density = 0.001f; // 10%
 
     std::vector<float> A_values;
     std::vector<int>   A_row_idx;
@@ -85,12 +85,10 @@ int main() {
 
     // Pack scalar arrays into 512-bit (16x32b) words for the HLS kernel
     const int nnz_words = CEIL_DIV(original_nnz, PACK_SIZE);
-    const int x_words   = CEIL_DIV(num_cols, PACK_SIZE);
     const int y_words   = CEIL_DIV(num_rows, PACK_SIZE);
 
     std::vector<float16> A_values_packed(MAX_NNZ_WORDS);
     std::vector<int16>   A_row_idx_packed(MAX_NNZ_WORDS);
-    std::vector<float16> x_packed(MAX_COL_WORDS);
     std::vector<float16> y_packed(MAX_ROW_WORDS);
 
     // Initialize packed containers (including padded lanes)
@@ -98,11 +96,6 @@ int main() {
         for (int lane = 0; lane < PACK_SIZE; ++lane) {
             A_values_packed[w][lane] = 0.0f;
             A_row_idx_packed[w][lane] = 0;
-        }
-    }
-    for (int w = 0; w < MAX_COL_WORDS; ++w) {
-        for (int lane = 0; lane < PACK_SIZE; ++lane) {
-            x_packed[w][lane] = 0.0f;
         }
     }
     for (int w = 0; w < MAX_ROW_WORDS; ++w) {
@@ -117,15 +110,9 @@ int main() {
         A_values_packed[w][lane]  = A_values[i];
         A_row_idx_packed[w][lane] = A_row_idx[i];
     }
-    for (int i = 0; i < num_cols; ++i) {
-        const int w    = i / PACK_SIZE;
-        const int lane = i % PACK_SIZE;
-        x_packed[w][lane] = x[i];
-    }
-
     // =========================================================
-    // Packed I/O: the HLS kernel uses 512-bit ports (16x32b lanes).
-    // The software reference uses the scalar arrays.
+    // Packed I/O for sparse matrix/value arrays and output y.
+    // x is scalar now and passed directly as float*.
     // =========================================================
 
     std::cout << "Running Software Reference..." << std::endl;
@@ -138,7 +125,7 @@ int main() {
              A_row_idx_packed.data(), 
              A_col_ptr.data(), 
              A_values_packed.data(), 
-             x_packed.data(), 
+             x.data(), 
              y_packed.data());
 
     // Unpack HW result

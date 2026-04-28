@@ -1,0 +1,131 @@
+{
+  "0": {
+    "basicblocks": 5,
+    "calls": "10 2",
+    "file": "spmv_csc.cpp",
+    "fileloc": 330,
+    "instructions": 35,
+    "name": "spmv_csc",
+    "total_instructions": 593
+  },
+  "1": {
+    "basicblocks": 1,
+    "calls": "3",
+    "file": "array",
+    "fileloc": 185,
+    "instructions": 3,
+    "name": "operator[]",
+    "total_instructions": 5
+  },
+  "10": {
+    "basicblocks": 10,
+    "calls": "5 8 9 6",
+    "file": "spmv_csc.cpp",
+    "fileloc": 299,
+    "instructions": 49,
+    "name": "spmv_csc_dataflow",
+    "total_instructions": 486
+  },
+  "2": {
+    "basicblocks": 24,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 268,
+    "instructions": 61,
+    "loads": {
+      "L": 2
+    },
+    "name": "reduce_and_write_packed",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 72
+  },
+  "3": {
+    "basicblocks": 1,
+    "calls": "",
+    "file": "array",
+    "fileloc": 55,
+    "instructions": 2,
+    "name": "_S_ref",
+    "total_instructions": 2
+  },
+  "4": {
+    "basicblocks": 1,
+    "calls": "7",
+    "file": "array",
+    "fileloc": 185,
+    "instructions": 3,
+    "name": "operator[]",
+    "total_instructions": 5
+  },
+  "5": {
+    "basicblocks": 11,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 36,
+    "instructions": 56,
+    "loads": {
+      "L": 5
+    },
+    "name": "read_col_info",
+    "stores": {
+      "L": 4
+    },
+    "total_instructions": 64
+  },
+  "6": {
+    "basicblocks": 17,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 45,
+    "loads": {
+      "L": 5
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 51
+  },
+  "7": {
+    "basicblocks": 1,
+    "calls": "",
+    "file": "array",
+    "fileloc": 55,
+    "instructions": 2,
+    "name": "_S_ref",
+    "total_instructions": 2
+  },
+  "8": {
+    "basicblocks": 29,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 80,
+    "instructions": 110,
+    "loads": {
+      "L": 5
+    },
+    "name": "read_nnz_packed",
+    "stores": {
+      "L": 7
+    },
+    "total_instructions": 153
+  },
+  "9": {
+    "basicblocks": 32,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 148,
+    "instructions": 141,
+    "loads": {
+      "L": 5
+    },
+    "name": "distribute_to_pe",
+    "stores": {
+      "L": 9
+    },
+    "total_instructions": 166
+  }
+}

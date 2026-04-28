@@ -1,0 +1,299 @@
+{
+  "0": {
+    "basicblocks": 3,
+    "calls": "5 12",
+    "file": "spmv_csc.cpp",
+    "fileloc": 330,
+    "instructions": 134,
+    "name": "spmv_csc",
+    "total_instructions": 2570
+  },
+  "1": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "10": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "11": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "12": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 268,
+    "instructions": 153,
+    "loads": {
+      "L": 16
+    },
+    "name": "reduce_and_write_packed",
+    "total_instructions": 250
+  },
+  "13": {
+    "basicblocks": 59,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 148,
+    "instructions": 469,
+    "name": "distribute_to_pe",
+    "total_instructions": 854
+  },
+  "14": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "15": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "16": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 36,
+    "instructions": 59,
+    "name": "read_col_info",
+    "total_instructions": 73
+  },
+  "17": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "18": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "19": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "2": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "20": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "21": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "3": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "4": {
+    "basicblocks": 7,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 80,
+    "instructions": 166,
+    "name": "read_nnz_packed",
+    "total_instructions": 415
+  },
+  "5": {
+    "basicblocks": 1,
+    "calls": "16 4 13 3 19 18 9 6 20 14 10 1 15 2 7 8 21 17 11",
+    "file": "spmv_csc.cpp",
+    "fileloc": 299,
+    "instructions": 92,
+    "name": "spmv_csc_dataflow",
+    "total_instructions": 2186
+  },
+  "6": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "7": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "8": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  },
+  "9": {
+    "basicblocks": 9,
+    "calls": "",
+    "file": "spmv_csc.cpp",
+    "fileloc": 242,
+    "instructions": 32,
+    "loads": {
+      "L": 1
+    },
+    "name": "compute_pe",
+    "stores": {
+      "L": 2
+    },
+    "total_instructions": 47
+  }
+}

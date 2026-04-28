@@ -1,0 +1,281 @@
+
+
+================================================================
+== Vitis HLS Report for 'distribute_to_pe_Pipeline_VITIS_LOOP_230_3'
+================================================================
+* Date:           Thu Apr 23 17:42:06 2026
+
+* Version:        2024.2 (Build 5238294 on Nov  8 2024)
+* Project:        spmv_csc
+* Solution:       hls (Vivado IP Flow Target)
+* Product family: zynquplus
+* Target device:  xczu7ev-ffvc1156-2-e
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+---------+----------+------------+
+    |  Clock |  Target | Estimated| Uncertainty|
+    +--------+---------+----------+------------+
+    |ap_clk  |  5.00 ns|  1.655 ns|     1.00 ns|
+    +--------+---------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+-----------+-----------+-----+-----+------------------------------------------------+
+    |  Latency (cycles) |   Latency (absolute)  |  Interval |                    Pipeline                    |
+    |   min   |   max   |    min    |    max    | min | max |                      Type                      |
+    +---------+---------+-----------+-----------+-----+-----+------------------------------------------------+
+    |       18|       18|  90.000 ns|  90.000 ns|   17|   17|  loop auto-rewind stp (delay=0 clock cycles(s))|
+    +---------+---------+-----------+-----------+-----+-----+------------------------------------------------+
+
+    + Detail: 
+        * Instance: 
+        N/A
+
+        * Loop: 
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |                    |  Latency (cycles) | Iteration|  Initiation Interval  | Trip |          |
+        |      Loop Name     |   min   |   max   |  Latency |  achieved |   target  | Count| Pipelined|
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |- VITIS_LOOP_230_3  |       16|       16|         2|          1|          1|    16|       yes|
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+
+
+
+================================================================
+== Utilization Estimates
+================================================================
+* Summary: 
++-----------------+---------+------+--------+--------+-----+
+|       Name      | BRAM_18K|  DSP |   FF   |   LUT  | URAM|
++-----------------+---------+------+--------+--------+-----+
+|DSP              |        -|     -|       -|       -|    -|
+|Expression       |        -|     -|       0|      93|    -|
+|FIFO             |        -|     -|       -|       -|    -|
+|Instance         |        -|     -|       -|       -|    -|
+|Memory           |        -|     -|       -|       -|    -|
+|Multiplexer      |        -|     -|       0|     180|    -|
+|Register         |        -|     -|      28|       -|    -|
++-----------------+---------+------+--------+--------+-----+
+|Total            |        0|     0|      28|     273|    0|
++-----------------+---------+------+--------+--------+-----+
+|Available        |      624|  1728|  460800|  230400|   96|
++-----------------+---------+------+--------+--------+-----+
+|Utilization (%)  |        0|     0|      ~0|      ~0|    0|
++-----------------+---------+------+--------+--------+-----+
+
++ Detail: 
+    * Instance: 
+    N/A
+
+    * DSP: 
+    N/A
+
+    * Memory: 
+    N/A
+
+    * FIFO: 
+    N/A
+
+    * Expression: 
+    +----------------------------------------+----------+----+---+----+------------+------------+
+    |              Variable Name             | Operation| DSP| FF| LUT| Bitwidth P0| Bitwidth P1|
+    +----------------------------------------+----------+----+---+----+------------+------------+
+    |add_ln230_fu_240_p2                     |         +|   0|  0|  12|           5|           1|
+    |ap_block_pp0_stage0_01001_grp1          |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp10         |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp11         |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp12         |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp13         |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp14         |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp15         |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp16         |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp2          |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp3          |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp4          |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp5          |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp6          |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp7          |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp8          |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_01001_grp9          |       and|   0|  0|   2|           1|           1|
+    |ap_block_pp0_stage0_11001               |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp1   |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp10  |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp11  |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp12  |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp13  |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp14  |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp15  |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp16  |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp2   |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp3   |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp4   |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp5   |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp6   |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp7   |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp8   |       and|   0|  0|   2|           1|           1|
+    |ap_block_state2_pp0_stage0_iter1_grp9   |       and|   0|  0|   2|           1|           1|
+    |icmp_ln230_fu_234_p2                    |      icmp|   0|  0|  13|           5|           6|
+    |ap_enable_pp0                           |       xor|   0|  0|   2|           1|           2|
+    +----------------------------------------+----------+----+---+----+------------+------------+
+    |Total                                   |          |   0|  0|  93|          44|          42|
+    +----------------------------------------+----------+----+---+----+------------+------------+
+
+    * Multiplexer: 
+    +-------------------------+----+-----------+-----+-----------+
+    |           Name          | LUT| Input Size| Bits| Total Bits|
+    +-------------------------+----+-----------+-----+-----------+
+    |ap_done_int              |   9|          2|    1|          2|
+    |ap_enable_reg_pp0_iter1  |   9|          2|    1|          2|
+    |ap_sig_allocacmp_i_1     |   9|          2|    5|         10|
+    |i_fu_94                  |   9|          2|    5|         10|
+    |pe_streams_0_blk_n       |   9|          2|    1|          2|
+    |pe_streams_10_blk_n      |   9|          2|    1|          2|
+    |pe_streams_11_blk_n      |   9|          2|    1|          2|
+    |pe_streams_12_blk_n      |   9|          2|    1|          2|
+    |pe_streams_13_blk_n      |   9|          2|    1|          2|
+    |pe_streams_14_blk_n      |   9|          2|    1|          2|
+    |pe_streams_15_blk_n      |   9|          2|    1|          2|
+    |pe_streams_1_blk_n       |   9|          2|    1|          2|
+    |pe_streams_2_blk_n       |   9|          2|    1|          2|
+    |pe_streams_3_blk_n       |   9|          2|    1|          2|
+    |pe_streams_4_blk_n       |   9|          2|    1|          2|
+    |pe_streams_5_blk_n       |   9|          2|    1|          2|
+    |pe_streams_6_blk_n       |   9|          2|    1|          2|
+    |pe_streams_7_blk_n       |   9|          2|    1|          2|
+    |pe_streams_8_blk_n       |   9|          2|    1|          2|
+    |pe_streams_9_blk_n       |   9|          2|    1|          2|
+    +-------------------------+----+-----------+-----+-----------+
+    |Total                    | 180|         40|   28|         56|
+    +-------------------------+----+-----------+-----+-----------+
+
+    * Register: 
+    +--------------------------------------------+---+----+-----+-----------+
+    |                    Name                    | FF| LUT| Bits| Const Bits|
+    +--------------------------------------------+---+----+-----+-----------+
+    |ap_CS_fsm                                   |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp10_done_reg  |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp11_done_reg  |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp12_done_reg  |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp13_done_reg  |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp14_done_reg  |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp15_done_reg  |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp16_done_reg  |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp1_done_reg   |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp2_done_reg   |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp3_done_reg   |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp4_done_reg   |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp5_done_reg   |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp6_done_reg   |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp7_done_reg   |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp8_done_reg   |  1|   0|    1|          0|
+    |ap_block_pp0_stage0_subdone_grp9_done_reg   |  1|   0|    1|          0|
+    |ap_done_reg                                 |  1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter1                     |  1|   0|    1|          0|
+    |i_fu_94                                     |  5|   0|    5|          0|
+    |trunc_ln230_reg_265                         |  4|   0|    4|          0|
+    +--------------------------------------------+---+----+-----+-----------+
+    |Total                                       | 28|   0|   28|          0|
+    +--------------------------------------------+---+----+-----+-----------+
+
+
+
+================================================================
+== Interface
+================================================================
+* Summary: 
++------------------------------+-----+-----+------------+--------------------------------------------+--------------+
+|           RTL Ports          | Dir | Bits|  Protocol  |                Source Object               |    C Type    |
++------------------------------+-----+-----+------------+--------------------------------------------+--------------+
+|ap_clk                        |   in|    1|  ap_ctrl_hs|  distribute_to_pe_Pipeline_VITIS_LOOP_230_3|  return value|
+|ap_rst                        |   in|    1|  ap_ctrl_hs|  distribute_to_pe_Pipeline_VITIS_LOOP_230_3|  return value|
+|ap_start                      |   in|    1|  ap_ctrl_hs|  distribute_to_pe_Pipeline_VITIS_LOOP_230_3|  return value|
+|ap_done                       |  out|    1|  ap_ctrl_hs|  distribute_to_pe_Pipeline_VITIS_LOOP_230_3|  return value|
+|ap_idle                       |  out|    1|  ap_ctrl_hs|  distribute_to_pe_Pipeline_VITIS_LOOP_230_3|  return value|
+|ap_ready                      |  out|    1|  ap_ctrl_hs|  distribute_to_pe_Pipeline_VITIS_LOOP_230_3|  return value|
+|pe_streams_14_din             |  out|   97|     ap_fifo|                               pe_streams_14|       pointer|
+|pe_streams_14_full_n          |   in|    1|     ap_fifo|                               pe_streams_14|       pointer|
+|pe_streams_14_write           |  out|    1|     ap_fifo|                               pe_streams_14|       pointer|
+|pe_streams_14_num_data_valid  |   in|   32|     ap_fifo|                               pe_streams_14|       pointer|
+|pe_streams_14_fifo_cap        |   in|   32|     ap_fifo|                               pe_streams_14|       pointer|
+|pe_streams_13_din             |  out|   97|     ap_fifo|                               pe_streams_13|       pointer|
+|pe_streams_13_full_n          |   in|    1|     ap_fifo|                               pe_streams_13|       pointer|
+|pe_streams_13_write           |  out|    1|     ap_fifo|                               pe_streams_13|       pointer|
+|pe_streams_13_num_data_valid  |   in|   32|     ap_fifo|                               pe_streams_13|       pointer|
+|pe_streams_13_fifo_cap        |   in|   32|     ap_fifo|                               pe_streams_13|       pointer|
+|pe_streams_12_din             |  out|   97|     ap_fifo|                               pe_streams_12|       pointer|
+|pe_streams_12_full_n          |   in|    1|     ap_fifo|                               pe_streams_12|       pointer|
+|pe_streams_12_write           |  out|    1|     ap_fifo|                               pe_streams_12|       pointer|
+|pe_streams_12_num_data_valid  |   in|   32|     ap_fifo|                               pe_streams_12|       pointer|
+|pe_streams_12_fifo_cap        |   in|   32|     ap_fifo|                               pe_streams_12|       pointer|
+|pe_streams_11_din             |  out|   97|     ap_fifo|                               pe_streams_11|       pointer|
+|pe_streams_11_full_n          |   in|    1|     ap_fifo|                               pe_streams_11|       pointer|
+|pe_streams_11_write           |  out|    1|     ap_fifo|                               pe_streams_11|       pointer|
+|pe_streams_11_num_data_valid  |   in|   32|     ap_fifo|                               pe_streams_11|       pointer|
+|pe_streams_11_fifo_cap        |   in|   32|     ap_fifo|                               pe_streams_11|       pointer|
+|pe_streams_10_din             |  out|   97|     ap_fifo|                               pe_streams_10|       pointer|
+|pe_streams_10_full_n          |   in|    1|     ap_fifo|                               pe_streams_10|       pointer|
+|pe_streams_10_write           |  out|    1|     ap_fifo|                               pe_streams_10|       pointer|
+|pe_streams_10_num_data_valid  |   in|   32|     ap_fifo|                               pe_streams_10|       pointer|
+|pe_streams_10_fifo_cap        |   in|   32|     ap_fifo|                               pe_streams_10|       pointer|
+|pe_streams_9_din              |  out|   97|     ap_fifo|                                pe_streams_9|       pointer|
+|pe_streams_9_full_n           |   in|    1|     ap_fifo|                                pe_streams_9|       pointer|
+|pe_streams_9_write            |  out|    1|     ap_fifo|                                pe_streams_9|       pointer|
+|pe_streams_9_num_data_valid   |   in|   32|     ap_fifo|                                pe_streams_9|       pointer|
+|pe_streams_9_fifo_cap         |   in|   32|     ap_fifo|                                pe_streams_9|       pointer|
+|pe_streams_8_din              |  out|   97|     ap_fifo|                                pe_streams_8|       pointer|
+|pe_streams_8_full_n           |   in|    1|     ap_fifo|                                pe_streams_8|       pointer|
+|pe_streams_8_write            |  out|    1|     ap_fifo|                                pe_streams_8|       pointer|
+|pe_streams_8_num_data_valid   |   in|   32|     ap_fifo|                                pe_streams_8|       pointer|
+|pe_streams_8_fifo_cap         |   in|   32|     ap_fifo|                                pe_streams_8|       pointer|
+|pe_streams_7_din              |  out|   97|     ap_fifo|                                pe_streams_7|       pointer|
+|pe_streams_7_full_n           |   in|    1|     ap_fifo|                                pe_streams_7|       pointer|
+|pe_streams_7_write            |  out|    1|     ap_fifo|                                pe_streams_7|       pointer|
+|pe_streams_7_num_data_valid   |   in|   32|     ap_fifo|                                pe_streams_7|       pointer|
+|pe_streams_7_fifo_cap         |   in|   32|     ap_fifo|                                pe_streams_7|       pointer|
+|pe_streams_6_din              |  out|   97|     ap_fifo|                                pe_streams_6|       pointer|
+|pe_streams_6_full_n           |   in|    1|     ap_fifo|                                pe_streams_6|       pointer|
+|pe_streams_6_write            |  out|    1|     ap_fifo|                                pe_streams_6|       pointer|
+|pe_streams_6_num_data_valid   |   in|   32|     ap_fifo|                                pe_streams_6|       pointer|
+|pe_streams_6_fifo_cap         |   in|   32|     ap_fifo|                                pe_streams_6|       pointer|
+|pe_streams_5_din              |  out|   97|     ap_fifo|                                pe_streams_5|       pointer|
+|pe_streams_5_full_n           |   in|    1|     ap_fifo|                                pe_streams_5|       pointer|
+|pe_streams_5_write            |  out|    1|     ap_fifo|                                pe_streams_5|       pointer|
+|pe_streams_5_num_data_valid   |   in|   32|     ap_fifo|                                pe_streams_5|       pointer|
+|pe_streams_5_fifo_cap         |   in|   32|     ap_fifo|                                pe_streams_5|       pointer|
+|pe_streams_4_din              |  out|   97|     ap_fifo|                                pe_streams_4|       pointer|
+|pe_streams_4_full_n           |   in|    1|     ap_fifo|                                pe_streams_4|       pointer|
+|pe_streams_4_write            |  out|    1|     ap_fifo|                                pe_streams_4|       pointer|
+|pe_streams_4_num_data_valid   |   in|   32|     ap_fifo|                                pe_streams_4|       pointer|
+|pe_streams_4_fifo_cap         |   in|   32|     ap_fifo|                                pe_streams_4|       pointer|
+|pe_streams_3_din              |  out|   97|     ap_fifo|                                pe_streams_3|       pointer|
+|pe_streams_3_full_n           |   in|    1|     ap_fifo|                                pe_streams_3|       pointer|
+|pe_streams_3_write            |  out|    1|     ap_fifo|                                pe_streams_3|       pointer|
+|pe_streams_3_num_data_valid   |   in|   32|     ap_fifo|                                pe_streams_3|       pointer|
+|pe_streams_3_fifo_cap         |   in|   32|     ap_fifo|                                pe_streams_3|       pointer|
+|pe_streams_2_din              |  out|   97|     ap_fifo|                                pe_streams_2|       pointer|
+|pe_streams_2_full_n           |   in|    1|     ap_fifo|                                pe_streams_2|       pointer|
+|pe_streams_2_write            |  out|    1|     ap_fifo|                                pe_streams_2|       pointer|
+|pe_streams_2_num_data_valid   |   in|   32|     ap_fifo|                                pe_streams_2|       pointer|
+|pe_streams_2_fifo_cap         |   in|   32|     ap_fifo|                                pe_streams_2|       pointer|
+|pe_streams_1_din              |  out|   97|     ap_fifo|                                pe_streams_1|       pointer|
+|pe_streams_1_full_n           |   in|    1|     ap_fifo|                                pe_streams_1|       pointer|
+|pe_streams_1_write            |  out|    1|     ap_fifo|                                pe_streams_1|       pointer|
+|pe_streams_1_num_data_valid   |   in|   32|     ap_fifo|                                pe_streams_1|       pointer|
+|pe_streams_1_fifo_cap         |   in|   32|     ap_fifo|                                pe_streams_1|       pointer|
+|pe_streams_0_din              |  out|   97|     ap_fifo|                                pe_streams_0|       pointer|
+|pe_streams_0_full_n           |   in|    1|     ap_fifo|                                pe_streams_0|       pointer|
+|pe_streams_0_write            |  out|    1|     ap_fifo|                                pe_streams_0|       pointer|
+|pe_streams_0_num_data_valid   |   in|   32|     ap_fifo|                                pe_streams_0|       pointer|
+|pe_streams_0_fifo_cap         |   in|   32|     ap_fifo|                                pe_streams_0|       pointer|
+|pe_streams_15_din             |  out|   97|     ap_fifo|                               pe_streams_15|       pointer|
+|pe_streams_15_full_n          |   in|    1|     ap_fifo|                               pe_streams_15|       pointer|
+|pe_streams_15_write           |  out|    1|     ap_fifo|                               pe_streams_15|       pointer|
+|pe_streams_15_num_data_valid  |   in|   32|     ap_fifo|                               pe_streams_15|       pointer|
+|pe_streams_15_fifo_cap        |   in|   32|     ap_fifo|                               pe_streams_15|       pointer|
++------------------------------+-----+-----+------------+--------------------------------------------+--------------+
+

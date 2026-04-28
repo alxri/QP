@@ -1,0 +1,221 @@
+
+
+================================================================
+== Vitis HLS Report for 'compute_pe_1_Pipeline_VITIS_LOOP_251_2'
+================================================================
+* Date:           Thu Apr 23 17:42:00 2026
+
+* Version:        2024.2 (Build 5238294 on Nov  8 2024)
+* Project:        spmv_csc
+* Solution:       hls (Vivado IP Flow Target)
+* Product family: zynquplus
+* Target device:  xczu7ev-ffvc1156-2-e
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+---------+----------+------------+
+    |  Clock |  Target | Estimated| Uncertainty|
+    +--------+---------+----------+------------+
+    |ap_clk  |  5.00 ns|  4.965 ns|     1.00 ns|
+    +--------+---------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |  Latency (cycles) |  Latency (absolute) |  Interval |                    Pipeline                    |
+    |   min   |   max   |    min   |    max   | min | max |                      Type                      |
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |        ?|        ?|         ?|         ?|    0|    0|  loop auto-rewind stp (delay=0 clock cycles(s))|
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+
+    + Detail: 
+        * Instance: 
+        N/A
+
+        * Loop: 
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |                    |  Latency (cycles) | Iteration|  Initiation Interval  | Trip |          |
+        |      Loop Name     |   min   |   max   |  Latency |  achieved |   target  | Count| Pipelined|
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |- VITIS_LOOP_251_2  |        ?|        ?|        10|          6|          1|     ?|       yes|
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+
+============================================================
++ Verbose Summary: Synthesis Manager
+============================================================
+InlineROM: 1
+ExposeGlobal: 0
+============================================================
++ Verbose Summary: CDFG Model
+============================================================
+IsTopModel: 0
+ResetActiveHigh: 1
+IsCombinational: 0
+IsDatapathOnly: 0
+HasWiredReturn: 1
+HasMFsm: 2
+HasVarLatency: 1
+IsPipeline: 0
+IsRtlPipelined: 0
+IsInstanceOverlapped: 0
+IsDontTouch: 0
+HasImplIP: 0
+IsGatedGlobalClock: 0
+
++ Individual pipeline summary: 
+  * Pipeline-0: initiation interval (II) = 6, depth = 10
+
+
+============================================================
++ Verbose Summary: Schedule
+============================================================
+* Number of FSM states : 10
+* Pipeline : 1
+  Pipeline-0 : II = 6, D = 10, States = { 1 2 3 4 5 6 7 8 9 10 }
+* Dataflow Pipeline: 0
+
+* FSM state transitions: 
+1 --> 2 
+2 --> 3 
+3 --> 4 
+4 --> 5 
+5 --> 6 
+6 --> 7 
+7 --> 8 
+8 --> 9 
+9 --> 10 
+10 --> 
+
+* FSM state operations: 
+
+State 1 <SV = 0> <Delay = 2.67>
+ST_1 : Operation 13 [1/1] (0.00ns)   --->   "%specmemcore_ln0 = specmemcore void @_ssdm_op_SpecMemCore, i32 %y_partial, i64 666, i64 31, i64 18446744073709551615"   --->   Operation 13 'specmemcore' 'specmemcore_ln0' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 14 [1/1] (0.00ns)   --->   "%specinterface_ln0 = specinterface void @_ssdm_op_SpecInterface, i97 %pe_streams_1, void @empty_16, i32 0, i32 0, void @empty_25, i32 0, i32 0, void @empty_25, void @empty_25, void @empty_25, i32 0, i32 0, i32 0, i32 0, void @empty_25, void @empty_25, i32 4294967295, i32 0, i32 0"   --->   Operation 14 'specinterface' 'specinterface_ln0' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 15 [1/1] (0.00ns)   --->   "%num_rows_15_read = read i32 @_ssdm_op_Read.ap_auto.i32, i32 %num_rows_15" [../HLS/src/spmv_csc.cpp:242]   --->   Operation 15 'read' 'num_rows_15_read' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 16 [1/1] (0.00ns)   --->   "%br_ln254 = br void %while.body" [../HLS/src/spmv_csc.cpp:254]   --->   Operation 16 'br' 'br_ln254' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 17 [1/1] ( I:1.65ns O:1.65ns )   --->   "%pe_streams_1_read = read i97 @_ssdm_op_Read.ap_fifo.volatile.i97P0A, i97 %pe_streams_1" [../HLS/src/spmv_csc.cpp:254]   --->   Operation 17 'read' 'pe_streams_1_read' <Predicate = true> <Delay = 1.65> <CoreInst = "FIFO">   --->   Core 77 'FIFO' <Latency = 0> <II = 1> <Delay = 1.65> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 97> <Depth = 256> <FIFO>
+ST_1 : Operation 18 [1/1] (0.00ns)   --->   "%pkt_last = bitselect i1 @_ssdm_op_BitSelect.i1.i97.i32, i97 %pe_streams_1_read, i32 96" [../HLS/src/spmv_csc.cpp:254]   --->   Operation 18 'bitselect' 'pkt_last' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 19 [1/1] (0.00ns)   --->   "%br_ln255 = br i1 %pkt_last, void %if.end, void %while.end.exitStub" [../HLS/src/spmv_csc.cpp:255]   --->   Operation 19 'br' 'br_ln255' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 20 [1/1] (0.00ns)   --->   "%trunc_ln254_s = partselect i32 @_ssdm_op_PartSelect.i32.i97.i32.i32, i97 %pe_streams_1_read, i32 32, i32 63" [../HLS/src/spmv_csc.cpp:254]   --->   Operation 20 'partselect' 'trunc_ln254_s' <Predicate = (!pkt_last)> <Delay = 0.00>
+ST_1 : Operation 21 [1/1] (0.00ns)   --->   "%trunc_ln254_2 = partselect i32 @_ssdm_op_PartSelect.i32.i97.i32.i32, i97 %pe_streams_1_read, i32 64, i32 95" [../HLS/src/spmv_csc.cpp:254]   --->   Operation 21 'partselect' 'trunc_ln254_2' <Predicate = (!pkt_last)> <Delay = 0.00>
+ST_1 : Operation 22 [1/1] (0.00ns)   --->   "%pkt_val = bitcast i32 %trunc_ln254_s" [../HLS/src/spmv_csc.cpp:254]   --->   Operation 22 'bitcast' 'pkt_val' <Predicate = (!pkt_last)> <Delay = 0.00>
+ST_1 : Operation 23 [1/1] (0.00ns)   --->   "%pkt_x = bitcast i32 %trunc_ln254_2" [../HLS/src/spmv_csc.cpp:254]   --->   Operation 23 'bitcast' 'pkt_x' <Predicate = (!pkt_last)> <Delay = 0.00>
+ST_1 : Operation 24 [1/1] (0.00ns)   --->   "%pkt_row = trunc i97 %pe_streams_1_read" [../HLS/src/spmv_csc.cpp:254]   --->   Operation 24 'trunc' 'pkt_row' <Predicate = (!pkt_last)> <Delay = 0.00>
+ST_1 : Operation 25 [1/1] (0.00ns)   --->   "%specpipeline_ln253 = specpipeline void @_ssdm_op_SpecPipeline, i32 1, i32 0, i32 0, i32 0, void @empty_25" [../HLS/src/spmv_csc.cpp:253]   --->   Operation 25 'specpipeline' 'specpipeline_ln253' <Predicate = (!pkt_last)> <Delay = 0.00>
+ST_1 : Operation 26 [1/1] (0.00ns)   --->   "%specloopname_ln251 = specloopname void @_ssdm_op_SpecLoopName, void @empty_9" [../HLS/src/spmv_csc.cpp:251]   --->   Operation 26 'specloopname' 'specloopname_ln251' <Predicate = (!pkt_last)> <Delay = 0.00>
+ST_1 : Operation 27 [1/1] (1.01ns)   --->   "%icmp_ln261 = icmp_ult  i32 %pkt_row, i32 %num_rows_15_read" [../HLS/src/spmv_csc.cpp:261]   --->   Operation 27 'icmp' 'icmp_ln261' <Predicate = (!pkt_last)> <Delay = 1.01> <CoreInst = "Cmp">   --->   Core 9 'Cmp' <Latency = 0> <II = 1> <Delay = 1.01> <FuncUnit> <Opcode : 'seteq' 'setne' 'setle' 'setge' 'setlt' 'setgt'> <InPorts = 2> <OutPorts = 1>
+ST_1 : Operation 28 [1/1] (0.00ns)   --->   "%br_ln261 = br i1 %icmp_ln261, void %cleanup.cont.critedge, void %if.then3" [../HLS/src/spmv_csc.cpp:261]   --->   Operation 28 'br' 'br_ln261' <Predicate = (!pkt_last)> <Delay = 0.00>
+ST_1 : Operation 29 [1/1] (0.00ns)   --->   "%zext_ln263 = zext i32 %pkt_row" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 29 'zext' 'zext_ln263' <Predicate = (!pkt_last & icmp_ln261)> <Delay = 0.00>
+ST_1 : Operation 30 [1/1] (0.00ns)   --->   "%y_partial_addr = getelementptr i32 %y_partial, i64 0, i64 %zext_ln263" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 30 'getelementptr' 'y_partial_addr' <Predicate = (!pkt_last & icmp_ln261)> <Delay = 0.00>
+ST_1 : Operation 31 [1/1] (0.00ns)   --->   "%br_ln251 = br void %while.body" [../HLS/src/spmv_csc.cpp:251]   --->   Operation 31 'br' 'br_ln251' <Predicate = (!pkt_last)> <Delay = 0.00>
+
+State 2 <SV = 1> <Delay = 3.79>
+ST_2 : Operation 32 [4/4] (3.79ns)   --->   "%mul = fmul i32 %pkt_val, i32 %pkt_x" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 32 'fmul' 'mul' <Predicate = (!pkt_last & icmp_ln261)> <Delay = 3.79> <CoreInst = "FMul_maxdsp">   --->   Core 30 'FMul_maxdsp' <Latency = 3> <II = 1> <Delay = 3.79> <FuncUnit> <Opcode : 'fmul'> <InPorts = 2> <OutPorts = 1>
+
+State 3 <SV = 2> <Delay = 3.79>
+ST_3 : Operation 33 [3/4] (3.79ns)   --->   "%mul = fmul i32 %pkt_val, i32 %pkt_x" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 33 'fmul' 'mul' <Predicate = (!pkt_last & icmp_ln261)> <Delay = 3.79> <CoreInst = "FMul_maxdsp">   --->   Core 30 'FMul_maxdsp' <Latency = 3> <II = 1> <Delay = 3.79> <FuncUnit> <Opcode : 'fmul'> <InPorts = 2> <OutPorts = 1>
+
+State 4 <SV = 3> <Delay = 3.79>
+ST_4 : Operation 34 [2/4] (3.79ns)   --->   "%mul = fmul i32 %pkt_val, i32 %pkt_x" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 34 'fmul' 'mul' <Predicate = (!pkt_last & icmp_ln261)> <Delay = 3.79> <CoreInst = "FMul_maxdsp">   --->   Core 30 'FMul_maxdsp' <Latency = 3> <II = 1> <Delay = 3.79> <FuncUnit> <Opcode : 'fmul'> <InPorts = 2> <OutPorts = 1>
+ST_4 : Operation 45 [1/1] (0.42ns)   --->   "%ret_ln0 = ret"   --->   Operation 45 'ret' 'ret_ln0' <Predicate = (pkt_last)> <Delay = 0.42>
+
+State 5 <SV = 4> <Delay = 3.79>
+ST_5 : Operation 35 [1/4] (3.79ns)   --->   "%mul = fmul i32 %pkt_val, i32 %pkt_x" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 35 'fmul' 'mul' <Predicate = (!pkt_last & icmp_ln261)> <Delay = 3.79> <CoreInst = "FMul_maxdsp">   --->   Core 30 'FMul_maxdsp' <Latency = 3> <II = 1> <Delay = 3.79> <FuncUnit> <Opcode : 'fmul'> <InPorts = 2> <OutPorts = 1>
+ST_5 : Operation 36 [2/2] (1.23ns)   --->   "%y_partial_load = load i10 %y_partial_addr" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 36 'load' 'y_partial_load' <Predicate = (!pkt_last & icmp_ln261)> <Delay = 1.23> <CoreInst = "RAM_T2P_URAM">   --->   Core 99 'RAM_T2P_URAM' <Latency = 1> <II = 1> <Delay = 1.23> <Storage> <Opcode : 'load' 'store'> <Ports = 2> <Width = 32> <Depth = 1024> <RAM>
+
+State 6 <SV = 5> <Delay = 4.96>
+ST_6 : Operation 37 [1/2] ( I:1.23ns O:1.23ns )   --->   "%y_partial_load = load i10 %y_partial_addr" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 37 'load' 'y_partial_load' <Predicate = (!pkt_last & icmp_ln261)> <Delay = 1.23> <CoreInst = "RAM_T2P_URAM">   --->   Core 99 'RAM_T2P_URAM' <Latency = 1> <II = 1> <Delay = 1.23> <Storage> <Opcode : 'load' 'store'> <Ports = 2> <Width = 32> <Depth = 1024> <RAM>
+ST_6 : Operation 38 [5/5] (3.72ns)   --->   "%add = fadd i32 %y_partial_load, i32 %mul" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 38 'fadd' 'add' <Predicate = (!pkt_last & icmp_ln261)> <Delay = 3.72> <CoreInst = "FAddSub_nodsp">   --->   Core 17 'FAddSub_nodsp' <Latency = 4> <II = 1> <Delay = 3.72> <FuncUnit> <Opcode : 'fadd' 'fsub'> <InPorts = 2> <OutPorts = 1>
+
+State 7 <SV = 6> <Delay = 3.72>
+ST_7 : Operation 39 [4/5] (3.72ns)   --->   "%add = fadd i32 %y_partial_load, i32 %mul" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 39 'fadd' 'add' <Predicate = (icmp_ln261)> <Delay = 3.72> <CoreInst = "FAddSub_nodsp">   --->   Core 17 'FAddSub_nodsp' <Latency = 4> <II = 1> <Delay = 3.72> <FuncUnit> <Opcode : 'fadd' 'fsub'> <InPorts = 2> <OutPorts = 1>
+
+State 8 <SV = 7> <Delay = 3.72>
+ST_8 : Operation 40 [3/5] (3.72ns)   --->   "%add = fadd i32 %y_partial_load, i32 %mul" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 40 'fadd' 'add' <Predicate = (icmp_ln261)> <Delay = 3.72> <CoreInst = "FAddSub_nodsp">   --->   Core 17 'FAddSub_nodsp' <Latency = 4> <II = 1> <Delay = 3.72> <FuncUnit> <Opcode : 'fadd' 'fsub'> <InPorts = 2> <OutPorts = 1>
+
+State 9 <SV = 8> <Delay = 3.72>
+ST_9 : Operation 41 [2/5] (3.72ns)   --->   "%add = fadd i32 %y_partial_load, i32 %mul" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 41 'fadd' 'add' <Predicate = (icmp_ln261)> <Delay = 3.72> <CoreInst = "FAddSub_nodsp">   --->   Core 17 'FAddSub_nodsp' <Latency = 4> <II = 1> <Delay = 3.72> <FuncUnit> <Opcode : 'fadd' 'fsub'> <InPorts = 2> <OutPorts = 1>
+
+State 10 <SV = 9> <Delay = 4.96>
+ST_10 : Operation 42 [1/5] (3.72ns)   --->   "%add = fadd i32 %y_partial_load, i32 %mul" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 42 'fadd' 'add' <Predicate = (icmp_ln261)> <Delay = 3.72> <CoreInst = "FAddSub_nodsp">   --->   Core 17 'FAddSub_nodsp' <Latency = 4> <II = 1> <Delay = 3.72> <FuncUnit> <Opcode : 'fadd' 'fsub'> <InPorts = 2> <OutPorts = 1>
+ST_10 : Operation 43 [1/1] ( I:1.23ns O:1.23ns )   --->   "%store_ln263 = store i32 %add, i10 %y_partial_addr" [../HLS/src/spmv_csc.cpp:263]   --->   Operation 43 'store' 'store_ln263' <Predicate = (icmp_ln261)> <Delay = 1.23> <CoreInst = "RAM_T2P_URAM">   --->   Core 99 'RAM_T2P_URAM' <Latency = 1> <II = 1> <Delay = 1.23> <Storage> <Opcode : 'load' 'store'> <Ports = 2> <Width = 32> <Depth = 1024> <RAM>
+ST_10 : Operation 44 [1/1] (0.00ns)   --->   "%br_ln264 = br void %cleanup.cont.critedge" [../HLS/src/spmv_csc.cpp:264]   --->   Operation 44 'br' 'br_ln264' <Predicate = (icmp_ln261)> <Delay = 0.00>
+
+
+============================================================
++ Verbose Summary: Timing violations
+============================================================
+Target clock period: 5.000ns, clock uncertainty: 1.000ns.
+
+ <State 1>: 2.671ns
+The critical path consists of the following:
+	fifo read operation ('pe_streams_1_read', ../HLS/src/spmv_csc.cpp:254) on port 'pe_streams_1' (../HLS/src/spmv_csc.cpp:254) [9]  (1.655 ns)
+	'icmp' operation 1 bit ('icmp_ln261', ../HLS/src/spmv_csc.cpp:261) [20]  (1.016 ns)
+
+ <State 2>: 3.793ns
+The critical path consists of the following:
+	'fmul' operation 32 bit ('mul', ../HLS/src/spmv_csc.cpp:263) [23]  (3.793 ns)
+
+ <State 3>: 3.793ns
+The critical path consists of the following:
+	'fmul' operation 32 bit ('mul', ../HLS/src/spmv_csc.cpp:263) [23]  (3.793 ns)
+
+ <State 4>: 3.793ns
+The critical path consists of the following:
+	'fmul' operation 32 bit ('mul', ../HLS/src/spmv_csc.cpp:263) [23]  (3.793 ns)
+
+ <State 5>: 3.793ns
+The critical path consists of the following:
+	'fmul' operation 32 bit ('mul', ../HLS/src/spmv_csc.cpp:263) [23]  (3.793 ns)
+
+ <State 6>: 4.965ns
+The critical path consists of the following:
+	'load' operation 32 bit ('y_partial_load', ../HLS/src/spmv_csc.cpp:263) on array 'y_partial' [26]  (1.237 ns)
+	'fadd' operation 32 bit ('add', ../HLS/src/spmv_csc.cpp:263) [27]  (3.728 ns)
+
+ <State 7>: 3.728ns
+The critical path consists of the following:
+	'fadd' operation 32 bit ('add', ../HLS/src/spmv_csc.cpp:263) [27]  (3.728 ns)
+
+ <State 8>: 3.728ns
+The critical path consists of the following:
+	'fadd' operation 32 bit ('add', ../HLS/src/spmv_csc.cpp:263) [27]  (3.728 ns)
+
+ <State 9>: 3.728ns
+The critical path consists of the following:
+	'fadd' operation 32 bit ('add', ../HLS/src/spmv_csc.cpp:263) [27]  (3.728 ns)
+
+ <State 10>: 4.965ns
+The critical path consists of the following:
+	'fadd' operation 32 bit ('add', ../HLS/src/spmv_csc.cpp:263) [27]  (3.728 ns)
+	'store' operation 0 bit ('store_ln263', ../HLS/src/spmv_csc.cpp:263) of variable 'add', ../HLS/src/spmv_csc.cpp:263 on array 'y_partial' [28]  (1.237 ns)
+
+
+============================================================
++ Verbose Summary: Binding
+============================================================
+N/A
+* FSMD analyzer results:
+  - Output states:
+ - Input state : 
+  - Chain level:
+	State 1
+	State 2
+	State 3
+	State 4
+	State 5
+	State 6
+	State 7
+	State 8
+	State 9
+	State 10
+
+
+============================================================
++ Verbose Summary: Datapath Resource usage 
+============================================================
+N/A
