@@ -3,11 +3,8 @@
 #include "ap_int.h"
 
 #ifndef NUM_PES
-#define NUM_PES 16
+#define NUM_PES 8
 #endif
-
-#define GLOBAL_MAX 65536
-#define TILE_SIZE 1024
 
 static constexpr int NNZ_LANES = (NUM_PES < PACK_SIZE) ? NUM_PES : PACK_SIZE;
 
@@ -242,17 +239,14 @@ static void distribute_to_pe(int nnz,
     }
 }
 
-static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MAX_ROWS], bool clear_y)
+static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MAX_ROWS])
 {
 #pragma HLS INLINE off
-    if (clear_y)
-    {
     for (int i = 0; i < num_rows; ++i)
     {
 #pragma HLS PIPELINE II = 1
         y_partial[i] = 0.0f;
     }
-    }   
 
     while (true)
     {
@@ -310,8 +304,7 @@ static void spmv_csc_dataflow(int num_rows,
                               const int *A_col_ptr,
                               const float16 *A_values,
                               const float *x,
-                              float y_partial[NUM_PES][MAX_ROWS],
-                              bool clear_y)
+                              float y_partial[NUM_PES][MAX_ROWS])
 {
 #pragma HLS INLINE off
 
@@ -331,7 +324,7 @@ static void spmv_csc_dataflow(int num_rows,
     for (int pe = 0; pe < NUM_PES; ++pe)
     {
 #pragma HLS UNROLL
-        compute_pe(num_rows, pe_streams[pe], y_partial[pe], clear_y);
+        compute_pe(num_rows, pe_streams[pe], y_partial[pe]);
     }
 }
 
@@ -342,9 +335,7 @@ void spmv_csc(int num_rows,
               const int *A_col_ptr,
               const float16 *A_values,
               const float *x,
-              float16 *y,
-              bool clear_y,
-              bool write_y)
+              float16 *y)
 {
 #pragma HLS INTERFACE m_axi port = A_row_idx offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
 #pragma HLS INTERFACE m_axi port = A_col_ptr offset = slave bundle = gmem1 depth = MAX_COL_PTR
@@ -360,8 +351,6 @@ void spmv_csc(int num_rows,
 #pragma HLS INTERFACE s_axilite port = A_values bundle = control
 #pragma HLS INTERFACE s_axilite port = x bundle = control
 #pragma HLS INTERFACE s_axilite port = y bundle = control
-#pragma HLS INTERFACE s_axilite port = clear_y bundle = control
-#pragma HLS INTERFACE s_axilite port = write_y bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
     if (num_rows > MAX_ROWS || num_cols > MAX_COLS)
@@ -369,15 +358,13 @@ void spmv_csc(int num_rows,
         return;
     }
 
-    static float y_partial[NUM_PES][MAX_ROWS];
+    //static float y_partial[NUM_PES][MAX_ROWS];
+    float y_partial[NUM_PES][MAX_ROWS];
 
 #pragma HLS ARRAY_PARTITION variable = y_partial complete dim = 1
 #pragma HLS BIND_STORAGE variable = y_partial type = ram_t2p impl = uram
 
-    spmv_csc_dataflow(num_rows, num_cols, nnz, A_row_idx, A_col_ptr, A_values, x, y_partial, clear_y);
+    spmv_csc_dataflow(num_rows, num_cols, nnz, A_row_idx, A_col_ptr, A_values, x, y_partial);
 
-    if (write_y)
-    {
-        reduce_and_write_packed(num_rows, y_partial, y);
-    }
+    reduce_and_write_packed(num_rows, y_partial, y);
 }

@@ -1,3 +1,0 @@
-relativeroot=/home/romoirib/QP/spmv_csc_tmp/spmv_csc
-original_argv=--mode hls --cosim --config /home/romoirib/QP/spmv_csc_tmp/spmv_csc/hls_config.cfg --work_dir spmv_csc 
-

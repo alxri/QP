@@ -346,23 +346,23 @@ void spmv_csc(int num_rows,
               bool clear_y,
               bool write_y)
 {
-#pragma HLS INTERFACE m_axi port = A_row_idx offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
-#pragma HLS INTERFACE m_axi port = A_col_ptr offset = slave bundle = gmem1 depth = MAX_COL_PTR
-#pragma HLS INTERFACE m_axi port = A_values offset = slave bundle = gmem2 depth = MAX_NNZ_WORDS
-#pragma HLS INTERFACE m_axi port = x offset = slave bundle = gmem3 depth = MAX_COLS
-#pragma HLS INTERFACE m_axi port = y offset = slave bundle = gmem4 depth = MAX_ROW_WORDS
+// #pragma HLS INTERFACE m_axi port = A_row_idx offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
+// #pragma HLS INTERFACE m_axi port = A_col_ptr offset = slave bundle = gmem1 depth = MAX_COL_PTR
+// #pragma HLS INTERFACE m_axi port = A_values offset = slave bundle = gmem2 depth = MAX_NNZ_WORDS
+// #pragma HLS INTERFACE m_axi port = x offset = slave bundle = gmem3 depth = MAX_COLS
+// #pragma HLS INTERFACE m_axi port = y offset = slave bundle = gmem4 depth = MAX_ROW_WORDS
 
-#pragma HLS INTERFACE s_axilite port = num_rows bundle = control
-#pragma HLS INTERFACE s_axilite port = num_cols bundle = control
-#pragma HLS INTERFACE s_axilite port = nnz bundle = control
-#pragma HLS INTERFACE s_axilite port = A_row_idx bundle = control
-#pragma HLS INTERFACE s_axilite port = A_col_ptr bundle = control
-#pragma HLS INTERFACE s_axilite port = A_values bundle = control
-#pragma HLS INTERFACE s_axilite port = x bundle = control
-#pragma HLS INTERFACE s_axilite port = y bundle = control
-#pragma HLS INTERFACE s_axilite port = clear_y bundle = control
-#pragma HLS INTERFACE s_axilite port = write_y bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
+// #pragma HLS INTERFACE s_axilite port = num_rows bundle = control
+// #pragma HLS INTERFACE s_axilite port = num_cols bundle = control
+// #pragma HLS INTERFACE s_axilite port = nnz bundle = control
+// #pragma HLS INTERFACE s_axilite port = A_row_idx bundle = control
+// #pragma HLS INTERFACE s_axilite port = A_col_ptr bundle = control
+// #pragma HLS INTERFACE s_axilite port = A_values bundle = control
+// #pragma HLS INTERFACE s_axilite port = x bundle = control
+// #pragma HLS INTERFACE s_axilite port = y bundle = control
+// #pragma HLS INTERFACE s_axilite port = clear_y bundle = control
+// #pragma HLS INTERFACE s_axilite port = write_y bundle = control
+// #pragma HLS INTERFACE s_axilite port = return bundle = control
 
     if (num_rows > MAX_ROWS || num_cols > MAX_COLS)
     {

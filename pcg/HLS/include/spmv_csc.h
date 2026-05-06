@@ -41,8 +41,6 @@ void spmv_csc(int num_rows,
               const int *A_col_ptr,
               const float16 *A_values,
               const float *x,
-              float16 *y,
-              bool clear_y,
-              bool write_y);
+              float *y);
 
 #endif // SPMV_CSC_H

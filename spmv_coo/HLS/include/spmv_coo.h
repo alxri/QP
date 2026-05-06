@@ -1,5 +1,5 @@
-#ifndef SPMV_CSC_H
-#define SPMV_CSC_H
+#ifndef SPMV_COO_H
+#define SPMV_COO_H
 
 #include "hls_stream.h"
 #include "hls_vector.h"
@@ -25,24 +25,25 @@
 
 #define CEIL_DIV(a, b) (((a) + (b) - 1) / (b))
 
-#define MAX_COL_PTR (MAX_COLS + 1)
+#define MAX_COL_PTR   (MAX_COLS + 1)
 #define MAX_COL_WORDS CEIL_DIV(MAX_COLS, PACK_SIZE)
 #define MAX_ROW_WORDS CEIL_DIV(MAX_ROWS, PACK_SIZE)
-#define MAX_NNZ_WORDS CEIL_DIV(MAX_NNZ, PACK_SIZE)
+#define MAX_NNZ_WORDS CEIL_DIV(MAX_NNZ,  PACK_SIZE)
 
 // 512 bit packed types (16 floats per packet)
 typedef hls::vector<float, PACK_SIZE> float16;
 typedef hls::vector<int, PACK_SIZE> int16;
 
-void spmv_csc(int num_rows,
-              int num_cols,
-              int nnz,
-              const int16 *A_row_idx,
-              const int *A_col_ptr,
-              const float16 *A_values,
-              const float *x,
-              float16 *y,
-              bool clear_y,
-              bool write_y);
+// COO SpMV kernel: y = A * x
+// A is provided in COO form as packed row/col/value arrays of length nnz.
+// Row/col/value arrays are packed into 512-bit words (PACK_SIZE lanes).
+void spmv_coo(int num_rows,
+			  int num_cols,
+			  int nnz,
+			  const int16 *A_row_idx,
+			  const int16 *A_col_idx,
+			  const float16 *A_values,
+			  const float16 *x,
+			  float16 *y);
 
-#endif // SPMV_CSC_H
+#endif // SPMV_COO_H

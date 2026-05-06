@@ -3,11 +3,8 @@
 #include "ap_int.h"
 
 #ifndef NUM_PES
-#define NUM_PES 16
+#define NUM_PES 8
 #endif
-
-#define GLOBAL_MAX 65536
-#define TILE_SIZE 1024
 
 static constexpr int NNZ_LANES = (NUM_PES < PACK_SIZE) ? NUM_PES : PACK_SIZE;
 
@@ -242,17 +239,14 @@ static void distribute_to_pe(int nnz,
     }
 }
 
-static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MAX_ROWS], bool clear_y)
+static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MAX_ROWS])
 {
 #pragma HLS INLINE off
-    if (clear_y)
-    {
     for (int i = 0; i < num_rows; ++i)
     {
 #pragma HLS PIPELINE II = 1
         y_partial[i] = 0.0f;
     }
-    }   
 
     while (true)
     {
@@ -271,35 +265,22 @@ static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MA
     }
 }
 
-static void reduce_and_write_packed(int num_rows, float y_partial[NUM_PES][MAX_ROWS], float16 *y_out)
+static void reduce_and_accumulate(int num_rows,
+                                 float y_partial[NUM_PES][MAX_ROWS],
+                                 float *y_out)
 {
 #pragma HLS INLINE off
-    const int words = CEIL_DIV(num_rows, PACK_SIZE);
-
-    for (int w = 0; w < words; ++w)
+    for (int idx = 0; idx < num_rows; ++idx)
     {
-        float16 out_word;
-
-        for (int lane = 0; lane < PACK_SIZE; ++lane)
-        {
 #pragma HLS PIPELINE II = 1
-            const int idx = w * PACK_SIZE + lane;
-            float sum = 0.0f;
+        float sum = 0.0f;
 
-            if (idx < num_rows)
-            {
-                for (int pe = 0; pe < NUM_PES; ++pe)
-                {
+        for (int pe = 0; pe < NUM_PES; ++pe)
+        {
 #pragma HLS UNROLL
-                    sum += y_partial[pe][idx];
-                    // y_partial[pe][idx] = 0.0f;
-                }
-            }
-
-            out_word[lane] = (idx < num_rows) ? sum : 0.0f;
+            sum += y_partial[pe][idx];
         }
-
-        y_out[w] = out_word;
+        y_out[idx] = sum;
     }
 }
 
@@ -310,8 +291,7 @@ static void spmv_csc_dataflow(int num_rows,
                               const int *A_col_ptr,
                               const float16 *A_values,
                               const float *x,
-                              float y_partial[NUM_PES][MAX_ROWS],
-                              bool clear_y)
+                              float y_partial[NUM_PES][MAX_ROWS])
 {
 #pragma HLS INLINE off
 
@@ -331,7 +311,7 @@ static void spmv_csc_dataflow(int num_rows,
     for (int pe = 0; pe < NUM_PES; ++pe)
     {
 #pragma HLS UNROLL
-        compute_pe(num_rows, pe_streams[pe], y_partial[pe], clear_y);
+        compute_pe(num_rows, pe_streams[pe], y_partial[pe]);
     }
 }
 
@@ -342,42 +322,20 @@ void spmv_csc(int num_rows,
               const int *A_col_ptr,
               const float16 *A_values,
               const float *x,
-              float16 *y,
-              bool clear_y,
-              bool write_y)
+              float *y)
 {
-#pragma HLS INTERFACE m_axi port = A_row_idx offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
-#pragma HLS INTERFACE m_axi port = A_col_ptr offset = slave bundle = gmem1 depth = MAX_COL_PTR
-#pragma HLS INTERFACE m_axi port = A_values offset = slave bundle = gmem2 depth = MAX_NNZ_WORDS
-#pragma HLS INTERFACE m_axi port = x offset = slave bundle = gmem3 depth = MAX_COLS
-#pragma HLS INTERFACE m_axi port = y offset = slave bundle = gmem4 depth = MAX_ROW_WORDS
-
-#pragma HLS INTERFACE s_axilite port = num_rows bundle = control
-#pragma HLS INTERFACE s_axilite port = num_cols bundle = control
-#pragma HLS INTERFACE s_axilite port = nnz bundle = control
-#pragma HLS INTERFACE s_axilite port = A_row_idx bundle = control
-#pragma HLS INTERFACE s_axilite port = A_col_ptr bundle = control
-#pragma HLS INTERFACE s_axilite port = A_values bundle = control
-#pragma HLS INTERFACE s_axilite port = x bundle = control
-#pragma HLS INTERFACE s_axilite port = y bundle = control
-#pragma HLS INTERFACE s_axilite port = clear_y bundle = control
-#pragma HLS INTERFACE s_axilite port = write_y bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
-
     if (num_rows > MAX_ROWS || num_cols > MAX_COLS)
     {
         return;
     }
 
-    static float y_partial[NUM_PES][MAX_ROWS];
+    //static float y_partial[NUM_PES][MAX_ROWS];
+    float y_partial[NUM_PES][MAX_ROWS];
 
 #pragma HLS ARRAY_PARTITION variable = y_partial complete dim = 1
 #pragma HLS BIND_STORAGE variable = y_partial type = ram_t2p impl = uram
 
-    spmv_csc_dataflow(num_rows, num_cols, nnz, A_row_idx, A_col_ptr, A_values, x, y_partial, clear_y);
+    spmv_csc_dataflow(num_rows, num_cols, nnz, A_row_idx, A_col_ptr, A_values, x, y_partial);
 
-    if (write_y)
-    {
-        reduce_and_write_packed(num_rows, y_partial, y);
-    }
+    reduce_and_accumulate(num_rows, y_partial, y);
 }

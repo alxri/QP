@@ -3,11 +3,8 @@
 #include "ap_int.h"
 
 #ifndef NUM_PES
-#define NUM_PES 16
+#define NUM_PES 8
 #endif
-
-#define GLOBAL_MAX 65536
-#define TILE_SIZE 1024
 
 static constexpr int NNZ_LANES = (NUM_PES < PACK_SIZE) ? NUM_PES : PACK_SIZE;
 
@@ -242,31 +239,113 @@ static void distribute_to_pe(int nnz,
     }
 }
 
-static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MAX_ROWS], bool clear_y)
+static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MAX_ROWS])
 {
 #pragma HLS INLINE off
-    if (clear_y)
-    {
     for (int i = 0; i < num_rows; ++i)
     {
 #pragma HLS PIPELINE II = 1
         y_partial[i] = 0.0f;
     }
-    }   
 
-    while (true)
+    // The MAC loop has a loop-carried dependency through y_partial[row] (read/modify/write).
+    // With a variable index (row), HLS must assume consecutive iterations might target the
+    // same address and will conservatively increase II (seen as II=5 in csynth).
+    //
+    // To enable II=1 for the common case (different rows), we:
+    //  1) Tell HLS to ignore the conservative inter-iteration dependence on y_partial.
+    //  2) Add an explicit runtime hazard check: if the next packet targets a row that is
+    //     still "in flight" in the FP pipeline, we stall until it is safe.
+    //
+    // NOTE: Y_PARTIAL_HAZARD_CYCLES must be >= the update pipeline distance (read->write)
+    // of y_partial[row]. Keep it conservative; tune with csynth if needed.
+    static constexpr int Y_PARTIAL_HAZARD_CYCLES = 8;
+
+    int hazard_rows[Y_PARTIAL_HAZARD_CYCLES];
+    bool hazard_valid[Y_PARTIAL_HAZARD_CYCLES];
+#pragma HLS ARRAY_PARTITION variable = hazard_rows complete
+#pragma HLS ARRAY_PARTITION variable = hazard_valid complete
+
+    for (int i = 0; i < Y_PARTIAL_HAZARD_CYCLES; ++i)
+    {
+#pragma HLS UNROLL
+        hazard_rows[i] = 0;
+        hazard_valid[i] = false;
+    }
+
+    // One-entry skid buffer so we can read from the stream but stall the update when needed.
+    NnzPkt pkt_buf;
+    bool have_pkt = false;
+    bool done = false;
+
+    while (!done)
     {
 #pragma HLS PIPELINE II = 1
-        NnzPkt pkt = in.read();
-        if (pkt.last)
+#pragma HLS DEPENDENCE variable = y_partial type = inter false
+
+        // Advance the in-flight row scoreboard by 1 cycle.
+        for (int i = Y_PARTIAL_HAZARD_CYCLES - 1; i > 0; --i)
         {
-            break;
+#pragma HLS UNROLL
+            hazard_rows[i] = hazard_rows[i - 1];
+            hazard_valid[i] = hazard_valid[i - 1];
+        }
+        hazard_rows[0] = 0;
+        hazard_valid[0] = false;
+
+        // Fetch a new packet when the skid buffer is empty.
+        if (!have_pkt)
+        {
+            pkt_buf = in.read();
+            have_pkt = true;
         }
 
-        int row = pkt.row;
-        if ((unsigned)row < (unsigned)num_rows)
+        // Default: do nothing this cycle (bubble).
+        bool do_update = false;
+        int row = 0;
+
+        if (have_pkt)
         {
-            y_partial[row] += pkt.val * pkt.x;
+            if (pkt_buf.last)
+            {
+                // Consume termination and stop launching new iterations.
+                have_pkt = false;
+                done = true;
+            }
+            else
+            {
+                row = pkt_buf.row;
+                const bool in_range = ((unsigned)row < (unsigned)num_rows);
+
+                bool hazard = false;
+                if (in_range)
+                {
+                    for (int i = 0; i < Y_PARTIAL_HAZARD_CYCLES; ++i)
+                    {
+#pragma HLS UNROLL
+                        hazard |= (hazard_valid[i] && (hazard_rows[i] == row));
+                    }
+                }
+
+                if (!hazard)
+                {
+                    // Safe to apply the update now.
+                    if (in_range)
+                    {
+                        y_partial[row] += pkt_buf.val * pkt_buf.x;
+                        do_update = true;
+                    }
+                    // Consume the buffered packet.
+                    have_pkt = false;
+                }
+            }
+        }
+
+        // Mark this row as busy (in flight) so we can stall on same-row updates.
+        if (do_update)
+        {
+            hazard_rows[0] = row;
+            hazard_valid[0] = true;
         }
     }
 }
@@ -292,7 +371,6 @@ static void reduce_and_write_packed(int num_rows, float y_partial[NUM_PES][MAX_R
                 {
 #pragma HLS UNROLL
                     sum += y_partial[pe][idx];
-                    // y_partial[pe][idx] = 0.0f;
                 }
             }
 
@@ -310,8 +388,7 @@ static void spmv_csc_dataflow(int num_rows,
                               const int *A_col_ptr,
                               const float16 *A_values,
                               const float *x,
-                              float y_partial[NUM_PES][MAX_ROWS],
-                              bool clear_y)
+                              float y_partial[NUM_PES][MAX_ROWS])
 {
 #pragma HLS INLINE off
 
@@ -331,7 +408,7 @@ static void spmv_csc_dataflow(int num_rows,
     for (int pe = 0; pe < NUM_PES; ++pe)
     {
 #pragma HLS UNROLL
-        compute_pe(num_rows, pe_streams[pe], y_partial[pe], clear_y);
+        compute_pe(num_rows, pe_streams[pe], y_partial[pe]);
     }
 }
 
@@ -342,9 +419,7 @@ void spmv_csc(int num_rows,
               const int *A_col_ptr,
               const float16 *A_values,
               const float *x,
-              float16 *y,
-              bool clear_y,
-              bool write_y)
+              float16 *y)
 {
 #pragma HLS INTERFACE m_axi port = A_row_idx offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
 #pragma HLS INTERFACE m_axi port = A_col_ptr offset = slave bundle = gmem1 depth = MAX_COL_PTR
@@ -360,8 +435,6 @@ void spmv_csc(int num_rows,
 #pragma HLS INTERFACE s_axilite port = A_values bundle = control
 #pragma HLS INTERFACE s_axilite port = x bundle = control
 #pragma HLS INTERFACE s_axilite port = y bundle = control
-#pragma HLS INTERFACE s_axilite port = clear_y bundle = control
-#pragma HLS INTERFACE s_axilite port = write_y bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
     if (num_rows > MAX_ROWS || num_cols > MAX_COLS)
@@ -369,15 +442,11 @@ void spmv_csc(int num_rows,
         return;
     }
 
-    static float y_partial[NUM_PES][MAX_ROWS];
-
+    float y_partial[NUM_PES][MAX_ROWS];
 #pragma HLS ARRAY_PARTITION variable = y_partial complete dim = 1
 #pragma HLS BIND_STORAGE variable = y_partial type = ram_t2p impl = uram
 
-    spmv_csc_dataflow(num_rows, num_cols, nnz, A_row_idx, A_col_ptr, A_values, x, y_partial, clear_y);
+    spmv_csc_dataflow(num_rows, num_cols, nnz, A_row_idx, A_col_ptr, A_values, x, y_partial);
 
-    if (write_y)
-    {
-        reduce_and_write_packed(num_rows, y_partial, y);
-    }
+    reduce_and_write_packed(num_rows, y_partial, y);
 }

@@ -3,11 +3,8 @@
 #include "ap_int.h"
 
 #ifndef NUM_PES
-#define NUM_PES 16
+#define NUM_PES 8
 #endif
-
-#define GLOBAL_MAX 65536
-#define TILE_SIZE 1024
 
 static constexpr int NNZ_LANES = (NUM_PES < PACK_SIZE) ? NUM_PES : PACK_SIZE;
 

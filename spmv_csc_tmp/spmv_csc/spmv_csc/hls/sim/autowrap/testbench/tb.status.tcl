@@ -1,1 +1,0 @@
-set ::AESL_AUTOSIM::gTopFileName /home/romoirib/QP/spmv_csc_tmp/spmv_csc/spmv_csc/hls/./sim/autowrap/testbench/spmv_csc.cpp_pre.cpp.tb.cpp
