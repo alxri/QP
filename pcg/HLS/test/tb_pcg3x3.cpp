@@ -33,8 +33,6 @@ static void transpose_csc(int num_rows,
                           std::vector<int> &row_idx_t,
                           std::vector<float> &values_t)
 {
-    // A is (num_rows x num_cols) in CSC; build AT = A^T which is (num_cols x num_rows) in CSC.
-    // AT has (num_rows) columns.
     col_ptr_t.assign(num_rows + 1, 0);
 
     std::vector<int> nnz_per_at_col(num_rows, 0);
@@ -83,7 +81,6 @@ static bool pack_csc_nnz_to_words(const std::vector<int> &row_idx,
         return false;
     }
 
-    // Clear full interface depth (cosim wrappers may read full depth).
     for (int w = 0; w < MAX_NNZ_WORDS; ++w)
     {
         for (int lane = 0; lane < PACK_SIZE; ++lane)
@@ -123,13 +120,13 @@ static std::vector<float> apply_K(int num_rows,
     std::vector<float> tmp2(num_cols, 0.0f);
     std::vector<float> px(num_cols, 0.0f);
 
-    spmv_sw_csc(num_rows, num_cols, A_col_ptr, A_row_idx, A_values, x, tmp0); // tmp0 = A*x
+    spmv_sw_csc(num_rows, num_cols, A_col_ptr, A_row_idx, A_values, x, tmp0); 
     for (int i = 0; i < num_rows; ++i)
     {
-        tmp1[i] = rho[i] * tmp0[i]; // tmp1 = rho*(A*x)
+        tmp1[i] = rho[i] * tmp0[i]; 
     }
-    spmv_sw_csc(num_cols, num_rows, AT_col_ptr, AT_row_idx, AT_values, tmp1, tmp2); // tmp2 = AT*tmp1
-    spmv_sw_csc(num_cols, num_cols, P_col_ptr, P_row_idx, P_values, x, px);         // px = P*x
+    spmv_sw_csc(num_cols, num_rows, AT_col_ptr, AT_row_idx, AT_values, tmp1, tmp2); 
+    spmv_sw_csc(num_cols, num_cols, P_col_ptr, P_row_idx, P_values, x, px);         
 
     std::vector<float> y(num_cols, 0.0f);
     for (int i = 0; i < num_cols; ++i)
@@ -213,57 +210,43 @@ int main()
     const int num_rows = 3;
     const int num_cols = 3;
 
-    std::cout << "Running PCG accelerator testbench (3x3, QP canonical form)..." << std::endl;
+    std::cout << "Running PCG accelerator testbench (3x3, Denser Matrix Case)..." << std::endl;
     std::cout << "Matrix sizes: A(" << num_rows << "x" << num_cols << "), P(" << num_cols << "x" << num_cols << ")" << std::endl;
 
-    // Choose parameters so PCG converges on SPD K = P + sigma*I + AT*rho*A
     const float sigma = 1e-1f;
     const float epsilon_sq = 1e-8f;
 
-    std::vector<float> rho(num_rows, 1.0f);
+    // =====================================================================
+    // Problem Setup (Modified 3x3 Case)
+    // =====================================================================
+    
+    // Matrix A: A somewhat dense 3x3 matrix (5 non-zeros)
+    // Col 0: r0=1.5, r2=0.5
+    // Col 1: r1=2.0
+    // Col 2: r0=-0.5, r2=1.5
+    const int A_nnz = 5;
+    std::vector<int> A_col_ptr = {0, 2, 3, 5};
+    std::vector<int> A_row_idx = {0, 2, 1, 0, 2};
+    std::vector<float> A_values = {1.5f, 0.5f, 2.0f, -0.5f, 1.5f};
 
-    // Build a simple deterministic 3x3 case:
-    // A = I (CSC with 1 nnz/col), P = diag(2,3,4), rho = 1.
-    const int A_nnz = num_cols;
-    std::vector<int> A_col_ptr(num_cols + 1, 0);
-    std::vector<int> A_row_idx(A_nnz, 0);
-    std::vector<float> A_values(A_nnz, 1.0f);
-    for (int c = 0; c < num_cols; ++c)
-    {
-        A_col_ptr[c] = c;
-        A_row_idx[c] = c;
-        A_values[c] = 1.0f;
-    }
-    A_col_ptr[num_cols] = A_nnz;
+    // Preconditioner P: diag(5.0, 1.0, 3.0)
+    const int P_nnz = 3;
+    std::vector<int> P_col_ptr = {0, 1, 2, 3};
+    std::vector<int> P_row_idx = {0, 1, 2};
+    std::vector<float> P_values = {5.0f, 1.0f, 3.0f};
+    std::vector<float> P_diag = {5.0f, 1.0f, 3.0f};
 
-    const int P_nnz = num_cols;
-    std::vector<int> P_col_ptr(num_cols + 1, 0);
-    std::vector<int> P_row_idx(P_nnz, 0);
-    std::vector<float> P_values(P_nnz, 0.0f);
-    std::vector<float> P_diag(num_cols, 0.0f);
-    {
-        const float diag_vals[num_cols] = {2.0f, 3.0f, 4.0f};
-        for (int c = 0; c < num_cols; ++c)
-        {
-            P_col_ptr[c] = c;
-            P_row_idx[c] = c;
-            P_values[c] = diag_vals[c];
-            P_diag[c] = diag_vals[c];
-        }
-        P_col_ptr[num_cols] = P_nnz;
-    }
+    // Vectors
+    std::vector<float> rho = {2.0f, 0.5f, 1.0f};
+    std::vector<float> b = {4.0f, -1.0f, 2.0f};
+
+    // =====================================================================
 
     // Obtain AT from A in CSC
     std::vector<int> AT_col_ptr;
     std::vector<int> AT_row_idx;
     std::vector<float> AT_values;
     transpose_csc(num_rows, num_cols, A_col_ptr, A_row_idx, A_values, AT_col_ptr, AT_row_idx, AT_values);
-
-    // Choose b
-    std::vector<float> b(num_cols, 0.0f);
-    b[0] = 1.0f;
-    b[1] = 2.0f;
-    b[2] = 3.0f;
 
     // Compute M_inv from diag(K)
     // diag(K)_i = P_ii + sigma + sum_j rho_j * (A_{j,i})^2
