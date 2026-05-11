@@ -43,7 +43,7 @@ static void read_col_info(int num_cols,
                           hls::stream<ColInfo> &col_info_stream)
 {
 #pragma HLS INLINE off
-#pragma HLS ARRAY_RESHAPE variable = x_in type = cyclic factor = RESHAPE_FACTOR dim = 1
+#pragma HLS ARRAY_RESHAPE variable = x_in type = cyclic factor = RESHAPE_FACTOR dim = 1 
     int prev = A_col_ptr[0];
 
     float x_element = x_in[0];
