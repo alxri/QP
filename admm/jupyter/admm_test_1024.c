@@ -28,25 +28,39 @@ void cma_invalidate_cache(void *buf, unsigned int phys_addr, int size);
 #define NUM_ROWS 1024
 #define NUM_COLS 1024
 #define PACK_SIZE 16
-#define MAX_NNZ_WORDS ((1024 * 1024) / PACK_SIZE)
-#define PAD 16 // Safety padding for AXI bursts
+#define MAX_NNZ_WORDS ((1024 * 1024) / PACK_SIZE) // Max sizing to prevent AXI hangs
+#define PAD 16                                    // Safety padding for AXI bursts
+
+// OSQP Constants
+#define OSQP_RHO 0.1f
+#define OSQP_RHO_EQ_OVER_RHO_INEQ 1000.0f
+#define OSQP_RHO_MIN 1e-6f
+#define OSQP_RHO_MAX 1e6f
+#define OSQP_INFTY 1e20f
 
 // Hardware Map
-#define PCG_IP_CONTROL_BASE_ADDR   0xA0000000 
-#define PCG_IP_CONTROL_R_BASE_ADDR 0xA0010000
+#define ADMM_IP_CONTROL_BASE_ADDR   0xA0000000 
+#define ADMM_IP_CONTROL_R_BASE_ADDR 0xA0010000
 #define MAP_SIZE 0x20000UL // 128KB (covers both addresses)
 #define MAP_MASK (MAP_SIZE - 1)
 
-// Control Bundle
-#define ADDR_AP_CTRL         0x00
-#define ADDR_NUM_ROWS        0x10
-#define ADDR_NUM_COLS        0x18
-#define ADDR_A_NNZ           0x20
-#define ADDR_P_NNZ           0x28
-#define ADDR_SIGMA           0x30
-#define ADDR_EPSILON_SQ      0x38
+// Control Bundle (0xA0000000)
+#define ADDR_AP_CTRL             0x00
+#define ADDR_NUM_ROWS            0x10
+#define ADDR_NUM_COLS            0x18
+#define ADDR_A_NNZ               0x20
+#define ADDR_P_NNZ               0x28
+#define ADDR_SIGMA               0x30
+#define ADDR_ALPHA               0x38
+#define ADDR_ADMM_MAX_ITER       0x40
+#define ADDR_PCG_MAX_ITER        0x48
+#define ADDR_ADMM_ITERS_OUT      0x50
+#define ADDR_PCG_ITERS_OUT       0x60
+#define ADDR_R_PRIM_OUT          0x70
+#define ADDR_R_DUAL_OUT          0x80
+#define ADDR_STATUS_OUT          0x90
 
-// Control_R Bundle
+// Control_R Bundle (0xA0010000)
 #define ADDR_R_A_ROW         0x10
 #define ADDR_R_A_COL         0x1c
 #define ADDR_R_A_VAL         0x28
@@ -56,10 +70,13 @@ void cma_invalidate_cache(void *buf, unsigned int phys_addr, int size);
 #define ADDR_R_P_ROW         0x58
 #define ADDR_R_P_COL         0x64
 #define ADDR_R_P_VAL         0x70
-#define ADDR_R_M_INV         0x7c
-#define ADDR_R_B             0x88
-#define ADDR_R_RHO           0x94
-#define ADDR_R_X_OUT         0xa0
+#define ADDR_R_P_DIAG        0x7c
+#define ADDR_R_L_IN          0x88
+#define ADDR_R_U_IN          0x94
+#define ADDR_R_Q_IN          0xa0
+#define ADDR_R_RHO_IN        0xac
+#define ADDR_R_X_OUT         0xb8
+#define ADDR_R_Y_OUT         0xc4
 
 // Hardware Structs (32-bit types, 16 elements = 512 bits)
 typedef struct { int32_t data[PACK_SIZE]; } int32_words;
@@ -93,36 +110,36 @@ uint32_t float_to_uint(float f) {
     return u;
 }
 
+float uint_to_float(uint32_t u) {
+    float f;
+    memcpy(&f, &u, 4);
+    return f;
+}
+
 float rand_float(float min, float max) {
     return min + ((float)rand() / RAND_MAX) * (max - min);
+}
+
+int rand_int(int min, int max) {
+    return min + rand() % ((max + 1) - min);
 }
 
 void pack_csc_to_words(int nnz, const int *row_idx, const float *values, 
                        int32_words *row_words, float32_words *val_words) 
 {
+    // Zero initialize
     for(int w = 0; w < MAX_NNZ_WORDS; ++w) {
         for(int lane = 0; lane < PACK_SIZE; ++lane) {
             row_words[w].data[lane] = 0;
             val_words[w].data[lane] = 0.0f;
         }
     }
+    // Pack
     for(int idx = 0; idx < nnz; ++idx) {
         int w = idx / PACK_SIZE;
         int lane = idx % PACK_SIZE;
         row_words[w].data[lane] = row_idx[idx];
         val_words[w].data[lane] = values[idx];
-    }
-}
-
-void spmv_sw_csc(int rows, int cols, const int *col_ptr, const int *row_idx, 
-                 const float *values, const float *x, float *y) 
-{
-    for(int i = 0; i < rows; i++) y[i] = 0.0f;
-    for (int c = 0; c < cols; ++c) {
-        float xc = x[c];
-        for (int idx = col_ptr[c]; idx < col_ptr[c + 1]; ++idx) {
-            y[row_idx[idx]] += values[idx] * xc;
-        }
     }
 }
 
@@ -154,43 +171,60 @@ void transpose_csc(int rows, int cols, const int *col_ptr, const int *row_idx, c
 // Main Logic
 // =====================================================================
 int main() {
-    printf("\n--- Starting PCG ZCU104 PYNQ Hardware Testbench (1024x1024 C/libcma) ---\n");
+    printf("\n--- Starting ADMM Hardware Benchmark (%dx%d Latency Test) ---\n", NUM_ROWS, NUM_COLS);
 
-    srand(42);
-    float sigma = 0.1f;
-    float epsilon_sq = 1e-8f;
+    srand(42); // Fixed seed for reproducibility
+    float sigma = 1e-6f;
+    float alpha = 1.6f;
+    int admm_max_iter = 2000;
+    int pcg_max_iter = 500;
 
     // =====================================================================
-    // 1. Generate CPU Matrices
+    // 1. Generate CPU Matrices (~1 nnz per column)
     // =====================================================================
-    printf("Generating A(%dx%d) and P(%dx%d) matrices...\n", NUM_ROWS, NUM_COLS, NUM_COLS, NUM_COLS);
+    printf("Generating Large Random Data (~1 nnz/col)...\n");
     
-    int A_nnz = NUM_COLS; // ~1 nnz per column
-    int P_nnz = NUM_COLS; // Diagonal
+    int A_nnz = NUM_COLS; 
+    int P_nnz = NUM_COLS; 
+
+    float *x_true = (float *)malloc(NUM_COLS * sizeof(float));
+    float *z_true = (float *)calloc(NUM_ROWS, sizeof(float));
+    float *q      = (float *)calloc(NUM_COLS, sizeof(float));
+
+    int *P_col_ptr_cpu   = (int *)malloc((NUM_COLS + 1) * sizeof(int));
+    int *P_row_idx_cpu   = (int *)malloc(P_nnz * sizeof(int));
+    float *P_values_cpu  = (float *)malloc(P_nnz * sizeof(float));
+    float *P_diag_cpu    = (float *)malloc(NUM_COLS * sizeof(float));
+
+    // Generate Ground Truth and P matrix (Diagonal)
+    for (int c = 0; c < NUM_COLS; ++c) {
+        x_true[c] = rand_float(-2.0f, 2.0f);
+        
+        P_col_ptr_cpu[c] = c;
+        P_row_idx_cpu[c] = c; 
+        float d = rand_float(1.0f, 3.0f);
+        P_values_cpu[c] = d;
+        P_diag_cpu[c] = d;
+        
+        q[c] = -d * x_true[c];
+    }
+    P_col_ptr_cpu[NUM_COLS] = P_nnz;
 
     int *A_col_ptr_cpu   = (int *)malloc((NUM_COLS + 1) * sizeof(int));
     int *A_row_idx_cpu   = (int *)malloc(A_nnz * sizeof(int));
     float *A_values_cpu  = (float *)malloc(A_nnz * sizeof(float));
 
-    int *P_col_ptr_cpu   = (int *)malloc((NUM_COLS + 1) * sizeof(int));
-    int *P_row_idx_cpu   = (int *)malloc(P_nnz * sizeof(int));
-    float *P_values_cpu  = (float *)malloc(P_nnz * sizeof(float));
-
+    // Generate A matrix (~1 nnz per column) and compute z_true
     for (int c = 0; c < NUM_COLS; ++c) {
-        // Matrix A
         A_col_ptr_cpu[c] = c;
-        A_row_idx_cpu[c] = rand() % NUM_ROWS;
+        A_row_idx_cpu[c] = rand_int(0, NUM_ROWS - 1);
         float v = rand_float(-1.0f, 1.0f);
         if (fabsf(v) < 1e-3f) v = 1e-3f; // Prevent precision washout
         A_values_cpu[c] = v;
 
-        // Preconditioner P (Diagonal)
-        P_col_ptr_cpu[c] = c;
-        P_row_idx_cpu[c] = c; 
-        P_values_cpu[c] = rand_float(1.0f, 2.0f);
+        z_true[A_row_idx_cpu[c]] += v * x_true[c];
     }
     A_col_ptr_cpu[NUM_COLS] = A_nnz;
-    P_col_ptr_cpu[NUM_COLS] = P_nnz;
 
     int *AT_col_ptr_cpu  = (int *)malloc((NUM_ROWS + 1) * sizeof(int));
     int *AT_row_idx_cpu  = (int *)malloc(A_nnz * sizeof(int));
@@ -198,53 +232,82 @@ int main() {
     transpose_csc(NUM_ROWS, NUM_COLS, A_col_ptr_cpu, A_row_idx_cpu, A_values_cpu, 
                   AT_col_ptr_cpu, AT_row_idx_cpu, AT_values_cpu);
 
+    // Bounding vectors
+    float *l_cpu   = (float *)malloc(NUM_ROWS * sizeof(float));
+    float *u_cpu   = (float *)malloc(NUM_ROWS * sizeof(float));
+    float *rho_cpu = (float *)malloc(NUM_ROWS * sizeof(float));
+
+    for (int i = 0; i < NUM_ROWS; i++) {
+        int type = rand_int(0, 2);
+        float slack1 = rand_float(0.5f, 5.0f);
+        float slack2 = rand_float(0.5f, 5.0f);
+
+        if (type == 0) {
+            l_cpu[i] = z_true[i];
+            u_cpu[i] = z_true[i];
+            rho_cpu[i] = OSQP_RHO * OSQP_RHO_EQ_OVER_RHO_INEQ;
+        } else if (type == 1) {
+            l_cpu[i] = z_true[i] - slack1;
+            u_cpu[i] = z_true[i] + slack2;
+            rho_cpu[i] = OSQP_RHO;
+        } else {
+            l_cpu[i] = -OSQP_INFTY;
+            u_cpu[i] = OSQP_INFTY;
+            rho_cpu[i] = OSQP_RHO_MIN;
+        }
+        
+        if(rho_cpu[i] < OSQP_RHO_MIN) rho_cpu[i] = OSQP_RHO_MIN;
+        if(rho_cpu[i] > OSQP_RHO_MAX) rho_cpu[i] = OSQP_RHO_MAX;
+    }
+
     // =====================================================================
     // 2. Allocate CMA (Contiguous Physical Memory, CACHED = 1)
     // =====================================================================
-    printf("Allocating Hardware CMA Buffers (Cached)...\n");
+    printf("Allocating Hardware CMA Buffers...\n");
 
-    int32_words *A_row_hw  = (int32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(int32_words), 1);
-    float32_words *A_val_hw= (float32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(float32_words), 1);
-    int *A_col_ptr_hw      = (int *)cma_alloc((NUM_COLS + 1 + PAD) * sizeof(int), 1);
+    int32_words *A_row_hw   = (int32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(int32_words), 1);
+    float32_words *A_val_hw = (float32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(float32_words), 1);
+    int *A_col_ptr_hw       = (int *)cma_alloc((NUM_COLS + 1 + PAD) * sizeof(int), 1);
 
-    int32_words *AT_row_hw = (int32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(int32_words), 1);
-    float32_words *AT_val_hw= (float32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(float32_words), 1);
-    int *AT_col_ptr_hw     = (int *)cma_alloc((NUM_ROWS + 1 + PAD) * sizeof(int), 1);
+    int32_words *AT_row_hw   = (int32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(int32_words), 1);
+    float32_words *AT_val_hw = (float32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(float32_words), 1);
+    int *AT_col_ptr_hw       = (int *)cma_alloc((NUM_ROWS + 1 + PAD) * sizeof(int), 1);
 
-    int32_words *P_row_hw  = (int32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(int32_words), 1);
-    float32_words *P_val_hw= (float32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(float32_words), 1);
-    int *P_col_ptr_hw      = (int *)cma_alloc((NUM_COLS + 1 + PAD) * sizeof(int), 1);
+    int32_words *P_row_hw   = (int32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(int32_words), 1);
+    float32_words *P_val_hw = (float32_words *)cma_alloc(MAX_NNZ_WORDS * sizeof(float32_words), 1);
+    int *P_col_ptr_hw       = (int *)cma_alloc((NUM_COLS + 1 + PAD) * sizeof(int), 1);
 
-    float *b_hw            = (float *)cma_alloc((NUM_COLS + PAD) * sizeof(float), 1);
-    float *rho_hw          = (float *)cma_alloc((NUM_ROWS + PAD) * sizeof(float), 1);
-    float *M_inv_hw        = (float *)cma_alloc((NUM_COLS + PAD) * sizeof(float), 1);
-    float *x_out_hw        = (float *)cma_alloc((NUM_COLS + PAD) * sizeof(float), 1);
+    float *P_diag_hw  = (float *)cma_alloc((NUM_COLS + PAD) * sizeof(float), 1);
+    float *l_hw       = (float *)cma_alloc((NUM_ROWS + PAD) * sizeof(float), 1);
+    float *u_hw       = (float *)cma_alloc((NUM_ROWS + PAD) * sizeof(float), 1);
+    float *q_hw       = (float *)cma_alloc((NUM_COLS + PAD) * sizeof(float), 1);
+    float *rho_hw     = (float *)cma_alloc((NUM_ROWS + PAD) * sizeof(float), 1);
+
+    float *x_out_hw   = (float *)cma_alloc((NUM_COLS + PAD) * sizeof(float), 1);
+    float *y_out_hw   = (float *)cma_alloc((NUM_ROWS + PAD) * sizeof(float), 1);
 
     // Zero-initialize
     memset(A_col_ptr_hw, 0, (NUM_COLS + 1 + PAD) * sizeof(int));
     memset(AT_col_ptr_hw, 0, (NUM_ROWS + 1 + PAD) * sizeof(int));
     memset(P_col_ptr_hw, 0, (NUM_COLS + 1 + PAD) * sizeof(int));
-    memset(b_hw, 0, (NUM_COLS + PAD) * sizeof(float));
+    memset(P_diag_hw, 0, (NUM_COLS + PAD) * sizeof(float));
+    memset(l_hw, 0, (NUM_ROWS + PAD) * sizeof(float));
+    memset(u_hw, 0, (NUM_ROWS + PAD) * sizeof(float));
+    memset(q_hw, 0, (NUM_COLS + PAD) * sizeof(float));
     memset(rho_hw, 0, (NUM_ROWS + PAD) * sizeof(float));
-    memset(M_inv_hw, 0, (NUM_COLS + PAD) * sizeof(float));
     memset(x_out_hw, 0, (NUM_COLS + PAD) * sizeof(float));
+    memset(y_out_hw, 0, (NUM_ROWS + PAD) * sizeof(float));
 
     // Populate buffers
     memcpy(A_col_ptr_hw, A_col_ptr_cpu, (NUM_COLS + 1) * sizeof(int));
     memcpy(P_col_ptr_hw, P_col_ptr_cpu, (NUM_COLS + 1) * sizeof(int));
     memcpy(AT_col_ptr_hw, AT_col_ptr_cpu, (NUM_ROWS + 1) * sizeof(int));
-
-    for (int i = 0; i < NUM_COLS; ++i) b_hw[i] = rand_float(-1.0f, 1.0f);
-    for (int i = 0; i < NUM_ROWS; ++i) rho_hw[i] = 1.0f;
-
-    for (int c = 0; c < NUM_COLS; ++c) {
-        float diagK = P_values_cpu[c] + sigma;
-        for (int idx = A_col_ptr_cpu[c]; idx < A_col_ptr_cpu[c + 1]; ++idx) {
-            float v = A_values_cpu[idx];
-            diagK += rho_hw[A_row_idx_cpu[idx]] * v * v;
-        }
-        M_inv_hw[c] = 1.0f / diagK;
-    }
+    
+    memcpy(P_diag_hw, P_diag_cpu, NUM_COLS * sizeof(float));
+    memcpy(l_hw, l_cpu, NUM_ROWS * sizeof(float));
+    memcpy(u_hw, u_cpu, NUM_ROWS * sizeof(float));
+    memcpy(q_hw, q, NUM_COLS * sizeof(float));
+    memcpy(rho_hw, rho_cpu, NUM_ROWS * sizeof(float));
 
     pack_csc_to_words(A_nnz, A_row_idx_cpu, A_values_cpu, A_row_hw, A_val_hw);
     pack_csc_to_words(A_nnz, AT_row_idx_cpu, AT_values_cpu, AT_row_hw, AT_val_hw);
@@ -265,20 +328,23 @@ int main() {
     cma_flush_cache(P_val_hw, cma_get_phy_addr(P_val_hw), MAX_NNZ_WORDS * sizeof(float32_words));
     cma_flush_cache(P_col_ptr_hw, cma_get_phy_addr(P_col_ptr_hw), (NUM_COLS + 1 + PAD) * sizeof(int));
     
-    cma_flush_cache(b_hw, cma_get_phy_addr(b_hw), (NUM_COLS + PAD) * sizeof(float));
+    cma_flush_cache(P_diag_hw, cma_get_phy_addr(P_diag_hw), (NUM_COLS + PAD) * sizeof(float));
+    cma_flush_cache(l_hw, cma_get_phy_addr(l_hw), (NUM_ROWS + PAD) * sizeof(float));
+    cma_flush_cache(u_hw, cma_get_phy_addr(u_hw), (NUM_ROWS + PAD) * sizeof(float));
+    cma_flush_cache(q_hw, cma_get_phy_addr(q_hw), (NUM_COLS + PAD) * sizeof(float));
     cma_flush_cache(rho_hw, cma_get_phy_addr(rho_hw), (NUM_ROWS + PAD) * sizeof(float));
-    cma_flush_cache(M_inv_hw, cma_get_phy_addr(M_inv_hw), (NUM_COLS + PAD) * sizeof(float));
     cma_flush_cache(x_out_hw, cma_get_phy_addr(x_out_hw), (NUM_COLS + PAD) * sizeof(float));
+    cma_flush_cache(y_out_hw, cma_get_phy_addr(y_out_hw), (NUM_ROWS + PAD) * sizeof(float));
 
     // =====================================================================
     // 4. Map IP / Write Registers
     // =====================================================================
     printf("Configuring Hardware Registers...\n");
     int mem_fd = open("/dev/mem", O_RDWR | O_SYNC);
-    void *ip_base = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, mem_fd, PCG_IP_CONTROL_BASE_ADDR & ~MAP_MASK);
+    void *ip_base = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, mem_fd, ADMM_IP_CONTROL_BASE_ADDR & ~MAP_MASK);
     
-    void *control_ip   = ip_base + (PCG_IP_CONTROL_BASE_ADDR & MAP_MASK);
-    void *control_r_ip = ip_base + (PCG_IP_CONTROL_R_BASE_ADDR & MAP_MASK);
+    void *control_ip   = ip_base + (ADMM_IP_CONTROL_BASE_ADDR & MAP_MASK);
+    void *control_r_ip = ip_base + (ADMM_IP_CONTROL_R_BASE_ADDR & MAP_MASK);
 
     // Control Bundle Writes
     write_reg(control_ip, ADDR_NUM_ROWS, NUM_ROWS);
@@ -286,22 +352,31 @@ int main() {
     write_reg(control_ip, ADDR_A_NNZ, A_nnz);
     write_reg(control_ip, ADDR_P_NNZ, P_nnz);
     write_reg(control_ip, ADDR_SIGMA, float_to_uint(sigma));
-    write_reg(control_ip, ADDR_EPSILON_SQ, float_to_uint(epsilon_sq));
+    write_reg(control_ip, ADDR_ALPHA, float_to_uint(alpha));
+    write_reg(control_ip, ADDR_ADMM_MAX_ITER, admm_max_iter);
+    write_reg(control_ip, ADDR_PCG_MAX_ITER, pcg_max_iter);
 
     // Control_R Bundle Writes
     write_64bit_address(control_r_ip, ADDR_R_A_ROW, cma_get_phy_addr(A_row_hw));
     write_64bit_address(control_r_ip, ADDR_R_A_COL, cma_get_phy_addr(A_col_ptr_hw));
     write_64bit_address(control_r_ip, ADDR_R_A_VAL, cma_get_phy_addr(A_val_hw));
+    
     write_64bit_address(control_r_ip, ADDR_R_AT_ROW, cma_get_phy_addr(AT_row_hw));
     write_64bit_address(control_r_ip, ADDR_R_AT_COL, cma_get_phy_addr(AT_col_ptr_hw));
     write_64bit_address(control_r_ip, ADDR_R_AT_VAL, cma_get_phy_addr(AT_val_hw));
+    
     write_64bit_address(control_r_ip, ADDR_R_P_ROW, cma_get_phy_addr(P_row_hw));
     write_64bit_address(control_r_ip, ADDR_R_P_COL, cma_get_phy_addr(P_col_ptr_hw));
     write_64bit_address(control_r_ip, ADDR_R_P_VAL, cma_get_phy_addr(P_val_hw));
-    write_64bit_address(control_r_ip, ADDR_R_M_INV, cma_get_phy_addr(M_inv_hw));
-    write_64bit_address(control_r_ip, ADDR_R_B,     cma_get_phy_addr(b_hw));
-    write_64bit_address(control_r_ip, ADDR_R_RHO,   cma_get_phy_addr(rho_hw));
+    write_64bit_address(control_r_ip, ADDR_R_P_DIAG, cma_get_phy_addr(P_diag_hw));
+    
+    write_64bit_address(control_r_ip, ADDR_R_L_IN, cma_get_phy_addr(l_hw));
+    write_64bit_address(control_r_ip, ADDR_R_U_IN, cma_get_phy_addr(u_hw));
+    write_64bit_address(control_r_ip, ADDR_R_Q_IN, cma_get_phy_addr(q_hw));
+    write_64bit_address(control_r_ip, ADDR_R_RHO_IN, cma_get_phy_addr(rho_hw));
+    
     write_64bit_address(control_r_ip, ADDR_R_X_OUT, cma_get_phy_addr(x_out_hw));
+    write_64bit_address(control_r_ip, ADDR_R_Y_OUT, cma_get_phy_addr(y_out_hw));
 
     // =====================================================================
     // 5. Execute
@@ -313,61 +388,67 @@ int main() {
     while ((read_reg(control_ip, ADDR_AP_CTRL) & 0x02) == 0); // Polling ap_done
 
     double hw_end = get_time_ms();
-    
-    printf("Hardware execution time: %.4f ms\n", hw_end - hw_start);
+    printf("--> Hardware Execution Time: %.4f ms <--\n", hw_end - hw_start);
+
+    // Read outputs
+    uint32_t admm_iters_out = read_reg(control_ip, ADDR_ADMM_ITERS_OUT);
+    uint32_t pcg_iters_out  = read_reg(control_ip, ADDR_PCG_ITERS_OUT);
+    float r_prim_out        = uint_to_float(read_reg(control_ip, ADDR_R_PRIM_OUT));
+    float r_dual_out        = uint_to_float(read_reg(control_ip, ADDR_R_DUAL_OUT));
+    uint32_t status_out     = read_reg(control_ip, ADDR_STATUS_OUT);
 
     // =====================================================================
     // 6. INVALIDATE CACHE (Fetch results from DDR)
     // =====================================================================
     cma_invalidate_cache(x_out_hw, cma_get_phy_addr(x_out_hw), (NUM_COLS + PAD) * sizeof(float));
+    cma_invalidate_cache(y_out_hw, cma_get_phy_addr(y_out_hw), (NUM_ROWS + PAD) * sizeof(float));
 
     // =====================================================================
-    // 7. CPU Verification Check
+    // 7. Verify Results
     // =====================================================================
-    printf("\nRunning CPU Reference Check...\n");
-    float *tmp0 = (float*)calloc(NUM_ROWS, sizeof(float));
-    float *tmp1 = (float*)calloc(NUM_ROWS, sizeof(float));
-    float *tmp2 = (float*)calloc(NUM_COLS, sizeof(float));
-    float *px   = (float*)calloc(NUM_COLS, sizeof(float));
+    printf("\n--- Simulation Results ---\n");
+    printf("Status: %s\n", status_out == 1 ? "Converged" : "Max Iterations Reached");
+    printf("ADMM Iterations: %u\n", admm_iters_out);
+    printf("Total PCG Iterations: %u\n", pcg_iters_out);
+    printf("Primal Residual: %e\n", r_prim_out);
+    printf("Dual Residual: %e\n", r_dual_out);
 
-    spmv_sw_csc(NUM_ROWS, NUM_COLS, A_col_ptr_cpu, A_row_idx_cpu, A_values_cpu, x_out_hw, tmp0);
-    for (int i = 0; i < NUM_ROWS; ++i) tmp1[i] = rho_hw[i] * tmp0[i];
-    spmv_sw_csc(NUM_COLS, NUM_ROWS, AT_col_ptr_cpu, AT_row_idx_cpu, AT_values_cpu, tmp1, tmp2);
-    spmv_sw_csc(NUM_COLS, NUM_COLS, P_col_ptr_cpu, P_row_idx_cpu, P_values_cpu, x_out_hw, px);
-
-    double norm_b2 = 0.0, norm_r2 = 0.0;
+    float mae = 0.0f;
     for (int i = 0; i < NUM_COLS; ++i) {
-        float Kxi = tmp2[i] + px[i] + (sigma * x_out_hw[i]);
-        double bi = (double)b_hw[i];
-        double ri = (double)Kxi - bi;
-        norm_b2 += bi * bi;
-        norm_r2 += ri * ri;
+        mae += fabsf(x_out_hw[i] - x_true[i]);
+    }
+    mae /= NUM_COLS;
+
+    printf("\nMean Absolute Error from x_true: %e\n", mae);
+    
+    printf("--- Output Preview (First 10 of %d elements) ---\n", NUM_COLS);
+    for (int i = 0; i < 10; i++) {
+        printf("x[%4d]: %13.5f | Expected: %13.5f\n", i, x_out_hw[i], x_true[i]);
     }
 
-    double rel_res = sqrt(norm_r2 / (norm_b2 + 1e-30));
-    double target = sqrt(epsilon_sq);
-
-    printf("\n--- Results ---\n");
-    printf("||b||^2    = %e\n", norm_b2);
-    printf("||Kx-b||^2 = %e\n", norm_r2);
-    printf("rel_res    = %e\n", rel_res);
-
-    if (rel_res <= 5.0 * target) {
-        printf(">>> SUCCESS: PCG HW residual meets tolerance (~%e)! <<<\n", target);
+    if (status_out == 1 && mae < 1e-2f) {
+        printf("\n>>> SUCCESS: Problem converged! <<<\n");
     } else {
-        printf(">>> ERROR: Residual too large (Target ~ %e). <<<\n", target);
+        printf("\n>>> FAILED: Did not converge to the expected target. <<<\n");
     }
 
-    // Cleanup
-    munmap(ip_base, MAP_SIZE); close(mem_fd);
+    // =====================================================================
+    // 8. Cleanup
+    // =====================================================================
+    munmap(ip_base, MAP_SIZE); 
+    close(mem_fd);
+
     cma_free(A_row_hw); cma_free(A_val_hw); cma_free(A_col_ptr_hw);
     cma_free(AT_row_hw); cma_free(AT_val_hw); cma_free(AT_col_ptr_hw);
     cma_free(P_row_hw); cma_free(P_val_hw); cma_free(P_col_ptr_hw);
-    cma_free(b_hw); cma_free(rho_hw); cma_free(M_inv_hw); cma_free(x_out_hw);
+    cma_free(P_diag_hw); cma_free(l_hw); cma_free(u_hw); cma_free(q_hw); 
+    cma_free(rho_hw); cma_free(x_out_hw); cma_free(y_out_hw);
+
+    free(x_true); free(z_true); free(q);
     free(A_col_ptr_cpu); free(A_row_idx_cpu); free(A_values_cpu);
     free(AT_col_ptr_cpu); free(AT_row_idx_cpu); free(AT_values_cpu);
-    free(P_col_ptr_cpu); free(P_row_idx_cpu); free(P_values_cpu);
-    free(tmp0); free(tmp1); free(tmp2); free(px);
+    free(P_col_ptr_cpu); free(P_row_idx_cpu); free(P_values_cpu); free(P_diag_cpu);
+    free(l_cpu); free(u_cpu); free(rho_cpu);
 
     return 0;
 }

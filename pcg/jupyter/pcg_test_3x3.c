@@ -25,11 +25,11 @@ void cma_invalidate_cache(void *buf, unsigned int phys_addr, int size);
 // =====================================================================
 // Configuration & Register Map
 // =====================================================================
-#define NUM_ROWS 1024
-#define NUM_COLS 1024
+#define NUM_ROWS 3
+#define NUM_COLS 3
 #define PACK_SIZE 16
-#define MAX_NNZ_WORDS ((1024 * 1024) / PACK_SIZE)
-#define PAD 16 // Safety padding for AXI bursts
+#define MAX_NNZ_WORDS 16 // Pad max words to ensure AXI bursts don't read out of bounds
+#define PAD 16           // Vector padding
 
 // Hardware Map
 #define PCG_IP_CONTROL_BASE_ADDR   0xA0000000 
@@ -61,7 +61,7 @@ void cma_invalidate_cache(void *buf, unsigned int phys_addr, int size);
 #define ADDR_R_RHO           0x94
 #define ADDR_R_X_OUT         0xa0
 
-// Hardware Structs (32-bit types, 16 elements = 512 bits)
+// Hardware Structs
 typedef struct { int32_t data[PACK_SIZE]; } int32_words;
 typedef struct { float   data[PACK_SIZE]; } float32_words;
 
@@ -91,10 +91,6 @@ uint32_t float_to_uint(float f) {
     uint32_t u;
     memcpy(&u, &f, 4);
     return u;
-}
-
-float rand_float(float min, float max) {
-    return min + ((float)rand() / RAND_MAX) * (max - min);
 }
 
 void pack_csc_to_words(int nnz, const int *row_idx, const float *values, 
@@ -154,52 +150,55 @@ void transpose_csc(int rows, int cols, const int *col_ptr, const int *row_idx, c
 // Main Logic
 // =====================================================================
 int main() {
-    printf("\n--- Starting PCG ZCU104 PYNQ Hardware Testbench (1024x1024 C/libcma) ---\n");
+    printf("\nRunning PCG accelerator C testbench (3x3, Denser Matrix Case)...\n");
 
-    srand(42);
     float sigma = 0.1f;
     float epsilon_sq = 1e-8f;
+    printf("Matrix sizes: A(%dx%d), P(%dx%d)\n", NUM_ROWS, NUM_COLS, NUM_COLS, NUM_COLS);
 
     // =====================================================================
-    // 1. Generate CPU Matrices
+    // 1. Problem Setup (3x3 Denser Case)
     // =====================================================================
-    printf("Generating A(%dx%d) and P(%dx%d) matrices...\n", NUM_ROWS, NUM_COLS, NUM_COLS, NUM_COLS);
-    
-    int A_nnz = NUM_COLS; // ~1 nnz per column
-    int P_nnz = NUM_COLS; // Diagonal
+    // Matrix A: A somewhat dense 3x3 matrix (5 non-zeros)
+    int A_col_ptr_data[] = {0, 2, 3, 5};
+    int A_row_idx_data[] = {0, 2, 1, 0, 2};
+    float A_values_data[]  = {1.5f, 0.5f, 2.0f, -0.5f, 1.5f};
+    int A_nnz = 5;
 
-    int *A_col_ptr_cpu   = (int *)malloc((NUM_COLS + 1) * sizeof(int));
-    int *A_row_idx_cpu   = (int *)malloc(A_nnz * sizeof(int));
-    float *A_values_cpu  = (float *)malloc(A_nnz * sizeof(float));
+    // Allocate and dynamically compute AT = A^T
+    int AT_col_ptr_data[NUM_COLS + 1];
+    int AT_row_idx_data[A_nnz];
+    float AT_values_data[A_nnz];
+    transpose_csc(NUM_ROWS, NUM_COLS, A_col_ptr_data, A_row_idx_data, A_values_data, 
+                  AT_col_ptr_data, AT_row_idx_data, AT_values_data);
 
-    int *P_col_ptr_cpu   = (int *)malloc((NUM_COLS + 1) * sizeof(int));
-    int *P_row_idx_cpu   = (int *)malloc(P_nnz * sizeof(int));
-    float *P_values_cpu  = (float *)malloc(P_nnz * sizeof(float));
+    // Preconditioner P = diag(5.0, 1.0, 3.0)
+    int P_col_ptr_data[] = {0, 1, 2, 3};
+    int P_row_idx_data[] = {0, 1, 2};
+    float P_values_data[]  = {5.0f, 1.0f, 3.0f};
+    int P_nnz = 3;
 
+    float rho_data[] = {2.0f, 0.5f, 1.0f};
+    float b_data[]   = {4.0f, -1.0f, 2.0f};
+
+    float M_inv_data[NUM_COLS];
     for (int c = 0; c < NUM_COLS; ++c) {
-        // Matrix A
-        A_col_ptr_cpu[c] = c;
-        A_row_idx_cpu[c] = rand() % NUM_ROWS;
-        float v = rand_float(-1.0f, 1.0f);
-        if (fabsf(v) < 1e-3f) v = 1e-3f; // Prevent precision washout
-        A_values_cpu[c] = v;
-
-        // Preconditioner P (Diagonal)
-        P_col_ptr_cpu[c] = c;
-        P_row_idx_cpu[c] = c; 
-        P_values_cpu[c] = rand_float(1.0f, 2.0f);
+        float diagK = P_values_data[c] + sigma;
+        for (int idx = A_col_ptr_data[c]; idx < A_col_ptr_data[c + 1]; ++idx) {
+            float v = A_values_data[idx];
+            diagK += rho_data[A_row_idx_data[idx]] * (v * v);
+        }
+        M_inv_data[c] = 1.0f / diagK;
     }
-    A_col_ptr_cpu[NUM_COLS] = A_nnz;
-    P_col_ptr_cpu[NUM_COLS] = P_nnz;
 
-    int *AT_col_ptr_cpu  = (int *)malloc((NUM_ROWS + 1) * sizeof(int));
-    int *AT_row_idx_cpu  = (int *)malloc(A_nnz * sizeof(int));
-    float *AT_values_cpu = (float *)malloc(A_nnz * sizeof(float));
-    transpose_csc(NUM_ROWS, NUM_COLS, A_col_ptr_cpu, A_row_idx_cpu, A_values_cpu, 
-                  AT_col_ptr_cpu, AT_row_idx_cpu, AT_values_cpu);
+    printf("sigma = %.6f\n", sigma);
+    printf("epsilon_sq = %.8f\n", epsilon_sq);
+    printf("rho = [%.1f, %.1f, %.1f]\n", rho_data[0], rho_data[1], rho_data[2]);
+    printf("b = [%.1f, %.1f, %.1f]\n", b_data[0], b_data[1], b_data[2]);
+    printf("M_inv = [%.6f, %.6f, %.6f]\n", M_inv_data[0], M_inv_data[1], M_inv_data[2]);
 
     // =====================================================================
-    // 2. Allocate CMA (Contiguous Physical Memory, CACHED = 1)
+    // 2. Buffer Allocation (Cached = 1)
     // =====================================================================
     printf("Allocating Hardware CMA Buffers (Cached)...\n");
 
@@ -220,7 +219,7 @@ int main() {
     float *M_inv_hw        = (float *)cma_alloc((NUM_COLS + PAD) * sizeof(float), 1);
     float *x_out_hw        = (float *)cma_alloc((NUM_COLS + PAD) * sizeof(float), 1);
 
-    // Zero-initialize
+    // Initialize to zero to clear padding
     memset(A_col_ptr_hw, 0, (NUM_COLS + 1 + PAD) * sizeof(int));
     memset(AT_col_ptr_hw, 0, (NUM_ROWS + 1 + PAD) * sizeof(int));
     memset(P_col_ptr_hw, 0, (NUM_COLS + 1 + PAD) * sizeof(int));
@@ -230,28 +229,19 @@ int main() {
     memset(x_out_hw, 0, (NUM_COLS + PAD) * sizeof(float));
 
     // Populate buffers
-    memcpy(A_col_ptr_hw, A_col_ptr_cpu, (NUM_COLS + 1) * sizeof(int));
-    memcpy(P_col_ptr_hw, P_col_ptr_cpu, (NUM_COLS + 1) * sizeof(int));
-    memcpy(AT_col_ptr_hw, AT_col_ptr_cpu, (NUM_ROWS + 1) * sizeof(int));
+    memcpy(A_col_ptr_hw, A_col_ptr_data, (NUM_COLS + 1) * sizeof(int));
+    memcpy(AT_col_ptr_hw, AT_col_ptr_data, (NUM_ROWS + 1) * sizeof(int));
+    memcpy(P_col_ptr_hw, P_col_ptr_data, (NUM_COLS + 1) * sizeof(int));
+    memcpy(b_hw, b_data, NUM_COLS * sizeof(float));
+    memcpy(rho_hw, rho_data, NUM_ROWS * sizeof(float));
+    memcpy(M_inv_hw, M_inv_data, NUM_COLS * sizeof(float));
 
-    for (int i = 0; i < NUM_COLS; ++i) b_hw[i] = rand_float(-1.0f, 1.0f);
-    for (int i = 0; i < NUM_ROWS; ++i) rho_hw[i] = 1.0f;
-
-    for (int c = 0; c < NUM_COLS; ++c) {
-        float diagK = P_values_cpu[c] + sigma;
-        for (int idx = A_col_ptr_cpu[c]; idx < A_col_ptr_cpu[c + 1]; ++idx) {
-            float v = A_values_cpu[idx];
-            diagK += rho_hw[A_row_idx_cpu[idx]] * v * v;
-        }
-        M_inv_hw[c] = 1.0f / diagK;
-    }
-
-    pack_csc_to_words(A_nnz, A_row_idx_cpu, A_values_cpu, A_row_hw, A_val_hw);
-    pack_csc_to_words(A_nnz, AT_row_idx_cpu, AT_values_cpu, AT_row_hw, AT_val_hw);
-    pack_csc_to_words(P_nnz, P_row_idx_cpu, P_values_cpu, P_row_hw, P_val_hw);
+    pack_csc_to_words(A_nnz, A_row_idx_data, A_values_data, A_row_hw, A_val_hw);
+    pack_csc_to_words(A_nnz, AT_row_idx_data, AT_values_data, AT_row_hw, AT_val_hw);
+    pack_csc_to_words(P_nnz, P_row_idx_data, P_values_data, P_row_hw, P_val_hw);
 
     // =====================================================================
-    // 3. FLUSH CACHES to DDR
+    // 3. FLUSH CACHE (Critical for Cached = 1)
     // =====================================================================
     cma_flush_cache(A_row_hw, cma_get_phy_addr(A_row_hw), MAX_NNZ_WORDS * sizeof(int32_words));
     cma_flush_cache(A_val_hw, cma_get_phy_addr(A_val_hw), MAX_NNZ_WORDS * sizeof(float32_words));
@@ -271,16 +261,14 @@ int main() {
     cma_flush_cache(x_out_hw, cma_get_phy_addr(x_out_hw), (NUM_COLS + PAD) * sizeof(float));
 
     // =====================================================================
-    // 4. Map IP / Write Registers
+    // 4. Hardware Execution
     // =====================================================================
-    printf("Configuring Hardware Registers...\n");
     int mem_fd = open("/dev/mem", O_RDWR | O_SYNC);
     void *ip_base = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, mem_fd, PCG_IP_CONTROL_BASE_ADDR & ~MAP_MASK);
     
     void *control_ip   = ip_base + (PCG_IP_CONTROL_BASE_ADDR & MAP_MASK);
     void *control_r_ip = ip_base + (PCG_IP_CONTROL_R_BASE_ADDR & MAP_MASK);
 
-    // Control Bundle Writes
     write_reg(control_ip, ADDR_NUM_ROWS, NUM_ROWS);
     write_reg(control_ip, ADDR_NUM_COLS, NUM_COLS);
     write_reg(control_ip, ADDR_A_NNZ, A_nnz);
@@ -288,7 +276,6 @@ int main() {
     write_reg(control_ip, ADDR_SIGMA, float_to_uint(sigma));
     write_reg(control_ip, ADDR_EPSILON_SQ, float_to_uint(epsilon_sq));
 
-    // Control_R Bundle Writes
     write_64bit_address(control_r_ip, ADDR_R_A_ROW, cma_get_phy_addr(A_row_hw));
     write_64bit_address(control_r_ip, ADDR_R_A_COL, cma_get_phy_addr(A_col_ptr_hw));
     write_64bit_address(control_r_ip, ADDR_R_A_VAL, cma_get_phy_addr(A_val_hw));
@@ -303,42 +290,37 @@ int main() {
     write_64bit_address(control_r_ip, ADDR_R_RHO,   cma_get_phy_addr(rho_hw));
     write_64bit_address(control_r_ip, ADDR_R_X_OUT, cma_get_phy_addr(x_out_hw));
 
-    // =====================================================================
-    // 5. Execute
-    // =====================================================================
     printf("Starting Hardware Accelerator...\n");
     double hw_start = get_time_ms();
 
     write_reg(control_ip, ADDR_AP_CTRL, 0x01);
-    while ((read_reg(control_ip, ADDR_AP_CTRL) & 0x02) == 0); // Polling ap_done
+    while ((read_reg(control_ip, ADDR_AP_CTRL) & 0x02) == 0);
 
     double hw_end = get_time_ms();
-    
-    printf("Hardware execution time: %.4f ms\n", hw_end - hw_start);
+    printf("HW Execution Time: %.4f ms\n", hw_end - hw_start);
 
     // =====================================================================
-    // 6. INVALIDATE CACHE (Fetch results from DDR)
+    // 5. INVALIDATE CACHE (Critical for Cached = 1)
     // =====================================================================
     cma_invalidate_cache(x_out_hw, cma_get_phy_addr(x_out_hw), (NUM_COLS + PAD) * sizeof(float));
 
-    // =====================================================================
-    // 7. CPU Verification Check
-    // =====================================================================
-    printf("\nRunning CPU Reference Check...\n");
-    float *tmp0 = (float*)calloc(NUM_ROWS, sizeof(float));
-    float *tmp1 = (float*)calloc(NUM_ROWS, sizeof(float));
-    float *tmp2 = (float*)calloc(NUM_COLS, sizeof(float));
-    float *px   = (float*)calloc(NUM_COLS, sizeof(float));
+    printf("\nHardware Output:\n");
+    printf("x_hw = [%.6f, %.6f, %.6f]\n", x_out_hw[0], x_out_hw[1], x_out_hw[2]);
 
-    spmv_sw_csc(NUM_ROWS, NUM_COLS, A_col_ptr_cpu, A_row_idx_cpu, A_values_cpu, x_out_hw, tmp0);
-    for (int i = 0; i < NUM_ROWS; ++i) tmp1[i] = rho_hw[i] * tmp0[i];
-    spmv_sw_csc(NUM_COLS, NUM_ROWS, AT_col_ptr_cpu, AT_row_idx_cpu, AT_values_cpu, tmp1, tmp2);
-    spmv_sw_csc(NUM_COLS, NUM_COLS, P_col_ptr_cpu, P_row_idx_cpu, P_values_cpu, x_out_hw, px);
+    // =====================================================================
+    // 6. Software Reference Check
+    // =====================================================================
+    float tmp0[NUM_ROWS], tmp1[NUM_ROWS], tmp2[NUM_COLS], px[NUM_COLS];
+    
+    spmv_sw_csc(NUM_ROWS, NUM_COLS, A_col_ptr_data, A_row_idx_data, A_values_data, x_out_hw, tmp0);
+    for (int i = 0; i < NUM_ROWS; ++i) tmp1[i] = rho_data[i] * tmp0[i];
+    spmv_sw_csc(NUM_COLS, NUM_ROWS, AT_col_ptr_data, AT_row_idx_data, AT_values_data, tmp1, tmp2);
+    spmv_sw_csc(NUM_COLS, NUM_COLS, P_col_ptr_data, P_row_idx_data, P_values_data, x_out_hw, px);
 
     double norm_b2 = 0.0, norm_r2 = 0.0;
     for (int i = 0; i < NUM_COLS; ++i) {
         float Kxi = tmp2[i] + px[i] + (sigma * x_out_hw[i]);
-        double bi = (double)b_hw[i];
+        double bi = (double)b_data[i];
         double ri = (double)Kxi - bi;
         norm_b2 += bi * bi;
         norm_r2 += ri * ri;
@@ -347,15 +329,15 @@ int main() {
     double rel_res = sqrt(norm_r2 / (norm_b2 + 1e-30));
     double target = sqrt(epsilon_sq);
 
-    printf("\n--- Results ---\n");
+    printf("\n--- Verification ---\n");
     printf("||b||^2    = %e\n", norm_b2);
     printf("||Kx-b||^2 = %e\n", norm_r2);
     printf("rel_res    = %e\n", rel_res);
 
     if (rel_res <= 5.0 * target) {
-        printf(">>> SUCCESS: PCG HW residual meets tolerance (~%e)! <<<\n", target);
+        printf(">>> SUCCESS: PCG Hardware residual meets tolerance (~%.1e)! <<<\n", target);
     } else {
-        printf(">>> ERROR: Residual too large (Target ~ %e). <<<\n", target);
+        printf(">>> ERROR: Residual too large (Target ~ %.1e). <<<\n", target);
     }
 
     // Cleanup
@@ -364,10 +346,6 @@ int main() {
     cma_free(AT_row_hw); cma_free(AT_val_hw); cma_free(AT_col_ptr_hw);
     cma_free(P_row_hw); cma_free(P_val_hw); cma_free(P_col_ptr_hw);
     cma_free(b_hw); cma_free(rho_hw); cma_free(M_inv_hw); cma_free(x_out_hw);
-    free(A_col_ptr_cpu); free(A_row_idx_cpu); free(A_values_cpu);
-    free(AT_col_ptr_cpu); free(AT_row_idx_cpu); free(AT_values_cpu);
-    free(P_col_ptr_cpu); free(P_row_idx_cpu); free(P_values_cpu);
-    free(tmp0); free(tmp1); free(tmp2); free(px);
 
     return 0;
 }

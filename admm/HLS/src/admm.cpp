@@ -215,11 +215,18 @@ void admm(int num_rows,
 
 #pragma HLS INTERFACE m_axi port = x_out offset = slave bundle = gmem3 depth = MAX_COLS
 #pragma HLS INTERFACE m_axi port = y_out offset = slave bundle = gmem3 depth = MAX_ROWS
-#pragma HLS INTERFACE m_axi port = admm_num_iterations_out offset = slave bundle = gmem3 depth = 1
-#pragma HLS INTERFACE m_axi port = pcg_num_iterations_out offset = slave bundle = gmem3 depth = 1
-#pragma HLS INTERFACE m_axi port = status_out offset = slave bundle = gmem3 depth = 1
-#pragma HLS INTERFACE m_axi port = r_prim_out offset = slave bundle = gmem3 depth = 1
-#pragma HLS INTERFACE m_axi port = r_dual_out offset = slave bundle = gmem3 depth = 1
+
+// #pragma HLS INTERFACE m_axi port = admm_num_iterations_out offset = slave bundle = gmem3 depth = 1
+// #pragma HLS INTERFACE m_axi port = pcg_num_iterations_out offset = slave bundle = gmem3 depth = 1
+// #pragma HLS INTERFACE m_axi port = status_out offset = slave bundle = gmem3 depth = 1
+// #pragma HLS INTERFACE m_axi port = r_prim_out offset = slave bundle = gmem3 depth = 1
+// #pragma HLS INTERFACE m_axi port = r_dual_out offset = slave bundle = gmem3 depth = 1
+
+#pragma HLS INTERFACE s_axilite port = admm_num_iterations_out bundle = control
+#pragma HLS INTERFACE s_axilite port = pcg_num_iterations_out bundle = control
+#pragma HLS INTERFACE s_axilite port = status_out bundle = control
+#pragma HLS INTERFACE s_axilite port = r_prim_out bundle = control
+#pragma HLS INTERFACE s_axilite port = r_dual_out bundle = control
 
 #pragma HLS INTERFACE s_axilite port = num_rows bundle = control
 #pragma HLS INTERFACE s_axilite port = num_cols bundle = control
