@@ -6,7 +6,7 @@
 #include "hls_math.h"
 
 #ifndef MAX_SIZE
-#define MAX_SIZE 32768
+#define MAX_SIZE 65536
 #endif
 
 void admm(int num_rows,
@@ -31,10 +31,6 @@ void admm(int num_rows,
           float *rho_in,
           int admm_max_iterations,
           int pcg_max_iterations,
-          bool adaptive_rho,
-          float eps_abs,
-          float eps_rel,
-          float pcg_tol_fraction,
           float *x_out,
           float *y_out,
           int *admm_num_iterations_out,

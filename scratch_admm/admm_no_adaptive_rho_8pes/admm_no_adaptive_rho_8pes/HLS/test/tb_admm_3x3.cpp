@@ -135,7 +135,6 @@ int main() {
     float sigma = 1e-6f;
     int admm_max_iterations = 1000;
     int pcg_max_iterations = 100;
-    bool adaptive_rho = false;
 
     std::vector<float> x_out(MAX_COLS, 0.0f);
     std::vector<float> y_out(MAX_ROWS, 0.0f);
@@ -158,7 +157,7 @@ int main() {
         P_row_words.data(), P_col_ptr.data(), P_val_words.data(), P_nnz, P_diag.data(),
         l.data(), u.data(), q.data(),
         sigma, alpha, rho.data(),
-        admm_max_iterations, pcg_max_iterations, adaptive_rho,
+        admm_max_iterations, pcg_max_iterations,
         x_out.data(), y_out.data(),
         &admm_num_iterations_out, &pcg_num_iterations_out,
         &r_prim_out, &r_dual_out, &status_out

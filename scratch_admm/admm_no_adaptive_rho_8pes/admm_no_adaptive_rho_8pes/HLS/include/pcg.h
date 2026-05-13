@@ -4,7 +4,7 @@
 #include "spmv_csc.h"
 
 #ifndef MAX_SIZE
-#define MAX_SIZE 32768
+#define MAX_SIZE 65536
 #endif
 
 void pcg(int num_rows,

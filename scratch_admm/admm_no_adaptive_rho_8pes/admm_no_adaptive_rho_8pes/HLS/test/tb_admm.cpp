@@ -179,12 +179,8 @@ int main() {
     // -------------------------------------------------------------------------
     float alpha = 1.6f;
     float sigma = 1e-6f;
-    float eps_abs = 1e-4f;
-    float eps_rel = 1e-4f;
-    float pcg_tol_frac = 0.1f;
     int admm_max_iterations = 2000;
     int pcg_max_iterations = 500;
-    bool adaptive_rho = false;
 
     std::vector<float> x_out(std::max(num_cols, (int)MAX_COLS), 0.0f);
     std::vector<float> y_out(std::max(num_rows, (int)MAX_ROWS), 0.0f);
@@ -202,8 +198,7 @@ int main() {
         P_row_words.data(), P_col_ptr.data(), P_val_words.data(), P_nnz, P_diag.data(),
         l.data(), u.data(), q.data(),
         sigma, alpha, rho.data(),
-        admm_max_iterations, pcg_max_iterations, adaptive_rho,
-        eps_abs, eps_rel, pcg_tol_frac,
+        admm_max_iterations, pcg_max_iterations,
         x_out.data(), y_out.data(),
         &admm_num_iterations_out, &pcg_num_iterations_out,
         &r_prim_out, &r_dual_out, &status_out
@@ -215,8 +210,7 @@ int main() {
     std::cout << "--- Simulation Results ---" << std::endl;
     std::cout << "Status: " << (status_out == 1 ? "Converged" : "Max Iterations Reached") << std::endl;
     std::cout << "ADMM Iterations: " << admm_num_iterations_out << std::endl;
-    std::cout << "Total PCG Iterations: " << pcg_num_iterations_out << std::endl;
-
+    
     std::cout << std::scientific << std::setprecision(5);
     std::cout << "Primal Residual: " << r_prim_out << std::endl;
     std::cout << "Dual Residual: " << r_dual_out << std::endl;
