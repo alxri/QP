@@ -9,13 +9,14 @@
 #include "admm.h"
 
 // OSQP Constants
-#define OSQP_RHO 0.1f
-#define OSQP_RHO_EQ_OVER_RHO_INEQ 1000.0f
-#define OSQP_RHO_TOL 1e-4f
-#define OSQP_INFTY 1e20f
-#define OSQP_MIN_SCALING 1e-4f
+#define OSQP_RHO 1.0f
+#define OSQP_RHO_EQ_OVER_RHO_INEQ 100
+#define OSQP_RHO_TOL 0.01f
+#define OSQP_INFTY 1e17f
 #define OSQP_RHO_MAX 1e6f
 #define OSQP_RHO_MIN 1e-6f
+
+
 
 // Helper to transpose A into A^T in CSC format
 static void transpose_csc(int num_rows, int num_cols,
@@ -177,14 +178,14 @@ int main() {
     // -------------------------------------------------------------------------
     // 4. Execution parameters
     // -------------------------------------------------------------------------
-    float alpha = 1.6f;
-    float sigma = 1e-6f;
-    float eps_abs = 1e-4f;
-    float eps_rel = 1e-4f;
-    float pcg_tol_frac = 0.1f;
+    float alpha = 1.8f;
+    float sigma = 1e-2f;
+    float eps_abs = 1e-3f;
+    float eps_rel = 1e-3f;
+    float pcg_tol_frac = 1.0f;
     int admm_max_iterations = 2000;
-    int pcg_max_iterations = 500;
-    bool adaptive_rho = false;
+    int pcg_max_iterations = 5;
+    bool adaptive_rho = true;
 
     std::vector<float> x_out(std::max(num_cols, (int)MAX_COLS), 0.0f);
     std::vector<float> y_out(std::max(num_rows, (int)MAX_ROWS), 0.0f);

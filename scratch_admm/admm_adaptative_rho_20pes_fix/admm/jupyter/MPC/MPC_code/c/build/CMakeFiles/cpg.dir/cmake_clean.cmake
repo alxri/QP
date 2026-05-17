@@ -1,0 +1,41 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/cpg.dir/solver_code/src/algebra_libs.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/algebra_libs.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/auxil.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/auxil.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/csc_math.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/csc_math.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/csc_utils.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/csc_utils.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/error.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/error.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/kkt.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/kkt.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/matrix.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/matrix.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/osqp_api.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/osqp_api.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/qdldl.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/qdldl.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/qdldl_interface.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/qdldl_interface.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/scaling.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/scaling.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/util.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/util.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/src/vector.c.o"
+  "CMakeFiles/cpg.dir/solver_code/src/vector.c.o.d"
+  "CMakeFiles/cpg.dir/solver_code/workspace.c.o"
+  "CMakeFiles/cpg.dir/solver_code/workspace.c.o.d"
+  "CMakeFiles/cpg.dir/src/cpg_solve.c.o"
+  "CMakeFiles/cpg.dir/src/cpg_solve.c.o.d"
+  "CMakeFiles/cpg.dir/src/cpg_workspace.c.o"
+  "CMakeFiles/cpg.dir/src/cpg_workspace.c.o.d"
+  "out/libcpg.a"
+  "out/libcpg.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang C)
+  include(CMakeFiles/cpg.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

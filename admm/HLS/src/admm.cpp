@@ -1,22 +1,47 @@
 #include "admm.h"
 
-#define PCG_TOL_MIN_SQ 1E-14
-#define PCG_TOLERANCE_FRACTION 0.01f
-#define NUM_ITERATIONS_CHECK_TERMINATION 10
+#define OSQP_CG_TOL_MIN 1e-5f
+#define OSQP_INFTY 1e17f
+#define OSQP_DIVISION_TOL 1e-10f
+// #define OSQP_CG_TOL_MIN_SQ (OSQP_CG_TOL_MIN * OSQP_CG_TOL_MIN)
 
-#define ADMM_ADAPTIVE_RHO_INTERVAL 50
-#define ADMM_ADAPTIVE_RHO_TOLERANCE 2
+// #define PCG_TOLERANCE_FRACTION 0.01f
+#define OSQP_CHECK_TERMINATION 5
 
-#define ADMM_RHO 0.1f
-#define ADMM_RHO_MAX 1e6f
-#define ADMM_RHO_MIN 1e-6f
-#define ADMM_RHO_EQ_OVER_RHO_INEQ 1e03
+#define OSQP_ADAPTIVE_RHO_INTERVAL 50
+#define OSQP_ADAPTIVE_RHO_TOLERANCE 2
 
-#define DEFAULT_EPS_ABS 1E-3f
-#define DEFAULT_EPS_REL 1E-3f
+#define OSQP_RHO 0.1f
+#define OSQP_RHO_MAX 1e6f
+#define OSQP_RHO_MIN 1e-6f
+#define OSQP_RHO_EQ_OVER_RHO_INEQ 1e03
+
+// #define DEFAULT_EPS_ABS 1E-3f
+// #define DEFAULT_EPS_REL 1E-3f
 
 #define UNROLL_FACTOR 8
 
+static float inf_norm(const float *v, int size)
+{
+#pragma HLS INLINE
+    float max_val = 0.0f;
+    for (int i = 0; i < size; i += UNROLL_FACTOR)
+    {
+#pragma HLS PIPELINE II = 1
+        float local_max = 0.0f;
+        for (int j = 0; j < UNROLL_FACTOR; ++j)
+        {
+#pragma HLS UNROLL
+            const int idx = i + j;
+            if (idx < size)
+            {
+                local_max = hls::fmax(local_max, hls::fabs(v[idx]));
+            }
+        }
+        max_val = hls::fmax(max_val, local_max);
+    }
+    return max_val;
+}
 
 inline float clamp(float val, float lower, float upper)
 {
@@ -84,52 +109,57 @@ void update_preconditioner(
     }
 }
 
-void update_eps_sq(float b_norm,
-                   float r_prim,
-                   float r_dual,
-                   float &eps_sq,
-                   float &eps_sq_old,
-                   int num_iterations,
-                   int num_pcg_iterations,
-                   int pcg_max_iterations,
-                   float &pcg_tol_fraction)
+void update_eps(float b_norm,
+                float r_prim,
+                float r_dual,
+                float &eps,
+                float &eps_old,
+                int num_iterations,
+                int num_pcg_iterations,
+                int &zero_pcg_iters,
+                float &pcg_tol_fraction)
 {
-    // eps_sq is a *relative* tolerance squared used by PCG's stop test:
-    //   ||r||_2^2 <= eps_sq * ||b||_2^2
-    // Start loose, then tighten as ADMM residuals decrease.
+#pragma HLS INLINE
+    eps_old = eps;
 
-    eps_sq_old = eps_sq;
-
-    // float frac = PCG_TOLERANCE_FRACTION;
-    if (num_iterations > 0 && num_pcg_iterations >= pcg_max_iterations)
+    // CUDA logic: Tighten tolerance if PCG solves in ZERO iterations repeatedly
+    // Do NOT tighten if it hits max iterations (that makes a hard problem harder!)
+    if (num_iterations > 0)
     {
-        // If PCG hit the iteration cap previously, tighten the target residual.
-        pcg_tol_fraction *= 0.5f;
+        if (num_pcg_iterations == 0) {
+            zero_pcg_iters++;
+        } else {
+            zero_pcg_iters = 0;
+        }
+
+        // OSQP default reduction_threshold is usually 5 or 10
+        if (zero_pcg_iters >= 5) {
+            pcg_tol_fraction *= 0.5f;
+            zero_pcg_iters = 0;
+        }
     }
 
-    float new_eps_sq;
+    float eps_new;
     if (num_iterations == 0)
     {
-        new_eps_sq = pcg_tol_fraction * pcg_tol_fraction;
+        // Iteration 0: eps_prev = rhs_norm * reduction_factor
+        eps_new = b_norm * pcg_tol_fraction; 
     }
     else
     {
-        // Normalize the geometric-mean residual against the magnitude of b to get a dimensionless ratio.
-        const float denom = (b_norm > 0.0f) ? (b_norm * b_norm) : 1.0f;
-        new_eps_sq = (pcg_tol_fraction * pcg_tol_fraction) * (r_prim * r_dual) / denom;
+        // Iteration > 0: eps = reduction_factor * sqrt(prim_res * dual_res)
+        eps_new = pcg_tol_fraction * hls::sqrt(r_prim * r_dual);
     }
 
-    if (new_eps_sq < PCG_TOL_MIN_SQ)
-    {
-        new_eps_sq = PCG_TOL_MIN_SQ;
+    // Clamp between MIN_TOL and eps_old (eps should monotonically decrease)
+    if (eps_new < OSQP_CG_TOL_MIN) {
+        eps_new = OSQP_CG_TOL_MIN;
     }
-    if (num_iterations > 0 && new_eps_sq > eps_sq_old)
-    {
-        // Prevent eps_sq from increasing after the first iteration.
-        new_eps_sq = eps_sq_old;
+    if (num_iterations > 0 && eps_new > eps_old) {
+        eps_new = eps_old;
     }
 
-    eps_sq = new_eps_sq;
+    eps = eps_new;
 }
 
 void update_b(int num_rows, int num_cols, float sigma, float *x, float *q, const float16 *AT_values, const int16 *AT_row_idx, const int *AT_col_ptr, int A_nnz, float *rho, float *y, float *z, float *b, float *scratch_in, float *scratch_out, float *b_norm)
@@ -147,39 +177,67 @@ void update_b(int num_rows, int num_cols, float sigma, float *x, float *q, const
     for (int i = 0; i < num_cols; i++) {
 #pragma HLS PIPELINE II=1
         b[i] = sigma * x[i] - q[i] + scratch_out[i]; // b = sigma*x - q + AT*(rho*z - y)
-
-        float abs_b = hls::fabs(b[i]);
-        if (abs_b > *b_norm) {
-            *b_norm = abs_b; // Also calculate norm of b for eps_sq calculation
-        }
     }
+    *b_norm = inf_norm(b, num_cols);
 }
 
-void update_rho(float r_prim, float r_dual, float &current_rho_base, float *rho, float *y, float *rho_inv, int num_rows)
+static float estimate_new_rho(float r_prim, float r_dual, 
+                              float norm_z, float norm_Ax, 
+                              float norm_q, float ATy_norm, float Px_norm, 
+                              float current_rho_base)
 {
-    float S = hls::sqrt(r_prim / hls::max(r_dual, 1e-15f)); 
-    float rho_base_new = current_rho_base * S; 
-    rho_base_new = clamp(rho_base_new, ADMM_RHO_MIN, ADMM_RHO_MAX); 
-    float S_eff = rho_base_new / current_rho_base; 
+#pragma HLS INLINE
+
+    // 1. Scale the primal and dual residuals by their respective norms
+    float prim_res_norm = hls::fmax(norm_z, norm_Ax);
+    float prim_res_scaled = r_prim / (prim_res_norm + OSQP_DIVISION_TOL);
+
+    float dual_res_norm = hls::fmax(norm_q, hls::fmax(ATy_norm, Px_norm));
+    float dual_res_scaled = r_dual / (dual_res_norm + OSQP_DIVISION_TOL);
+
+    // 2. Compute the scaling factor (S) with square root
+    float S = hls::sqrt(prim_res_scaled / hls::fmax(dual_res_scaled, OSQP_DIVISION_TOL)); 
     
-    for (int j = 0; j < num_rows; j++) 
+    // 3. Compute new base rho
+    float rho_base_new = current_rho_base * S; 
+    rho_base_new = clamp(rho_base_new, OSQP_RHO_MIN, OSQP_RHO_MAX); 
+    
+    return rho_base_new;
+}
+
+void apply_new_rho(float rho_base_new, float &current_rho_base, 
+                   float *rho, float *y, float *rho_inv, int num_rows)
+{
+#pragma HLS INLINE off
+    float S_eff = rho_base_new / current_rho_base; 
+
+    // Update vectors (Optimized for Latency with Block Unrolling)
+    for (int i = 0; i < num_rows; i += UNROLL_FACTOR) 
     {
 #pragma HLS PIPELINE II=1
-        const float rho_old = rho[j];
-        float rho_new = rho_old;
-
-        if (rho_old > (ADMM_RHO_MIN * 1.1f)) 
+        for (int j = 0; j < UNROLL_FACTOR; ++j) 
         {
-            rho_new = rho_old * S_eff;
-            rho_new = clamp(rho_new, ADMM_RHO_MIN, ADMM_RHO_MAX * ADMM_RHO_EQ_OVER_RHO_INEQ);
-            rho[j] = rho_new;
-        }
+#pragma HLS UNROLL
+            const int idx = i + j;
+            if (idx < num_rows) 
+            {
+                const float rho_old = rho[idx];
+                float rho_new = rho_old;
 
-        if (rho_new != rho_old)
-        {
-            y[j] = y[j] * (rho_new / rho_old);
+                if (rho_old > (OSQP_RHO_MIN * 1.1f)) 
+                {
+                    rho_new = rho_old * S_eff;
+                    rho_new = clamp(rho_new, OSQP_RHO_MIN, OSQP_RHO_MAX * OSQP_RHO_EQ_OVER_RHO_INEQ);
+                    rho[idx] = rho_new;
+                }
+
+                if (rho_new != rho_old)
+                {
+                    y[idx] = y[idx] * (rho_new / rho_old);
+                }
+                rho_inv[idx] = 1.0f / rho_new; 
+            }
         }
-        rho_inv[j] = 1.0f / rho_new; 
     }
     current_rho_base = rho_base_new;
 }
@@ -370,8 +428,8 @@ void admm(int num_rows,
 
     float b_norm = 0.0f;
 
-    float eps_sq = 0.0f;
-    float eps_sq_old = 0.0f;
+    float eps = 0.0f;
+    float eps_old = 0.0f;
 
     float r_prim = 0.0f;
     float r_dual = 0.0f;
@@ -388,23 +446,28 @@ void admm(int num_rows,
     int num_iterations = 0;
     int num_pcg_iterations = 0;
     int total_pcg_iterations = 0;
+    int zero_pcg_iters = 0;
 
     float norm_q = 0.0f;
+    float norm_z = 0.0f;
+
+    float ATy_norm = 0.0f;
+    float Px_norm = 0.0f;
 
     float Ax_norm = 0.0f; 
-    float r_prim_calc = 0.0f;
 
     for (int i = 0; i < num_cols; i++)
     {
 #pragma HLS PIPELINE II = 1
-        x[i] = 0.0f; // initial x
+        x[i] = 0.0f;      // initial x
+        x_tilde[i] = 0.0f; // initial guess for PCG (warm-started across ADMM iterations)
 
         float q_val = q_in[i];
         q[i] = q_val; // copy q from DDR to BRAM
 
         float abs_q = hls::fabs(q_val); // inf_norm of q
-        norm_q = hls::fmax(norm_q, abs_q);
     }
+    norm_q = inf_norm(q, num_cols);
 
     for (int i = 0; i < num_rows; i++)
     {
@@ -422,28 +485,35 @@ void admm(int num_rows,
 
     float one_minus_alpha = 1.0f - alpha;
 
-    float current_rho_base = ADMM_RHO;
+    float current_rho_base = OSQP_RHO;
 
     do
     {   
-        // Adaptive Rho Update every ADMM_ADAPTIVE_RHO_INTERVAL iterations
-        if (adaptive_rho && (num_iterations > 0 && num_iterations % ADMM_ADAPTIVE_RHO_INTERVAL == 0)) 
+        // Adaptive Rho Update every OSQP_ADAPTIVE_RHO_INTERVAL iterations
+        if (adaptive_rho && (num_iterations > 0 && num_iterations % OSQP_ADAPTIVE_RHO_INTERVAL == 0)) 
         {
-            if ((r_prim > ADMM_ADAPTIVE_RHO_TOLERANCE * r_dual) || (r_dual > ADMM_ADAPTIVE_RHO_TOLERANCE * r_prim)) 
-            {
-                update_rho(r_prim, r_dual, current_rho_base, rho, y, rho_inv, num_rows);
+            // 1. Calculate the proposed new rho
+            float rho_new = estimate_new_rho(r_prim, r_dual, 
+                                             norm_z, Ax_norm, 
+                                             norm_q, ATy_norm, Px_norm, 
+                                             current_rho_base);
+            
+            // 2. Check if the proposed rho is outside the tolerance window
+            float upper_bound = current_rho_base * OSQP_ADAPTIVE_RHO_TOLERANCE;
+            float lower_bound = current_rho_base / OSQP_ADAPTIVE_RHO_TOLERANCE;
 
-                // Recompute preconditioner with new rho
+            if ((rho_new > upper_bound) || (rho_new < lower_bound)) 
+            {
+                apply_new_rho(rho_new, current_rho_base, rho, y, rho_inv, num_rows);
                 update_preconditioner(P_diag, A_values, A_row_idx, A_col_ptr, rho, sigma, M_inv, num_cols); 
             }
         }
 
-        update_b(num_rows, num_cols, sigma, x, q, AT_values, AT_row_idx, AT_col_ptr, A_nnz, rho, y, z, b, tmp1, tmp2, &b_norm); // Compute vector b for PCG and its norm for eps_sq calculation
+        update_b(num_rows, num_cols, sigma, x, q, AT_values, AT_row_idx, AT_col_ptr, A_nnz, rho, y, z, b, tmp1, tmp2, &b_norm); // Compute vector b for PCG and its norm for eps calculation
         
-        update_eps_sq(b_norm, r_prim, r_dual, eps_sq, eps_sq_old, num_iterations, num_pcg_iterations, pcg_max_iterations, pcg_tol_fraction); // Update PCG tolerance eps_sq based on ADMM residuals
+        update_eps(b_norm, r_prim, r_dual, eps, eps_old, num_iterations, num_pcg_iterations, zero_pcg_iters, pcg_tol_fraction);
 
-
-        pcg(num_rows, num_cols, A_row_idx, A_col_ptr, A_values, A_nnz, AT_row_idx, AT_col_ptr, AT_values, P_row_idx, P_col_ptr, P_values, P_nnz, M_inv, rho, sigma, eps_sq, x_tilde, b, tmp1, tmp2, &num_pcg_iterations, pcg_max_iterations);
+        pcg(num_rows, num_cols, A_row_idx, A_col_ptr, A_values, A_nnz, AT_row_idx, AT_col_ptr, AT_values, P_row_idx, P_col_ptr, P_values, P_nnz, M_inv, rho, sigma, eps, x_tilde, b, tmp1, tmp2, &num_pcg_iterations, pcg_max_iterations);
 
         total_pcg_iterations += num_pcg_iterations;
 
@@ -456,7 +526,6 @@ void admm(int num_rows,
             x[i] = alpha * x_tilde[i] + one_minus_alpha * x[i]; // x = alpha * x_tilde + (1 - alpha) * x 
         }
 
-        float norm_z = 0.0f;
         for (int i = 0; i < num_rows; i++)
         {
 #pragma HLS PIPELINE II = 1
@@ -467,75 +536,57 @@ void admm(int num_rows,
             float new_z = clamp(v + y[i] * rho_inv[i], l[i], u[i]);
             z[i] = new_z; // z = clamp(v, l, u)
             y[i] = y[i] + rho[i] * (v - new_z); // y = y + rho*(v - z)
-
-            float z_abs = hls::fabs(new_z);
-            norm_z = hls::fmax(norm_z, z_abs);
         }
+        norm_z = inf_norm(z, num_rows);
 
 
         // r_prim, note: inf_norm replaced inside loop to reduce an extra loop
         spmv_csc(num_rows, num_cols, A_nnz, A_row_idx, A_col_ptr, A_values, x, tmp1); // tmp1 = A*x
-        Ax_norm = 0.0f;
-        r_prim_calc = 0.0f;
-        for (int i = 0; i < num_rows; i++)
+        Ax_norm = inf_norm(tmp1, num_rows);
+        for (int i = 0; i < num_rows; i += UNROLL_FACTOR)
         {
 #pragma HLS PIPELINE II = 1
-            
-            float ax_val = tmp1[i];
-            
-            float ax_abs = hls::fabs(ax_val);
-            Ax_norm = hls::fmax(Ax_norm, ax_abs);
-
-            float r_abs = hls::fabs(ax_val - z[i]);
-            r_prim_calc = hls::fmax(r_prim_calc, r_abs);
-        }
-        r_prim = r_prim_calc;
-
-        //r_dual ADMM residual AT*rho*(z - z_prev)
-        for (int i = 0; i < num_rows; i++)
-        {
-        #pragma HLS PIPELINE II=1
-
-            tmp2[i] = rho[i] * (z[i] - tmp2[i]);
-        }
-        spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values, tmp2, tmp1); // tmp1 = AT*(z - z_prev)
-        float r_dual_calc = 0.0f;
-        for (int i = 0; i < num_cols; i++)
-        {
-        #pragma HLS PIPELINE II=1
-
-            float abs_val = hls::fabs(tmp1[i]);
-
-            r_dual_calc =
-                hls::fmax(r_dual_calc, abs_val);
-        }
-        r_dual = r_dual_calc;
-
-
-        // Check for convergence every NUM_ITERATIONS_CHECK_TERMINATION iterations
-        if (num_iterations > 0 && num_iterations % NUM_ITERATIONS_CHECK_TERMINATION == 0) {
-            spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values,y,tmp1); // tmp1 = AT*y
-            spmv_csc(num_cols, num_cols, P_nnz, P_row_idx, P_col_ptr, P_values, x, tmp2); // tmp2 = P*x
-            float Px_norm = 0.0f;
-            float ATy_norm = 0.0f;
-            float r_dual_kkt = 0.0f; // ||P*x + q + AT*y||_inf
-            for (int i = 0; i < num_cols; i++)
+            for (int j = 0; j < UNROLL_FACTOR; ++j)
             {
-            #pragma HLS PIPELINE II=1
-                Px_norm = hls::fmax(Px_norm, hls::fabs(tmp2[i]));
-                ATy_norm = hls::fmax(ATy_norm, hls::fabs(tmp1[i]));
-
-                float rd_abs = hls::fabs(tmp2[i] + q[i] + tmp1[i]);
-                r_dual_kkt = hls::fmax(r_dual_kkt, rd_abs);
+#pragma HLS UNROLL
+                const int idx = i + j;
+                if (idx < num_rows)
+                {
+                    tmp1[idx] = tmp1[idx] - z[idx]; // tmp1 now holds (Ax - z)
+                }
             }
+        }
+        r_prim = inf_norm(tmp1, num_rows);
 
+        //r_dual calculation ||P*x + q + AT*y||inf
+        spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values, y, tmp1); // tmp1 = AT*y
+        spmv_csc(num_cols, num_cols, P_nnz, P_row_idx, P_col_ptr, P_values, x, tmp2);    // tmp2 = P*x
+        ATy_norm = inf_norm(tmp1, num_cols); // for convergence check and adaptive rho
+        Px_norm = inf_norm(tmp2, num_cols);
+        for (int i = 0; i < num_cols; i += UNROLL_FACTOR)
+        {
+#pragma HLS PIPELINE II=1
+            for (int j = 0; j < UNROLL_FACTOR; ++j)
+            {
+#pragma HLS UNROLL
+                const int idx = i + j;
+                if (idx < num_cols)
+                {
+                    tmp2[idx] = tmp2[idx] + q[idx] + tmp1[idx]; 
+                }
+            }
+        }
+        r_dual = inf_norm(tmp2, num_cols);
+
+        // Check for convergence every OSQP_CHECK_TERMINATION iterations
+        if (num_iterations > 0 && num_iterations % OSQP_CHECK_TERMINATION == 0) {
             float max_prim = hls::fmax(Ax_norm, norm_z);
             float max_dual = hls::fmax(Px_norm, hls::fmax(norm_q, ATy_norm));
 
             eps_prim = eps_abs + eps_rel*max_prim;
             eps_dual = eps_abs + eps_rel*max_dual;
 
-            if (r_prim <= eps_prim && r_dual_kkt <= eps_dual) {
+            if (r_prim <= eps_prim && r_dual <= eps_dual) {
                 break; // Converged
             }
         }
@@ -543,25 +594,12 @@ void admm(int num_rows,
         num_iterations++;
 
     } while (num_iterations < admm_max_iterations);
-
-    // r_dual_KKT calculation for output (P*x + q + AT*y)
-    spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values,y,tmp1); // tmp1 = AT*y
-    spmv_csc(num_cols, num_cols, P_nnz, P_row_idx, P_col_ptr, P_values, x, tmp2); // tmp2 = P*x
-    float r_dual_KKT = 0.0f;
-    for (int i = 0; i < num_cols; i++)
-    {
-#pragma HLS PIPELINE II = 1
-        float rd_val = tmp2[i] + q[i] + tmp1[i];
-        float rd_abs = hls::fabs(rd_val);
-
-        r_dual_KKT = hls::fmax(r_dual_KKT, rd_abs);
-    }
      
     // Write outputs back to DDR
     *admm_num_iterations_out = num_iterations;
     *pcg_num_iterations_out = total_pcg_iterations;
     *r_prim_out = r_prim;
-    *r_dual_out = r_dual_KKT;
+    *r_dual_out = r_dual;
     *status_out = (num_iterations == admm_max_iterations) ? 0 : 1; // 0 if max iterations reached, 1 if converged
 
 

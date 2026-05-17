@@ -1,0 +1,48 @@
+Loading overlay from /home/xilinx/admm/admm_fixed.bit...
+Overlay loaded!
+
+Loading QP data from: /home/xilinx/jupyter_notebooks/cvxpygen_test/data
+Problem size: 1020 x 894
+
+Applying Ruiz Equilibration...
+A nnz: 2160
+P nnz: 894
+Initial rho: base=1.000e+00 | eq=642 ineq=378 loose=0 | min/med/max=1.000e+00/1.000e+02/1.000e+02
+
+Allocating hardware buffers...
+
+=== HW Run (adaptive_rho=0) ===
+HW execution time: 247.3383 ms
+
+--- Results ---
+Kernel Status: Converged
+ADMM Iterations: 210
+PCG Iterations : 1050
+PCG/ADMM       : 5.00 (max=5)
+Primal Residual: 5.55396e-04
+Dual Residual  : 4.45843e-03
+Constraint Violation: 5.554e-04
+Objective Value: 2.605783e+02
+
+=== HW Run (adaptive_rho=1) ===
+HW execution time: 499.7177 ms
+
+--- Results ---
+Kernel Status: Converged
+ADMM Iterations: 425
+PCG Iterations : 2125
+PCG/ADMM       : 5.00 (max=5)
+Primal Residual: 7.16448e-04
+Dual Residual  : 4.53091e-03
+Constraint Violation: 7.165e-04
+Objective Value: 2.604598e+02
+
+=== Summary ===
+ADMM iterations: off=210 | on=425
+Primal residual: off=5.554e-04 | on=7.164e-04
+Dual residual: off=4.458e-03 | on=4.531e-03
+Violation: off=5.554e-04 | on=7.165e-04
+Objective: off=2.605783e+02 | on=2.604598e+02
+HW time (ms): off=247.338 | on=499.718
+
+Buffers released.

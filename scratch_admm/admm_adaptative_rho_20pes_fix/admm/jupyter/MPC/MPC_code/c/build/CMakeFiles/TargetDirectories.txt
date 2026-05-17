@@ -1,0 +1,6 @@
+/home/romoirib/QP/admm/jupyter/MPC/MPC_code/c/build/CMakeFiles/cpg_example.dir
+/home/romoirib/QP/admm/jupyter/MPC/MPC_code/c/build/CMakeFiles/cpg.dir
+/home/romoirib/QP/admm/jupyter/MPC/MPC_code/c/build/CMakeFiles/edit_cache.dir
+/home/romoirib/QP/admm/jupyter/MPC/MPC_code/c/build/CMakeFiles/rebuild_cache.dir
+/home/romoirib/QP/admm/jupyter/MPC/MPC_code/c/build/solver_code/CMakeFiles/edit_cache.dir
+/home/romoirib/QP/admm/jupyter/MPC/MPC_code/c/build/solver_code/CMakeFiles/rebuild_cache.dir
