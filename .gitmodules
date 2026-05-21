@@ -1,3 +1,7 @@
 [submodule "QPFPGA/cvxpy"]
 	path = QPFPGA/cvxpy
 	url = https://github.com/cvxpy/cvxpy
+
+[submodule "admm/jupyter/power/pmt"]
+	path = admm/jupyter/power/pmt
+	url = https://github.com/alxri/pmt-fork.git
