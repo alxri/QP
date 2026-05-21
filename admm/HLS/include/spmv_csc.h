@@ -33,6 +33,17 @@
 typedef hls::vector<float, PACK_SIZE> float16;
 typedef hls::vector<int, PACK_SIZE> int16;
 
+struct TiledMatrix {
+    int num_row_tiles;
+    int num_col_tiles;
+    const int *nnz_counts; 
+    const int *nnz_offsets;
+    const int *col_offsets;
+    const int16 *row_idx;  
+    const int *col_ptr;    
+    const float16 *values; 
+};
+
 void spmv_csc(int num_rows,
               int num_cols,
               int nnz,
@@ -41,5 +52,11 @@ void spmv_csc(int num_rows,
               const float16 *A_values,
               const float *x,
               float *y);
+
+void spmv_csc_tiled(int global_num_rows,
+                    int global_num_cols,
+                    const TiledMatrix &A,
+                    float *x,
+                    float *y);
 
 #endif // SPMV_CSC_H

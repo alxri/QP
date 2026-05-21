@@ -284,8 +284,8 @@ P_sparse_scaled = sp.diags(P_diag_scaled).tocsc()
 alpha = 1.8
 sigma = 1e-2
 
-eps_abs = 1e-3
-eps_rel = 1e-3
+eps_abs = 5e-3
+eps_rel = 5e-3
 
 pcg_tol_fraction = 1.0
 

@@ -12,12 +12,14 @@ if __name__ == "__main__":
     1. Define Problem (Targeting 1024x1024 OSQP size)
     '''
     # To get a 1024x1024 OSQP matrix, m + n must equal 1024.
-    m, n = 5120, 5120
+    m, n = 15, 15
     x = cp.Variable(n, name='x')
 
+    nnz_per_col = 3
+    density = nnz_per_col / m
     # Generate a random sparse structure FIRST (e.g., 1% density)
     np.random.seed(1)
-    A_sparse_matrix = sp.random(m, n, density=0.1, format='coo', random_state=1)
+    A_sparse_matrix = sp.random(m, n, density=density, format='coo', random_state=1)
 
     # Tell CVXPY to use the exact row/col sparsity pattern we just generated
     A = cp.Parameter((m, n), name='A', sparsity=(A_sparse_matrix.row, A_sparse_matrix.col))

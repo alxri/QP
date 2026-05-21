@@ -34,16 +34,16 @@ struct ColInfo
 };
 
 /*
-* Reads column pointer information and corresponding x values, and sends them as a stream of ColInfo structs.
-* Each ColInfo contains the number of non-zeros in the column and the corresponding x value
-*/
+ * Reads column pointer information and corresponding x values, and sends them as a stream of ColInfo structs.
+ * Each ColInfo contains the number of non-zeros in the column and the corresponding x value
+ */
 static void read_col_info(int num_cols,
                           const int *A_col_ptr,
                           const float *x_in,
                           hls::stream<ColInfo> &col_info_stream)
 {
 #pragma HLS INLINE off
-#pragma HLS ARRAY_RESHAPE variable = x_in type = cyclic factor = RESHAPE_FACTOR dim = 1 
+#pragma HLS ARRAY_RESHAPE variable = x_in type = cyclic factor = RESHAPE_FACTOR dim = 1
     int prev = A_col_ptr[0];
 
     float x_element = x_in[0];
@@ -79,9 +79,9 @@ static void read_col_info(int num_cols,
 }
 
 /*
-* Read A_row_idx and A_values in groups of 16 (PACK_SIZE) in bursts.
-* Each burst is packed into NnzPack structs containing up to NNZ_LANES valid entries.
-*/
+ * Read A_row_idx and A_values in groups of 16 (PACK_SIZE) in bursts.
+ * Each burst is packed into NnzPack structs containing up to NNZ_LANES valid entries.
+ */
 static void read_nnz_packed(int nnz,
                             const int16 *row_in,
                             const float16 *val_in,
@@ -139,17 +139,17 @@ static void read_nnz_packed(int nnz,
 }
 
 /*
-* Distributes nnz elements to PEs in a continuous round-robin way.
-* Each cycle, up to NNZ_LANES elements are dispatched in parallel to the PE streams, 
-* reading column info and nnz packs.
-*
-* Nnz elements are sent in NNZ_LANES groups. If the current column has fewer than NNZ_LANES
-* remaining, only that many are sent and the next column's info is read in the same cycle. The next
-* elements will be sent to the next PEs in the round-robin order. This ensures that all PEs receive 
-* work as soon as possible without waiting for an entire column to be dispatched.
-*
-* When all nnz have been dispatched, termination packets with last=true are sent to each PE.
-*/
+ * Distributes nnz elements to PEs in a continuous round-robin way.
+ * Each cycle, up to NNZ_LANES elements are dispatched in parallel to the PE streams,
+ * reading column info and nnz packs.
+ *
+ * Nnz elements are sent in NNZ_LANES groups. If the current column has fewer than NNZ_LANES
+ * remaining, only that many are sent and the next column's info is read in the same cycle. The next
+ * elements will be sent to the next PEs in the round-robin order. This ensures that all PEs receive
+ * work as soon as possible without waiting for an entire column to be dispatched.
+ *
+ * When all nnz have been dispatched, termination packets with last=true are sent to each PE.
+ */
 static void distribute_to_pe(int nnz,
                              hls::stream<ColInfo> &col_info_stream,
                              hls::stream<NnzPack> &nnz_stream,
@@ -172,7 +172,7 @@ static void distribute_to_pe(int nnz,
     // Value of x for the current column
     float x_cur = 0.0f;
     // Total nnz distributed so far (for termination)
-    int distributed = 0; 
+    int distributed = 0;
 
     while (distributed < nnz)
     {
@@ -221,7 +221,8 @@ static void distribute_to_pe(int nnz,
         // Move the current PE pointer forward by 'send' positions in a round-robin way
         pe += send;
         // Wrap around if we exceed the number of PEs
-        if (pe >= NUM_PES){
+        if (pe >= NUM_PES)
+        {
             pe -= NUM_PES;
         }
 
@@ -244,20 +245,24 @@ static void distribute_to_pe(int nnz,
     }
 }
 
-static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MAX_ROWS])
+static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MAX_ROWS], bool clear_y)
 {
 #pragma HLS INLINE off
-#pragma HLS ARRAY_PARTITION variable = y_partial type=cyclic factor=RESHAPE_FACTOR dim=1
-    for (int i = 0; i < num_rows; i += RESHAPE_FACTOR)
+#pragma HLS ARRAY_PARTITION variable = y_partial type = cyclic factor = RESHAPE_FACTOR dim = 1
+
+    if (clear_y)
     {
-#pragma HLS PIPELINE II = 1
-        for (int j = 0; j < RESHAPE_FACTOR; ++j) 
+        for (int i = 0; i < num_rows; i += RESHAPE_FACTOR)
         {
-#pragma HLS UNROLL
-            const int idx = i + j;
-            if (idx < num_rows) 
+#pragma HLS PIPELINE II = 1
+            for (int j = 0; j < RESHAPE_FACTOR; ++j)
             {
-                y_partial[idx] = 0.0f;
+#pragma HLS UNROLL
+                const int idx = i + j;
+                if (idx < num_rows)
+                {
+                    y_partial[idx] = 0.0f;
+                }
             }
         }
     }
@@ -266,7 +271,8 @@ static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MA
     {
 #pragma HLS PIPELINE II = 1
         NnzPkt pkt = in.read();
-        if (pkt.last) break;
+        if (pkt.last)
+            break;
 
         int row = pkt.row;
         if ((unsigned)row < (unsigned)num_rows)
@@ -277,8 +283,8 @@ static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MA
 }
 
 static void reduce_and_accumulate(int num_rows,
-                                 float y_partial[NUM_PES][MAX_ROWS],
-                                 float *y_out)
+                                  float y_partial[NUM_PES][MAX_ROWS],
+                                  float *y_out)
 {
 #pragma HLS INLINE off
 #pragma HLS ARRAY_RESHAPE variable = y_out type = cyclic factor = RESHAPE_FACTOR dim = 1
@@ -289,15 +295,15 @@ static void reduce_and_accumulate(int num_rows,
         {
 #pragma HLS UNROLL
             const int idx = i + j;
-            if (idx < num_rows) 
+            if (idx < num_rows)
             {
                 float sum = 0.0f;
-                for (int pe = 0; pe < NUM_PES; ++pe) 
+                for (int pe = 0; pe < NUM_PES; ++pe)
                 {
 #pragma HLS UNROLL
                     sum += y_partial[pe][idx];
                 }
-                y_out[idx] = sum; 
+                y_out[idx] = sum;
             }
         }
     }
@@ -310,7 +316,8 @@ static void spmv_csc_dataflow(int num_rows,
                               const int *A_col_ptr,
                               const float16 *A_values,
                               const float *x,
-                              float y_partial[NUM_PES][MAX_ROWS])
+                              float y_partial[NUM_PES][MAX_ROWS],
+                              bool clear_y)
 {
 #pragma HLS INLINE off
 
@@ -330,7 +337,7 @@ static void spmv_csc_dataflow(int num_rows,
     for (int pe = 0; pe < NUM_PES; ++pe)
     {
 #pragma HLS UNROLL
-        compute_pe(num_rows, pe_streams[pe], y_partial[pe]);
+        compute_pe(num_rows, pe_streams[pe], y_partial[pe], clear_y);
     }
 }
 
@@ -341,23 +348,66 @@ void spmv_csc(int num_rows,
               const int *A_col_ptr,
               const float16 *A_values,
               const float *x,
-              float *y)
+              float *y,
+              bool clear_y,
+              bool write_y)
 {
 #pragma HLS INLINE off
 #pragma HLS ARRAY_RESHAPE variable = x type = cyclic factor = RESHAPE_FACTOR dim = 1
 #pragma HLS ARRAY_RESHAPE variable = y type = cyclic factor = RESHAPE_FACTOR dim = 1
 
-    if (num_rows > MAX_ROWS || num_cols > MAX_COLS) return;
+    if (num_rows > MAX_ROWS || num_cols > MAX_COLS)
+        return;
 
-    //static float y_partial[NUM_PES][MAX_ROWS];
-    float y_partial[NUM_PES][MAX_ROWS];
+    static float y_partial[NUM_PES][MAX_ROWS];
 
 #pragma HLS ARRAY_PARTITION variable = y_partial complete dim = 1
 // #pragma HLS BIND_STORAGE variable = y_partial type = ram_t2p impl = uram
-#pragma HLS ARRAY_PARTITION variable = y_partial type=cyclic factor=RESHAPE_FACTOR dim=2
+#pragma HLS ARRAY_PARTITION variable = y_partial type = cyclic factor = RESHAPE_FACTOR dim = 2
 #pragma HLS BIND_STORAGE variable = y_partial type = ram_t2p impl = bram
 
-    spmv_csc_dataflow(num_rows, num_cols, nnz, A_row_idx, A_col_ptr, A_values, x, y_partial);
+    spmv_csc_dataflow(num_rows, num_cols, nnz, A_row_idx, A_col_ptr, A_values, x, y_partial, clear_y);
 
-    reduce_and_accumulate(num_rows, y_partial, y);
+    if (write_y)
+    {
+        reduce_and_accumulate(num_rows, y_partial, y);
+    }
+}
+
+void spmv_csc_tiled(int global_num_rows,
+                    int global_num_cols,
+                    const TiledMatrix &A,
+                    float *x,
+                    float *y)
+{
+    // Process one row-tile at a time so `spmv_csc`'s internal accumulator
+    // can accumulate across all column-tiles for that tile row
+    for (int tile_row = 0; tile_row < A.num_row_tiles; ++tile_row)
+    {
+        int row_base = tile_row * MAX_ROWS;
+        int rows_this_tile = (row_base + MAX_ROWS <= global_num_rows) ? MAX_ROWS : (global_num_rows - row_base);
+
+        for (int tile_col = 0; tile_col < A.num_col_tiles; ++tile_col)
+        {
+            int col_base = tile_col * MAX_COLS;
+            int cols_this_tile = (col_base + MAX_COLS <= global_num_cols) ? MAX_COLS : (global_num_cols - col_base);
+
+            int tile_idx = tile_row * A.num_col_tiles + tile_col;
+            int tile_nnz = A.nnz_counts[tile_idx];
+            int tile_nnz_offset = A.nnz_offsets[tile_idx];
+            int tile_col_offset = A.col_offsets[tile_idx];
+
+            spmv_csc(
+                rows_this_tile,
+                cols_this_tile,
+                tile_nnz,
+                A.row_idx + tile_nnz_offset,
+                A.col_ptr + tile_col_offset,
+                A.values + tile_nnz_offset,
+                x + col_base,
+                y + tile_row * MAX_ROWS,
+                /*clear_y=*/(tile_col == 0),
+                /*write_y=*/(tile_col == A.num_col_tiles - 1));
+        }
+    }
 }

@@ -6,6 +6,10 @@
 #define NUM_PES 16
 #endif
 
+#ifndef RESHAPE_FACTOR
+#define RESHAPE_FACTOR 8
+#endif
+
 #define GLOBAL_MAX 65536
 #define TILE_SIZE 1024
 
@@ -42,6 +46,8 @@ static void read_col_info(int num_cols,
                           hls::stream<ColInfo> &col_info_stream)
 {
 #pragma HLS INLINE off
+// #pragma HLS ARRAY_RESHAPE variable = x_in type = cyclic factor = RESHAPE_FACTOR dim = 1
+
     int prev = A_col_ptr[0];
 
     float x_element = x_in[0];
@@ -245,14 +251,23 @@ static void distribute_to_pe(int nnz,
 static void compute_pe(int num_rows, hls::stream<NnzPkt> &in, float y_partial[MAX_ROWS], bool clear_y)
 {
 #pragma HLS INLINE off
+// #pragma HLS ARRAY_PARTITION variable = y_partial type=cyclic factor=RESHAPE_FACTOR dim=1
     if (clear_y)
     {
-    for (int i = 0; i < num_rows; ++i)
+        for (int i = 0; i < num_rows; i += RESHAPE_FACTOR)
     {
 #pragma HLS PIPELINE II = 1
-        y_partial[i] = 0.0f;
+        for (int j = 0; j < RESHAPE_FACTOR; ++j) 
+        {
+#pragma HLS UNROLL
+            const int idx = i + j;
+            if (idx < num_rows) 
+            {
+                y_partial[idx] = 0.0f;
+            }
+        }
     }
-    }   
+    }
 
     while (true)
     {
@@ -278,11 +293,12 @@ static void reduce_and_write_packed(int num_rows, float y_partial[NUM_PES][MAX_R
 
     for (int w = 0; w < words; ++w)
     {
+#pragma HLS PIPELINE II = 1
         float16 out_word;
 
         for (int lane = 0; lane < PACK_SIZE; ++lane)
         {
-#pragma HLS PIPELINE II = 1
+#pragma HLS UNROLL
             const int idx = w * PACK_SIZE + lane;
             float sum = 0.0f;
 
@@ -292,7 +308,6 @@ static void reduce_and_write_packed(int num_rows, float y_partial[NUM_PES][MAX_R
                 {
 #pragma HLS UNROLL
                     sum += y_partial[pe][idx];
-                    // y_partial[pe][idx] = 0.0f;
                 }
             }
 
@@ -372,7 +387,8 @@ void spmv_csc(int num_rows,
     static float y_partial[NUM_PES][MAX_ROWS];
 
 #pragma HLS ARRAY_PARTITION variable = y_partial complete dim = 1
-#pragma HLS BIND_STORAGE variable = y_partial type = ram_t2p impl = uram
+#pragma HLS ARRAY_PARTITION variable = y_partial type=cyclic factor=RESHAPE_FACTOR dim=2
+#pragma HLS BIND_STORAGE variable = y_partial type = ram_t2p impl = bram
 
     spmv_csc_dataflow(num_rows, num_cols, nnz, A_row_idx, A_col_ptr, A_values, x, y_partial, clear_y);
 

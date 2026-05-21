@@ -11,17 +11,21 @@
 
 void admm(int num_rows,
           int num_cols,
-          const int16 *A_row_idx,
-          const int *A_col_ptr,
-          const float16 *A_values,
-          int A_nnz,
-          const int16 *AT_row_idx,
-          const int *AT_col_ptr,
-          const float16 *AT_values,
-          const int16 *P_row_idx,
-          const int *P_col_ptr,
-          const float16 *P_values,
-          int P_nnz,
+          // Regular format Matrix A (for preconditioner update)
+          const int16 *A_row_idx, const int *A_col_ptr, const float16 *A_values, int A_nnz,
+          // Tiled Matrix A
+          int A_num_row_tiles, int A_num_col_tiles,
+          const int *A_tile_nnz_counts, const int *A_tile_nnz_offsets, const int *A_tile_col_offsets,
+          const int16 *A_row_idx_tiled, const int *A_col_ptr_tiled, const float16 *A_values_tiled,
+          // Tiled Matrix AT
+          int AT_num_row_tiles, int AT_num_col_tiles,
+          const int *AT_tile_nnz_counts, const int *AT_tile_nnz_offsets, const int *AT_tile_col_offsets,
+          const int16 *AT_row_idx_tiled, const int *AT_col_ptr_tiled, const float16 *AT_values_tiled,
+          // Tiled Matrix P
+          int P_num_row_tiles, int P_num_col_tiles,
+          const int *P_tile_nnz_counts, const int *P_tile_nnz_offsets, const int *P_tile_col_offsets,
+          const int16 *P_row_idx_tiled, const int *P_col_ptr_tiled, const float16 *P_values_tiled,
+          // Remaining standard arguments
           const float *P_diag,
           const float *l_in,
           const float *u_in,

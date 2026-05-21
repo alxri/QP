@@ -1,0 +1,3 @@
+[submodule "QPFPGA/cvxpy"]
+	path = QPFPGA/cvxpy
+	url = https://github.com/cvxpy/cvxpy

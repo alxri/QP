@@ -64,17 +64,9 @@ static float dot_prod(const float *x, const float *y, int size)
 // make struct for CSC data to reduce number of arguments and simplify function calls ?
 void pcg(int num_rows,
          int num_cols,
-         const int16 *A_row_idx,
-         const int *A_col_ptr,
-         const float16 *A_values,
-         int A_nnz,
-         const int16 *AT_row_idx,
-         const int *AT_col_ptr,
-         const float16 *AT_values,
-         const int16 *P_row_idx,
-         const int *P_col_ptr,
-         const float16 *P_values,
-         int P_nnz,
+         const TiledMatrix &mat_A,
+         const TiledMatrix &mat_AT,
+         const TiledMatrix &mat_P,
          const float *M_inv,
          const float *rho,
          const float sigma,
@@ -143,7 +135,8 @@ float beta;
 // scratch1 is used for intermediate SpMVs; scratch2 temporarily holds K*x and then z=M^{-1}r.
 
 // scratch1[0..num_rows): A*x
-spmv_csc(num_rows, num_cols, A_nnz, A_row_idx, A_col_ptr, A_values, x, scratch1);
+// spmv_csc(num_rows, num_cols, A_nnz, A_row_idx, A_col_ptr, A_values, x, scratch1);
+spmv_csc_tiled(num_rows, num_cols, mat_A, x, scratch1);
 
 // scratch1 = rho .* (A*x)
 for (int i = 0; i < num_rows; i += RESHAPE_FACTOR)
@@ -161,10 +154,12 @@ for (int i = 0; i < num_rows; i += RESHAPE_FACTOR)
 }
 
 // scratch2[0..num_cols): A^T * (rho .* (A*x))
-spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values, scratch1, scratch2);
+// spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values, scratch1, scratch2);
+spmv_csc_tiled(num_cols, num_rows, mat_AT, scratch1, scratch2);
 
 // scratch1[0..num_cols): P*x
-spmv_csc(num_cols, num_cols, P_nnz, P_row_idx, P_col_ptr, P_values, x, scratch1);
+// spmv_csc(num_cols, num_cols, P_nnz, P_row_idx, P_col_ptr, P_values, x, scratch1);
+spmv_csc_tiled(num_cols, num_cols, mat_P, x, scratch1);
 
 // scratch2[0..num_cols): K*x = P*x + sigma*x + A^T*(rho*(A*x))
 for (int i = 0; i < num_cols; i += RESHAPE_FACTOR)
@@ -212,20 +207,9 @@ int iter_count = 0;
 
 for (int k = 0; k < pcg_max_iterations && r_norm > epsilon; ++k)
 {
-    // //#pragma HLS DATAFLOW ?
-    // float A_p[MAX_SIZE] = spmv_csc(A, p);
-    // float rho_A_p[MAX_SIZE] = rho * A_p; // Element-wise vector product of rho matrix (diagonal) with A_p
-    // float AT_rho_A_p[MAX_SIZE] = spmv_csc(AT, rho_A_p);
-
-
-    // float P_p[MAX_SIZE] = spmv_csc(P, p);
-    // float sigma_p = sigma * p; // Dot product of sigma scalar with p
-
-    // K_p = P_p + sigma_p + AT_rho_A_p; // Vector addition
-
-
     // scratch1[0..num_rows): A*p
-    spmv_csc(num_rows, num_cols, A_nnz, A_row_idx, A_col_ptr, A_values, p, scratch1);
+    // spmv_csc(num_rows, num_cols, A_nnz, A_row_idx, A_col_ptr, A_values, p, scratch1);
+    spmv_csc_tiled(num_rows, num_cols, mat_A, p, scratch1);
 
     // scratch1 = rho .* (A*p)
     for (int i = 0; i < num_rows; i += RESHAPE_FACTOR)
@@ -243,10 +227,12 @@ for (int k = 0; k < pcg_max_iterations && r_norm > epsilon; ++k)
     }
 
     // K_p = A^T * (rho .* (A*p))
-    spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values, scratch1, K_p);
+    // spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values, scratch1, K_p);
+    spmv_csc_tiled(num_cols, num_rows, mat_AT, scratch1, K_p);
 
     // scratch1[0..num_cols): P*p
-    spmv_csc(num_cols, num_cols, P_nnz, P_row_idx, P_col_ptr, P_values, p, scratch1);
+    // spmv_csc(num_cols, num_cols, P_nnz, P_row_idx, P_col_ptr, P_values, p, scratch1);
+    spmv_csc_tiled(num_cols, num_cols, mat_P, p, scratch1);
 
     // K_p = P*p + sigma*p + A^T*(rho*(A*p))
     for (int i = 0; i < num_cols; i += RESHAPE_FACTOR)

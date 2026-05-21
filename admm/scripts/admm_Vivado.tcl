@@ -42,6 +42,7 @@ set_property -dict [list \
   CONFIG.PSU__USE__S_AXI_GP4 {1} \
   CONFIG.PSU__USE__S_AXI_GP5 {1} \
   CONFIG.PSU__USE__IRQ0 {1} \
+  CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {200} \
 ] [get_bd_cells zynq_ultra_ps_e_0]
 
 # ==============================================================================

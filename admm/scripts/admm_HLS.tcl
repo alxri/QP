@@ -15,7 +15,7 @@ add_files -tb HLS/test/tb_admm.cpp -cflags "-I HLS/include -I HLS/test"
 
 open_solution "solution1" -flow_target vivado
 set_part {xczu7ev-ffvc1156-2-e}
-create_clock -period 10 -name default
+create_clock -period 5 -name default
 set_clock_uncertainty 1
 config_interface -m_axi_addr64=1
 quit

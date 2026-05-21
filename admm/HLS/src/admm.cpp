@@ -21,6 +21,8 @@
 
 #define UNROLL_FACTOR 8
 
+#define MAX_TILES ( (MAX_SIZE / MAX_ROWS) * (MAX_SIZE / MAX_COLS) )
+
 static float inf_norm(const float *v, int size)
 {
 #pragma HLS INLINE
@@ -162,7 +164,7 @@ void update_eps(float b_norm,
     eps = eps_new;
 }
 
-void update_b(int num_rows, int num_cols, float sigma, float *x, float *q, const float16 *AT_values, const int16 *AT_row_idx, const int *AT_col_ptr, int A_nnz, float *rho, float *y, float *z, float *b, float *scratch_in, float *scratch_out, float *b_norm)
+void update_b(int num_rows, int num_cols, float sigma, float *x, float *q, const TiledMatrix &mat_AT, float *rho, float *y, float *z, float *b, float *scratch_in, float *scratch_out, float *b_norm)
 {
 #pragma HLS INLINE
     *b_norm = 0.0f;
@@ -172,7 +174,7 @@ void update_b(int num_rows, int num_cols, float sigma, float *x, float *q, const
         scratch_in[i] = rho[i] * z[i] - y[i]; // AT * (rho * z - y)
     }
 
-    spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values, scratch_in, scratch_out); // scratch_out = AT * (rho * z - y)
+    spmv_csc_tiled(num_cols, num_rows, mat_AT, scratch_in, scratch_out); // scratch_out = AT * (rho * z - y)
 
     for (int i = 0; i < num_cols; i++) {
 #pragma HLS PIPELINE II=1
@@ -244,17 +246,21 @@ void apply_new_rho(float rho_base_new, float &current_rho_base,
 
 void admm(int num_rows,
           int num_cols,
-          const int16 *A_row_idx,
-          const int *A_col_ptr,
-          const float16 *A_values,
-          int A_nnz,
-          const int16 *AT_row_idx,
-          const int *AT_col_ptr,
-          const float16 *AT_values,
-          const int16 *P_row_idx,
-          const int *P_col_ptr,
-          const float16 *P_values,
-          int P_nnz,
+          // Regular format Matrix A (for preconditioner update)
+          const int16 *A_row_idx, const int *A_col_ptr, const float16 *A_values, int A_nnz,
+          // Tiled Matrix A
+          int A_num_row_tiles, int A_num_col_tiles,
+          const int *A_tile_nnz_counts, const int *A_tile_nnz_offsets, const int *A_tile_col_offsets,
+          const int16 *A_row_idx_tiled, const int *A_col_ptr_tiled, const float16 *A_values_tiled,
+          // Tiled Matrix AT
+          int AT_num_row_tiles, int AT_num_col_tiles,
+          const int *AT_tile_nnz_counts, const int *AT_tile_nnz_offsets, const int *AT_tile_col_offsets,
+          const int16 *AT_row_idx_tiled, const int *AT_col_ptr_tiled, const float16 *AT_values_tiled,
+          // Tiled Matrix P
+          int P_num_row_tiles, int P_num_col_tiles,
+          const int *P_tile_nnz_counts, const int *P_tile_nnz_offsets, const int *P_tile_col_offsets,
+          const int16 *P_row_idx_tiled, const int *P_col_ptr_tiled, const float16 *P_values_tiled,
+          // Remaining standard arguments
           const float *P_diag,
           const float *l_in,
           const float *u_in,
@@ -309,18 +315,30 @@ void admm(int num_rows,
 *   - Status flag: how solver terminated (converged, max iterations reached)
 *   - Final residuals: primal and dual residual norms to verify quality of solution
 */
-
 #pragma HLS INTERFACE m_axi port = A_row_idx offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
 #pragma HLS INTERFACE m_axi port = A_col_ptr offset = slave bundle = gmem1 depth = MAX_COL_PTR
 #pragma HLS INTERFACE m_axi port = A_values offset = slave bundle = gmem2 depth = MAX_NNZ_WORDS
 
-#pragma HLS INTERFACE m_axi port = AT_row_idx offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
-#pragma HLS INTERFACE m_axi port = AT_col_ptr offset = slave bundle = gmem1 depth = MAX_COL_PTR
-#pragma HLS INTERFACE m_axi port = AT_values offset = slave bundle = gmem2 depth = MAX_NNZ_WORDS
+#pragma HLS INTERFACE m_axi port = A_row_idx_tiled offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
+#pragma HLS INTERFACE m_axi port = A_col_ptr_tiled offset = slave bundle = gmem1 depth = MAX_COL_PTR
+#pragma HLS INTERFACE m_axi port = A_values_tiled offset = slave bundle = gmem2 depth = MAX_NNZ_WORDS
+#pragma HLS INTERFACE m_axi port = A_tile_nnz_counts offset = slave bundle = gmem1 depth = MAX_TILES
+#pragma HLS INTERFACE m_axi port = A_tile_nnz_offsets offset = slave bundle = gmem1 depth = MAX_TILES
+#pragma HLS INTERFACE m_axi port = A_tile_col_offsets offset = slave bundle = gmem1 depth = MAX_TILES
 
-#pragma HLS INTERFACE m_axi port = P_row_idx offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
-#pragma HLS INTERFACE m_axi port = P_col_ptr offset = slave bundle = gmem1 depth = MAX_COL_PTR
-#pragma HLS INTERFACE m_axi port = P_values offset = slave bundle = gmem2 depth = MAX_NNZ_WORDS
+#pragma HLS INTERFACE m_axi port = AT_row_idx_tiled offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
+#pragma HLS INTERFACE m_axi port = AT_col_ptr_tiled offset = slave bundle = gmem1 depth = MAX_COL_PTR
+#pragma HLS INTERFACE m_axi port = AT_values_tiled offset = slave bundle = gmem2 depth = MAX_NNZ_WORDS
+#pragma HLS INTERFACE m_axi port = AT_tile_nnz_counts offset = slave bundle = gmem1 depth = MAX_TILES
+#pragma HLS INTERFACE m_axi port = AT_tile_nnz_offsets offset = slave bundle = gmem1 depth = MAX_TILES
+#pragma HLS INTERFACE m_axi port = AT_tile_col_offsets offset = slave bundle = gmem1 depth = MAX_TILES
+
+#pragma HLS INTERFACE m_axi port = P_row_idx_tiled offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
+#pragma HLS INTERFACE m_axi port = P_col_ptr_tiled offset = slave bundle = gmem1 depth = MAX_COL_PTR
+#pragma HLS INTERFACE m_axi port = P_values_tiled offset = slave bundle = gmem2 depth = MAX_NNZ_WORDS
+#pragma HLS INTERFACE m_axi port = P_tile_nnz_counts offset = slave bundle = gmem1 depth = MAX_TILES
+#pragma HLS INTERFACE m_axi port = P_tile_nnz_offsets offset = slave bundle = gmem1 depth = MAX_TILES
+#pragma HLS INTERFACE m_axi port = P_tile_col_offsets offset = slave bundle = gmem1 depth = MAX_TILES
 #pragma HLS INTERFACE m_axi port = P_diag offset = slave bundle = gmem2 depth = MAX_COLS
 
 #pragma HLS INTERFACE m_axi port = q_in offset = slave bundle = gmem3 depth = MAX_COLS
@@ -338,6 +356,13 @@ void admm(int num_rows,
 // #pragma HLS INTERFACE m_axi port = r_prim_out offset = slave bundle = gmem3 depth = 1
 // #pragma HLS INTERFACE m_axi port = r_dual_out offset = slave bundle = gmem3 depth = 1
 
+#pragma HLS INTERFACE s_axilite port = A_num_row_tiles bundle = control
+#pragma HLS INTERFACE s_axilite port = A_num_col_tiles bundle = control
+#pragma HLS INTERFACE s_axilite port = AT_num_row_tiles bundle = control
+#pragma HLS INTERFACE s_axilite port = AT_num_col_tiles bundle = control
+#pragma HLS INTERFACE s_axilite port = P_num_row_tiles bundle = control
+#pragma HLS INTERFACE s_axilite port = P_num_col_tiles bundle = control
+
 #pragma HLS INTERFACE s_axilite port = admm_num_iterations_out bundle = control
 #pragma HLS INTERFACE s_axilite port = pcg_num_iterations_out bundle = control
 #pragma HLS INTERFACE s_axilite port = adaptive_rho bundle = control
@@ -352,7 +377,6 @@ void admm(int num_rows,
 #pragma HLS INTERFACE s_axilite port = num_rows bundle = control
 #pragma HLS INTERFACE s_axilite port = num_cols bundle = control
 #pragma HLS INTERFACE s_axilite port = A_nnz bundle = control
-#pragma HLS INTERFACE s_axilite port = P_nnz bundle = control
 #pragma HLS INTERFACE s_axilite port = sigma bundle = control
 #pragma HLS INTERFACE s_axilite port = alpha bundle = control
 #pragma HLS INTERFACE s_axilite port = pcg_max_iterations bundle = control
@@ -425,6 +449,25 @@ void admm(int num_rows,
 // #pragma HLS BIND_STORAGE variable=x_tilde type=RAM_T2P impl=URAM
 // #pragma HLS BIND_STORAGE variable=x type=RAM_T2P impl=URAM
 // #pragma HLS BIND_STORAGE variable=y type=RAM_T2P impl=URAM
+
+// Pack into structs
+    TiledMatrix mat_A = {
+        A_num_row_tiles, A_num_col_tiles, 
+        A_tile_nnz_counts, A_tile_nnz_offsets, A_tile_col_offsets, 
+        A_row_idx_tiled, A_col_ptr_tiled, A_values_tiled
+    };
+
+    TiledMatrix mat_AT = {
+        AT_num_row_tiles, AT_num_col_tiles, 
+        AT_tile_nnz_counts, AT_tile_nnz_offsets, AT_tile_col_offsets, 
+        AT_row_idx_tiled, AT_col_ptr_tiled, AT_values_tiled
+    };
+
+    TiledMatrix mat_P = {
+        P_num_row_tiles, P_num_col_tiles, 
+        P_tile_nnz_counts, P_tile_nnz_offsets, P_tile_col_offsets, 
+        P_row_idx_tiled, P_col_ptr_tiled, P_values_tiled
+    };
 
     float b_norm = 0.0f;
 
@@ -509,16 +552,16 @@ void admm(int num_rows,
             }
         }
 
-        update_b(num_rows, num_cols, sigma, x, q, AT_values, AT_row_idx, AT_col_ptr, A_nnz, rho, y, z, b, tmp1, tmp2, &b_norm); // Compute vector b for PCG and its norm for eps calculation
+        update_b(num_rows, num_cols, sigma, x, q, mat_AT, rho, y, z, b, tmp1, tmp2, &b_norm); // Compute vector b for PCG and its norm for eps calculation
         
         update_eps(b_norm, r_prim, r_dual, eps, eps_old, num_iterations, num_pcg_iterations, zero_pcg_iters, pcg_tol_fraction);
 
-        pcg(num_rows, num_cols, A_row_idx, A_col_ptr, A_values, A_nnz, AT_row_idx, AT_col_ptr, AT_values, P_row_idx, P_col_ptr, P_values, P_nnz, M_inv, rho, sigma, eps, x_tilde, b, tmp1, tmp2, &num_pcg_iterations, pcg_max_iterations);
+        pcg(num_rows, num_cols, mat_A, mat_AT, mat_P, M_inv, rho, sigma, eps, x_tilde, b, tmp1, tmp2, &num_pcg_iterations, pcg_max_iterations);
 
         total_pcg_iterations += num_pcg_iterations;
 
 
-        spmv_csc(num_rows, num_cols, A_nnz, A_row_idx, A_col_ptr, A_values, x_tilde, tmp1); // z_tilde = A*x_tilde
+        spmv_csc_tiled(num_rows, num_cols, mat_A, x_tilde, tmp1); // z_tilde = A*x_tilde
         
         for (int i = 0; i < num_cols; i++)
         {
@@ -541,7 +584,7 @@ void admm(int num_rows,
 
 
         // r_prim, note: inf_norm replaced inside loop to reduce an extra loop
-        spmv_csc(num_rows, num_cols, A_nnz, A_row_idx, A_col_ptr, A_values, x, tmp1); // tmp1 = A*x
+        spmv_csc_tiled(num_rows, num_cols, mat_A, x, tmp1); // tmp1 = A*x
         Ax_norm = inf_norm(tmp1, num_rows);
         for (int i = 0; i < num_rows; i += UNROLL_FACTOR)
         {
@@ -559,8 +602,8 @@ void admm(int num_rows,
         r_prim = inf_norm(tmp1, num_rows);
 
         //r_dual calculation ||P*x + q + AT*y||inf
-        spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values, y, tmp1); // tmp1 = AT*y
-        spmv_csc(num_cols, num_cols, P_nnz, P_row_idx, P_col_ptr, P_values, x, tmp2);    // tmp2 = P*x
+        spmv_csc_tiled(num_cols, num_rows, mat_AT, y, tmp1); // tmp1 = AT*y
+        spmv_csc_tiled(num_cols, num_cols, mat_P, x, tmp2);    // tmp2 = P*x
         ATy_norm = inf_norm(tmp1, num_cols); // for convergence check and adaptive rho
         Px_norm = inf_norm(tmp2, num_cols);
         for (int i = 0; i < num_cols; i += UNROLL_FACTOR)
