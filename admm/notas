@@ -1,6 +1,6 @@
-Experiment 3:
-- 1024x1024_reshape8_pes30
-- 4096x4096_reshape8_pes30
-- 8192x8192_reshape8_pes20
-- 16384x16384_reshape8_pes12
-- 32768x32768_reshape8_pes6
+export QPFPGA_LIBRARY="$(pwd)/libqpfpga.so"
+export QPFPGA_BITSTREAM="/lib/firmware/admm_pcg_acc_16PEs_8192x8192_unroll_8.bit"
+export LD_LIBRARY_PATH="$(pwd):${LD_LIBRARY_PATH:-}"
+
+# run
+python3 examples/cvxpy_qpfpga_demo.py

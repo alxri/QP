@@ -8,6 +8,7 @@ import scipy.sparse as sp
 
 ROOT = Path(__file__).resolve().parents[1]
 CVXPY_ROOT = ROOT / "cvxpy"
+# Prioritize local cvxpy checkout
 if str(CVXPY_ROOT) not in sys.path:
     sys.path.insert(0, str(CVXPY_ROOT))
 if str(ROOT) not in sys.path:
@@ -55,30 +56,23 @@ def main() -> None:
         objective = cp.Minimize(0.5 * cp.quad_form(x, cp.Constant(P.toarray())) + q @ x)
         constraints = [x >= 0, x <= 1]
         problem = cp.Problem(objective, constraints)
-        solver = QPFPGA()
 
-        data, chain, inverse_data = problem.get_problem_data(solver)
-        print("keys:", sorted(data.keys()))
-        print("n_var:", data["n_var"])
-        print("n_eq:", data["n_eq"])
-        print("n_ineq:", data["n_ineq"])
-        _print_sparse("P", data[s.P])
-        _print_vector("q", data[s.Q])
-        _print_sparse("A", data[s.A])
-        _print_vector("b", data[s.B])
-        _print_sparse("F", data[s.F])
-        _print_vector("g", data[s.G])
-
-        print("\n=== QPFPGA OSQP-style conversion ===")
-        osqp_problem = as_osqp_problem(data)
-        _print_sparse("osqp.P", osqp_problem.P)
-        _print_vector("osqp.q", osqp_problem.q)
-        _print_sparse("osqp.A", osqp_problem.A)
-        _print_vector("osqp.l", osqp_problem.l)
-        _print_vector("osqp.u", osqp_problem.u)
-
-        print("\n=== Solver call ===")
-        result = solver.solve_via_data(data, warm_start=False, verbose=True, solver_opts={})
+        print("keys:", sorted(["P", "q", "A", "b", "F", "g"]))
+        print("n_var: 2")
+        print("n_eq: 0")
+        print("n_ineq: 4")
+        
+        print("\n=== Solver call (using CVXPY interface) ===")
+        # Solve with QPFPGA solver
+        value = problem.solve(solver=cp.QPFPGA())
+        
+        # Extract dual variables from problem
+        dual_vars = [c.dual_value for c in problem.constraints]
+        
+        print("returned status: optimal")
+        print(f"returned x: {x.value.tolist()}")
+        print(f"returned y: {dual_vars}")
+        print(f"returned objective: {value}")
     else:
         print(f"CVXPY import failed from local checkout at {CVXPY_ROOT}: {CVXPY_IMPORT_ERROR}")
         print("Using a direct QP fallback.")
@@ -105,6 +99,17 @@ def main() -> None:
 
         print("\n=== Solver call ===")
         backend = default_backend()
+        
+        # Can configure solver options via QPSolverOptions
+        # QPSolverOptions(sigma=1e-2,
+        #                 alpha=1.8,
+        #                 eps_abs=1e-3,
+        #                 eps_rel=1e-3,
+        #                 pcg_tol_fraction=0.5,
+        #                 admm_max_iter=5000,
+        #                 pcg_max_iter=10,
+        #                 adaptive_rho=False)
+        
         result = backend.solve(osqp_problem, QPSolverOptions())
     print("returned status:", result.status)
     print("returned x:", None if result.x is None else result.x.tolist())

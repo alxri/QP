@@ -14,7 +14,15 @@ extern "C" {
 }
 
 // Provide lightweight CMA stubs for host testing when PYNQ libcma is unavailable.
+// Mark as weak so a real PYNQ libcma implementation can override these symbols
+// when present on the target system.
 extern "C" {
+    void* cma_alloc(uint32_t len, uint32_t cacheable) __attribute__((weak));
+    unsigned long cma_get_phy_addr(void *buf) __attribute__((weak));
+    void cma_free(void *buf) __attribute__((weak));
+    void cma_flush_cache(void *buf, unsigned long phys_addr, int size) __attribute__((weak));
+    void cma_invalidate_cache(void *buf, unsigned long phys_addr, int size) __attribute__((weak));
+
     void* cma_alloc(uint32_t len, uint32_t cacheable) {
         (void)cacheable;
         return std::malloc(len);
@@ -33,8 +41,33 @@ extern "C" {
 // path: bitstreams/*.bit
 
 int load_bitstream(const char* path) {
-    std::string cmd = "cat " + std::string(path) + " > /lib/firmware/xilinx/fpga_manager";
-    return std::system(cmd.c_str());
+    // Prefer the canonical firmware/sysfs programming method: copy the bitstream
+    // into /lib/firmware and write the filename into the FPGA manager sysfs
+    // node. Fall back to a direct copy attempt if sysfs path differs.
+    std::string src(path);
+    std::string fname = src.substr(src.find_last_of("/\\") + 1);
+    std::string staged = std::string("/lib/firmware/") + fname;
+    std::string sysfs_firmware = "/sys/class/fpga_manager/fpga0/firmware";
+    std::string alternate_sysfs = "/sys/class/fpga_manager/fpga_manager/firmware";
+
+    // Copy to /lib/firmware
+    std::string copy_cmd = "cp -f '" + src + "' '" + staged + "'";
+    int rc = std::system(copy_cmd.c_str());
+    if (rc != 0) {
+        // Attempt a direct cat to firmware node as a last resort (may require root)
+        std::string direct_cmd = "cat '" + src + "' > /lib/firmware/xilinx/fpga_manager";
+        return std::system(direct_cmd.c_str());
+    }
+
+    // Write the filename into sysfs to trigger programming
+    std::string echo_cmd = "echo '" + fname + "' > " + sysfs_firmware;
+    rc = std::system(echo_cmd.c_str());
+    if (rc == 0) return 0;
+
+    // Try alternate sysfs location
+    echo_cmd = "echo '" + fname + "' > " + alternate_sysfs;
+    rc = std::system(echo_cmd.c_str());
+    return rc;
 }
 
 void write_reg(void *base, uint32_t offset, uint32_t val) { *((volatile uint32_t *)((uint8_t *)base + offset)) = val; }
