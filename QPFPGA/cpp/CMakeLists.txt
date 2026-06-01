@@ -3,8 +3,8 @@ project(qpfpga_solver LANGUAGES CXX)
 
 add_library(qpfpga SHARED
     src/api.cpp
-    ../utils.cpp
-    ../fpga_utils.cpp
+    src/utils.cpp
+    src/fpga_utils.cpp
 )
 
 target_include_directories(qpfpga

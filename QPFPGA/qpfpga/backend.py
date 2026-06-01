@@ -21,18 +21,72 @@ class QPFPGABackend(Protocol):
 
 
 class MockBackend:
-    """Development backend used on PC when no FPGA runtime is available."""
+    """CPU development backend used when no FPGA runtime is available."""
 
     def solve(self, problem: QPData, options: QPSolverOptions) -> QPSolverResult:
-        x = np.zeros(problem.q.shape[0], dtype=np.float32)
-        y = np.zeros(problem.A.shape[0], dtype=np.float32)
+        try:
+            import osqp  # type: ignore[import-not-found]
+        except Exception as exc:  # pragma: no cover - only used when osqp is missing
+            raise RuntimeError(
+                "QPFPGA CPU backend requires the osqp package when no FPGA library is available."
+            ) from exc
+
+        solver = osqp.OSQP()
+        solver.setup(
+            P=problem.P,
+            q=problem.q,
+            A=problem.A,
+            l=problem.l,
+            u=problem.u,
+            verbose=False,
+            eps_abs=options.eps_abs,
+            eps_rel=options.eps_rel,
+            max_iter=options.admm_max_iter,
+            alpha=options.alpha,
+            adaptive_rho=options.adaptive_rho,
+            polishing=True,
+        )
+        result = solver.solve(raise_error=False)
+
+        status = _osqp_status_name(result.info.status_val)
+        x = None if result.x is None else np.asarray(result.x, dtype=np.float32)
+        y = None if result.y is None else np.asarray(result.y, dtype=np.float32)
+        obj_val = float(result.info.obj_val) if status in _SOLUTION_PRESENT else None
+
         return QPSolverResult(
-            status="not_implemented",
+            status=status,
             x=x,
             y=y,
-            obj_val=None,
-            extra_stats={"backend": "mock", "options": asdict(options)},
+            obj_val=obj_val,
+            primal_residual=float(getattr(result.info, "prim_res", np.nan)),
+            dual_residual=float(getattr(result.info, "dual_res", np.nan)),
+            num_iters=int(getattr(result.info, "iter", 0)),
+            solve_time_s=float(getattr(result.info, "run_time", 0.0)),
+            extra_stats={
+                "backend": "osqp",
+                "osqp_status": getattr(result.info, "status", None),
+                "options": asdict(options),
+            },
         )
+
+
+_SOLUTION_PRESENT = {"optimal", "optimal_inaccurate"}
+
+
+def _osqp_status_name(status_val: int) -> str:
+    status_map = {
+        1: "optimal",
+        2: "optimal_inaccurate",
+        3: "infeasible",
+        4: "infeasible_inaccurate",
+        5: "unbounded",
+        6: "unbounded_inaccurate",
+        7: "user_limit",
+        8: "user_limit",
+        10: "solver_error",
+        11: "solver_error",
+    }
+    return status_map.get(int(status_val), "solver_error")
 
 
 class CtypesBackend:
@@ -46,12 +100,12 @@ class CtypesBackend:
         self._configure_abi()
 
     def _configure_abi(self) -> None:
-        self._lib.qpfpga_solve_osqp_style.argtypes = [
+        self._lib.qpfpga_solve.argtypes = [
             ctypes.POINTER(QPFPGAProblemC),
             ctypes.POINTER(QPFPGAOptionsC),
             ctypes.POINTER(QPFPGAResultC),
         ]
-        self._lib.qpfpga_solve_osqp_style.restype = ctypes.c_int32
+        self._lib.qpfpga_solve.restype = ctypes.c_int32
 
     def _ensure_bitstream_loaded(self) -> None:
         if self.bitstream_path is None or self._bitstream_loaded:
@@ -136,7 +190,7 @@ class CtypesBackend:
         y_out = np.zeros(problem.A.shape[0], dtype=np.float32)
         result_c = QPFPGAResultC()
 
-        status = self._lib.qpfpga_solve_osqp_style(
+        status = self._lib.qpfpga_solve(
             ctypes.byref(problem_c),
             ctypes.byref(options_c),
             ctypes.byref(result_c),
@@ -173,12 +227,15 @@ def default_backend(library_path: str | Path | None = None) -> QPFPGABackend:
     bitstream_path = os.environ.get("QPFPGA_BITSTREAM")
     if library_path is None:
         return MockBackend()
-    return CtypesBackend(library_path, bitstream_path=bitstream_path)
+    try:
+        return CtypesBackend(library_path, bitstream_path=bitstream_path)
+    except (OSError, AttributeError):
+        return MockBackend()
 
 
 def as_osqp_problem(data: dict) -> QPData:
     try:
-        import cvxpy.settings as s
+        import cvxpy.settings as s  # type: ignore[import-not-found]
     except ModuleNotFoundError as exc:
         raise ImportError("CVXPY settings are required to map solver data keys.") from exc
 

@@ -1,5 +1,7 @@
-#include "qpfpga/api.h"
-#include "../../utils.h"
+#include "api.h"
+#include "utils.h"
+#include "fpga_utils.h"
+#include <utility>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -11,9 +13,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-extern int load_bitstream(const char* path);
-
-extern "C" QPFPGAStatus qpfpga_solve_osqp_style(
+extern "C" QPFPGAStatus qpfpga_solve(
     const QPFPGAProblem* problem,
     const QPFPGAOptions* options,
     QPFPGAResult* result)
@@ -47,20 +47,14 @@ extern "C" QPFPGAStatus qpfpga_solve_osqp_style(
     };
 
     // Copy P (CSC)
-    std::vector<int> P_cptr(problem->P.ncols + 1);
-    std::vector<int> P_ridx(problem->P.nnz);
-    std::vector<float> P_vals(problem->P.nnz);
-    for (int i = 0; i < problem->P.ncols + 1; ++i) P_cptr[i] = problem->P.indptr[i];
-    for (int i = 0; i < problem->P.nnz; ++i) P_ridx[i] = problem->P.indices[i];
-    for (int i = 0; i < problem->P.nnz; ++i) P_vals[i] = problem->P.data[i];
+    std::vector<int> P_cptr; std::vector<int> P_ridx; std::vector<float> P_vals;
+    copy_csc_from_raw(problem->P.ncols, problem->P.nnz, problem->P.indptr, problem->P.indices, problem->P.data,
+                      P_cptr, P_ridx, P_vals);
 
     // Copy A (CSC)
-    std::vector<int> A_cptr(problem->A.ncols + 1);
-    std::vector<int> A_ridx(problem->A.nnz);
-    std::vector<float> A_vals(problem->A.nnz);
-    for (int i = 0; i < problem->A.ncols + 1; ++i) A_cptr[i] = problem->A.indptr[i];
-    for (int i = 0; i < problem->A.nnz; ++i) A_ridx[i] = problem->A.indices[i];
-    for (int i = 0; i < problem->A.nnz; ++i) A_vals[i] = problem->A.data[i];
+    std::vector<int> A_cptr; std::vector<int> A_ridx; std::vector<float> A_vals;
+    copy_csc_from_raw(problem->A.ncols, problem->A.nnz, problem->A.indptr, problem->A.indices, problem->A.data,
+                      A_cptr, A_ridx, A_vals);
 
     // Copy vectors
     std::vector<float> q(problem->q, problem->q + n);
@@ -68,13 +62,8 @@ extern "C" QPFPGAStatus qpfpga_solve_osqp_style(
     std::vector<float> u(problem->u, problem->u + m);
 
     // Build P diagonal vector
-    std::vector<float> P_diag(n, 0.0f);
-    for (int c = 0; c < n; ++c) {
-        for (int idx = P_cptr[c]; idx < P_cptr[c+1]; ++idx) {
-            int r = P_ridx[idx];
-            if (r == c) P_diag[c] = P_vals[idx];
-        }
-    }
+    std::vector<float> P_diag;
+    build_diag_from_csc(n, P_cptr, P_ridx, P_vals, P_diag);
 
     // Equilibration (in-place modifies A_vals, P_diag, q, l, u)
     std::vector<float> D, E;
@@ -93,28 +82,13 @@ extern "C" QPFPGAStatus qpfpga_solve_osqp_style(
     TiledMatrix tm_AT = build_tiled_csc(n, m, AT_cptr, AT_ridx, AT_vals);
     TiledMatrix tm_P = build_tiled_csc(n, n, P_cptr, P_ridx, P_vals);
 
-    // Prepare CMA buffers and copy data
+    // Prepare CMA buffers and copy data for A (packed words)
     CmaTracker cma;
-
-    int a_words_cnt = ceil_div((int)A_vals.size(), PACK_SIZE);
-    int32_words* A_reg_ridx = cma.alloc<int32_words>(a_words_cnt);
-    float32_words* A_reg_vals = cma.alloc<float32_words>(a_words_cnt);
-    int* A_reg_cptr = cma.alloc<int>(problem->A.ncols + 1);
-
-    // Pack into word arrays
-    std::vector<int32_words> temp_A_ridx(a_words_cnt);
-    std::vector<float32_words> temp_A_vals(a_words_cnt);
-    for (size_t i = 0; i < temp_A_ridx.size(); ++i) {
-        for (int j = 0; j < PACK_SIZE; ++j) { temp_A_ridx[i].data[j] = 0; temp_A_vals[i].data[j] = 0.0f; }
-    }
-    for (size_t i = 0; i < A_ridx.size(); ++i) {
-        temp_A_ridx[i / PACK_SIZE].data[i % PACK_SIZE] = A_ridx[i];
-        temp_A_vals[i / PACK_SIZE].data[i % PACK_SIZE] = A_vals[i];
-    }
-
-    cma_copy(A_reg_cptr, A_cptr.data(), problem->A.ncols + 1);
-    cma_copy(A_reg_ridx, temp_A_ridx.data(), a_words_cnt);
-    cma_copy(A_reg_vals, temp_A_vals.data(), a_words_cnt);
+    int32_words* A_reg_ridx = nullptr;
+    float32_words* A_reg_vals = nullptr;
+    int* A_reg_cptr = nullptr;
+    int a_words_cnt = 0;
+    allocate_and_copy_csc_to_cma(cma, A_cptr, A_ridx, A_vals, &A_reg_ridx, &A_reg_vals, &A_reg_cptr, &a_words_cnt);
 
     // Allocate tiled CMA buffers for A, AT, P
 #define ALLOC_TILE_CMA_LOCAL(mat, tm) \
@@ -150,45 +124,45 @@ extern "C" QPFPGAStatus qpfpga_solve_osqp_style(
     void *ctrl_r = (void*)((uint8_t*)ip_base + (ADMM_IP_CONTROL_R_BASE & MAP_MASK));
 
     // Program CMA addresses to control_r registers
-    write_64bit_address(ctrl_r, 0x010, cma_get_phy_addr(A_reg_ridx));
-    write_64bit_address(ctrl_r, 0x01c, cma_get_phy_addr(A_reg_cptr));
-    write_64bit_address(ctrl_r, 0x028, cma_get_phy_addr(A_reg_vals));
-    write_64bit_address(ctrl_r, 0x034, cma_get_phy_addr(hw_tile_A_cnt)); write_64bit_address(ctrl_r, 0x040, cma_get_phy_addr(hw_tile_A_noff));
-    write_64bit_address(ctrl_r, 0x04c, cma_get_phy_addr(hw_tile_A_coff)); write_64bit_address(ctrl_r, 0x058, cma_get_phy_addr(hw_tile_A_ridx));
-    write_64bit_address(ctrl_r, 0x064, cma_get_phy_addr(hw_tile_A_cptr)); write_64bit_address(ctrl_r, 0x070, cma_get_phy_addr(hw_tile_A_vals));
-    write_64bit_address(ctrl_r, 0x07c, cma_get_phy_addr(hw_tile_AT_cnt)); write_64bit_address(ctrl_r, 0x088, cma_get_phy_addr(hw_tile_AT_noff));
-    write_64bit_address(ctrl_r, 0x094, cma_get_phy_addr(hw_tile_AT_coff)); write_64bit_address(ctrl_r, 0x0a0, cma_get_phy_addr(hw_tile_AT_ridx));
-    write_64bit_address(ctrl_r, 0x0ac, cma_get_phy_addr(hw_tile_AT_cptr)); write_64bit_address(ctrl_r, 0x0b8, cma_get_phy_addr(hw_tile_AT_vals));
-    write_64bit_address(ctrl_r, 0x0c4, cma_get_phy_addr(hw_tile_P_cnt)); write_64bit_address(ctrl_r, 0x0d0, cma_get_phy_addr(hw_tile_P_noff));
-    write_64bit_address(ctrl_r, 0x0dc, cma_get_phy_addr(hw_tile_P_coff)); write_64bit_address(ctrl_r, 0x0e8, cma_get_phy_addr(hw_tile_P_ridx));
-    write_64bit_address(ctrl_r, 0x0f4, cma_get_phy_addr(hw_tile_P_cptr)); write_64bit_address(ctrl_r, 0x100, cma_get_phy_addr(hw_tile_P_vals));
-    write_64bit_address(ctrl_r, 0x10c, cma_get_phy_addr(hw_Pdiag)); write_64bit_address(ctrl_r, 0x118, cma_get_phy_addr(hw_l));
-    write_64bit_address(ctrl_r, 0x124, cma_get_phy_addr(hw_u)); write_64bit_address(ctrl_r, 0x130, cma_get_phy_addr(hw_q));
-    write_64bit_address(ctrl_r, 0x13c, cma_get_phy_addr(hw_rho)); write_64bit_address(ctrl_r, 0x148, cma_get_phy_addr(hw_x));
-    write_64bit_address(ctrl_r, 0x154, cma_get_phy_addr(hw_y));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_A_ROW_IDX_DATA, cma_get_phy_addr(A_reg_ridx));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_A_COL_PTR_DATA, cma_get_phy_addr(A_reg_cptr));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_A_VALUES_DATA, cma_get_phy_addr(A_reg_vals));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_A_TILE_NNZ_COUNTS_DATA, cma_get_phy_addr(hw_tile_A_cnt)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_A_TILE_NNZ_OFFSETS_DATA, cma_get_phy_addr(hw_tile_A_noff));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_A_TILE_COL_OFFSETS_DATA, cma_get_phy_addr(hw_tile_A_coff)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_A_ROW_IDX_TILED_DATA, cma_get_phy_addr(hw_tile_A_ridx));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_A_COL_PTR_TILED_DATA, cma_get_phy_addr(hw_tile_A_cptr)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_A_VALUES_TILED_DATA, cma_get_phy_addr(hw_tile_A_vals));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_AT_TILE_NNZ_COUNTS_DATA, cma_get_phy_addr(hw_tile_AT_cnt)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_AT_TILE_NNZ_OFFSETS_DATA, cma_get_phy_addr(hw_tile_AT_noff));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_AT_TILE_COL_OFFSETS_DATA, cma_get_phy_addr(hw_tile_AT_coff)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_AT_ROW_IDX_TILED_DATA, cma_get_phy_addr(hw_tile_AT_ridx));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_AT_COL_PTR_TILED_DATA, cma_get_phy_addr(hw_tile_AT_cptr)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_AT_VALUES_TILED_DATA, cma_get_phy_addr(hw_tile_AT_vals));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_P_TILE_NNZ_COUNTS_DATA, cma_get_phy_addr(hw_tile_P_cnt)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_P_TILE_NNZ_OFFSETS_DATA, cma_get_phy_addr(hw_tile_P_noff));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_P_TILE_COL_OFFSETS_DATA, cma_get_phy_addr(hw_tile_P_coff)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_P_ROW_IDX_TILED_DATA, cma_get_phy_addr(hw_tile_P_ridx));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_P_COL_PTR_TILED_DATA, cma_get_phy_addr(hw_tile_P_cptr)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_P_VALUES_TILED_DATA, cma_get_phy_addr(hw_tile_P_vals));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_P_DIAG_DATA, cma_get_phy_addr(hw_Pdiag)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_L_IN_DATA, cma_get_phy_addr(hw_l));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_U_IN_DATA, cma_get_phy_addr(hw_u)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_Q_IN_DATA, cma_get_phy_addr(hw_q));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_RHO_IN_DATA, cma_get_phy_addr(hw_rho)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_X_OUT_DATA, cma_get_phy_addr(hw_x));
+    write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_Y_OUT_DATA, cma_get_phy_addr(hw_y));
 
     // Optionally load bitstream if provided via options->sigma < 0 (cheap hack to pass path?) - skip here
 
     // Write control scalars and start
-    write_reg(ctrl, 0x10, m); write_reg(ctrl, 0x18, n); write_reg(ctrl, 0x20, (int)A_vals.size());
-    write_reg(ctrl, 0x28, tm_A.rtiles); write_reg(ctrl, 0x30, tm_A.ctiles);
-    write_reg(ctrl, 0x38, tm_AT.rtiles); write_reg(ctrl, 0x40, tm_AT.ctiles);
-    write_reg(ctrl, 0x48, tm_P.rtiles); write_reg(ctrl, 0x50, tm_P.ctiles);
-    write_reg(ctrl, 0x58, float_to_uint(options->sigma)); write_reg(ctrl, 0x60, float_to_uint(options->alpha));
-    write_reg(ctrl, 0x68, options->admm_max_iter); write_reg(ctrl, 0x70, options->pcg_max_iter);
-    write_reg(ctrl, 0x78, options->adaptive_rho);
-    write_reg(ctrl, 0x80, float_to_uint(options->eps_abs)); write_reg(ctrl, 0x88, float_to_uint(options->eps_rel));
-    write_reg(ctrl, 0x90, float_to_uint(options->pcg_tol_fraction));
+    write_reg(ctrl, XADMM_CONTROL_ADDR_NUM_ROWS_DATA, m); write_reg(ctrl, XADMM_CONTROL_ADDR_NUM_COLS_DATA, n); write_reg(ctrl, XADMM_CONTROL_ADDR_A_NNZ_DATA, (int)A_vals.size());
+    write_reg(ctrl, XADMM_CONTROL_ADDR_A_NUM_ROW_TILES_DATA, tm_A.rtiles); write_reg(ctrl, XADMM_CONTROL_ADDR_A_NUM_COL_TILES_DATA, tm_A.ctiles);
+    write_reg(ctrl, XADMM_CONTROL_ADDR_AT_NUM_ROW_TILES_DATA, tm_AT.rtiles); write_reg(ctrl, XADMM_CONTROL_ADDR_AT_NUM_COL_TILES_DATA, tm_AT.ctiles);
+    write_reg(ctrl, XADMM_CONTROL_ADDR_P_NUM_ROW_TILES_DATA, tm_P.rtiles); write_reg(ctrl, XADMM_CONTROL_ADDR_P_NUM_COL_TILES_DATA, tm_P.ctiles);
+    write_reg(ctrl, XADMM_CONTROL_ADDR_SIGMA_DATA, float_to_uint(options->sigma)); write_reg(ctrl, XADMM_CONTROL_ADDR_ALPHA_DATA, float_to_uint(options->alpha));
+    write_reg(ctrl, XADMM_CONTROL_ADDR_ADMM_MAX_ITERATIONS_DATA, options->admm_max_iter); write_reg(ctrl, XADMM_CONTROL_ADDR_PCG_MAX_ITERATIONS_DATA, options->pcg_max_iter);
+    write_reg(ctrl, XADMM_CONTROL_ADDR_ADAPTIVE_RHO_DATA, options->adaptive_rho);
+    write_reg(ctrl, XADMM_CONTROL_ADDR_EPS_ABS_DATA, float_to_uint(options->eps_abs)); write_reg(ctrl, XADMM_CONTROL_ADDR_EPS_REL_DATA, float_to_uint(options->eps_rel));
+    write_reg(ctrl, XADMM_CONTROL_ADDR_PCG_TOL_FRACTION_DATA, float_to_uint(options->pcg_tol_fraction));
 
     cma.flush_all();
 
     double hw_start = get_time_ms();
-    write_reg(ctrl, 0x00, 0x01);
+    write_reg(ctrl, XADMM_CONTROL_ADDR_AP_CTRL, 0x01);
 
     // Poll for completion with a hard timeout so the board does not freeze.
     const int timeout_ms = 5000;
     auto poll_start = std::chrono::steady_clock::now();
-    while ((read_reg(ctrl, 0x00) & 0x02) == 0) {
+    while ((read_reg(ctrl, XADMM_CONTROL_ADDR_AP_CTRL) & 0x02) == 0) {
         auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - poll_start).count();
         if (elapsed_ms > timeout_ms) {
@@ -204,11 +178,11 @@ extern "C" QPFPGAStatus qpfpga_solve_osqp_style(
 
     cma.invalidate_all();
 
-    int admm_iters = read_reg(ctrl, 0x98);
-    int pcg_iters = read_reg(ctrl, 0xa8);
-    float p_res = uint_to_float(read_reg(ctrl, 0xb8));
-    float d_res = uint_to_float(read_reg(ctrl, 0xc8));
-    int status = read_reg(ctrl, 0xd8);
+    int admm_iters = read_reg(ctrl, XADMM_CONTROL_ADDR_ADMM_NUM_ITERATIONS_OUT_DATA);
+    int pcg_iters = read_reg(ctrl, XADMM_CONTROL_ADDR_PCG_NUM_ITERATIONS_OUT_DATA);
+    float p_res = uint_to_float(read_reg(ctrl, XADMM_CONTROL_ADDR_R_PRIM_OUT_DATA));
+    float d_res = uint_to_float(read_reg(ctrl, XADMM_CONTROL_ADDR_R_DUAL_OUT_DATA));
+    int status = read_reg(ctrl, XADMM_CONTROL_ADDR_STATUS_OUT_DATA);
 
     // Copy out results into freshly allocated arrays returned to caller
     float* out_x = new float[n];

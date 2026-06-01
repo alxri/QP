@@ -1,6 +1,8 @@
 #include "pcg.h"
 
+#ifndef RESHAPE_FACTOR
 #define RESHAPE_FACTOR 8
+#endif
 
 static float inf_norm(const float *v, int size)
 {

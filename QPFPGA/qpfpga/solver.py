@@ -61,9 +61,9 @@ class QPFPGA(QpSolver):
             eps_abs=float(solver_opts.get("eps_abs", 1e-3)),
             eps_rel=float(solver_opts.get("eps_rel", 1e-3)),
             pcg_tol_fraction=float(solver_opts.get("pcg_tol_fraction", 1.0)),
-            admm_max_iter=int(solver_opts.get("admm_max_iter", 2000)),
+            admm_max_iter=int(solver_opts.get("admm_max_iter", 5000)),
             pcg_max_iter=int(solver_opts.get("pcg_max_iter", 5)),
-            adaptive_rho=bool(solver_opts.get("adaptive_rho", False)),
+            adaptive_rho=bool(solver_opts.get("adaptive_rho", True)),
             extra={k: v for k, v in solver_opts.items() if k not in {
                 "sigma", "alpha", "eps_abs", "eps_rel", "pcg_tol_fraction",
                 "admm_max_iter", "pcg_max_iter", "adaptive_rho"

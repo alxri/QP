@@ -7,6 +7,9 @@ import numpy as np
 import scipy.sparse as sp
 
 ROOT = Path(__file__).resolve().parents[1]
+CVXPY_ROOT = ROOT / "cvxpy"
+if str(CVXPY_ROOT) not in sys.path:
+    sys.path.insert(0, str(CVXPY_ROOT))
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -14,10 +17,12 @@ try:
     import cvxpy as cp
     import cvxpy.settings as s
     HAVE_CVXPY = all(hasattr(cp, name) for name in ("Variable", "Problem", "Minimize"))
-except Exception:
+    CVXPY_IMPORT_ERROR = None
+except Exception as exc:
     cp = None
     s = None
     HAVE_CVXPY = False
+    CVXPY_IMPORT_ERROR = exc
 
 from qpfpga import QPFPGA
 from qpfpga.backend import as_osqp_problem, default_backend
@@ -75,7 +80,8 @@ def main() -> None:
         print("\n=== Solver call ===")
         result = solver.solve_via_data(data, warm_start=False, verbose=True, solver_opts={})
     else:
-        print("CVXPY is unavailable or incomplete on this board; using a direct QP fallback.")
+        print(f"CVXPY import failed from local checkout at {CVXPY_ROOT}: {CVXPY_IMPORT_ERROR}")
+        print("Using a direct QP fallback.")
         data = {
             "P": P,
             "q": q,

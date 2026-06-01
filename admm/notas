@@ -1,34 +1,6 @@
-xilinx@pynq:~$ sudo -E env QPFPGA_LIBRARY=/home/xilinx/QPFPGA/cpp/build/libqpfpga.so QPFPGA_BITSTREAM=/home/xilinx/QPFPGA/bitstreams/admm_pcg_acc_16PEs_8192x8192_unroll_8.bit  /home/xilinx/qpfpga-venv/bi
-n/python /home/xilinx/QPFPGA/examples/cvxpy_qpfpga_demo.py
-[sudo] password for xilinx: 
-=== Problem assembly output ===
-CVXPY is unavailable or incomplete on this board; using a direct QP fallback.
-P: shape=(2, 2), nnz=2
-P.indptr=[0, 1, 2]
-P.indices=[0, 1]
-P.data=[4.0, 2.0]
-q: shape=(2,), values=[-1.0, -1.0]
-A: shape=(4, 2), nnz=4
-A.indptr=[0, 2, 4]
-A.indices=[0, 2, 1, 3]
-A.data=[-1.0, 1.0, -1.0, 1.0]
-l: shape=(4,), values=[-inf, -inf, -inf, -inf]
-u: shape=(4,), values=[0.0, 0.0, 1.0, 1.0]
-
-=== Solver call ===
-Traceback (most recent call last):
-  File "/home/xilinx/QPFPGA/examples/cvxpy_qpfpga_demo.py", line 110, in <module>
-    main()
-  File "/home/xilinx/QPFPGA/examples/cvxpy_qpfpga_demo.py", line 101, in main
-    backend = default_backend()
-  File "/home/xilinx/QPFPGA/qpfpga/backend.py", line 151, in default_backend
-    return CtypesBackend(library_path, bitstream_path=bitstream_path)
-  File "/home/xilinx/QPFPGA/qpfpga/backend.py", line 43, in __init__
-    self._configure_abi()
-  File "/home/xilinx/QPFPGA/qpfpga/backend.py", line 46, in _configure_abi
-    self._lib.load_bitstream.argtypes = [ctypes.c_char_p]
-  File "/usr/lib/python3.10/ctypes/__init__.py", line 387, in __getattr__
-    func = self.__getitem__(name)
-  File "/usr/lib/python3.10/ctypes/__init__.py", line 392, in __getitem__
-    func = self._FuncPtr((name_or_ordinal, self))
-AttributeError: /home/xilinx/QPFPGA/cpp/build/libqpfpga.so: undefined symbol: load_bitstream
+Experiment 3:
+- 1024x1024_reshape8_pes30
+- 4096x4096_reshape8_pes30
+- 8192x8192_reshape8_pes20
+- 16384x16384_reshape8_pes12
+- 32768x32768_reshape8_pes6

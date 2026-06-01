@@ -70,44 +70,44 @@ CMakeFiles/qpfpga.dir/src/api.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/qpfpga.dir/src/api.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/romoirib/QP/QPFPGA/cpp/src/api.cpp -o CMakeFiles/qpfpga.dir/src/api.cpp.s
 
-CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.o: CMakeFiles/qpfpga.dir/flags.make
-CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.o: /home/romoirib/QP/QPFPGA/utils.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/romoirib/QP/QPFPGA/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.o -c /home/romoirib/QP/QPFPGA/utils.cpp
+CMakeFiles/qpfpga.dir/src/utils.cpp.o: CMakeFiles/qpfpga.dir/flags.make
+CMakeFiles/qpfpga.dir/src/utils.cpp.o: ../src/utils.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/romoirib/QP/QPFPGA/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/qpfpga.dir/src/utils.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/qpfpga.dir/src/utils.cpp.o -c /home/romoirib/QP/QPFPGA/cpp/src/utils.cpp
 
-CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/romoirib/QP/QPFPGA/utils.cpp > CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.i
+CMakeFiles/qpfpga.dir/src/utils.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/qpfpga.dir/src/utils.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/romoirib/QP/QPFPGA/cpp/src/utils.cpp > CMakeFiles/qpfpga.dir/src/utils.cpp.i
 
-CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/romoirib/QP/QPFPGA/utils.cpp -o CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.s
+CMakeFiles/qpfpga.dir/src/utils.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/qpfpga.dir/src/utils.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/romoirib/QP/QPFPGA/cpp/src/utils.cpp -o CMakeFiles/qpfpga.dir/src/utils.cpp.s
 
-CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.o: CMakeFiles/qpfpga.dir/flags.make
-CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.o: /home/romoirib/QP/QPFPGA/fpga_utils.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/romoirib/QP/QPFPGA/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.o -c /home/romoirib/QP/QPFPGA/fpga_utils.cpp
+CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.o: CMakeFiles/qpfpga.dir/flags.make
+CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.o: ../src/fpga_utils.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/romoirib/QP/QPFPGA/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.o -c /home/romoirib/QP/QPFPGA/cpp/src/fpga_utils.cpp
 
-CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/romoirib/QP/QPFPGA/fpga_utils.cpp > CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.i
+CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/romoirib/QP/QPFPGA/cpp/src/fpga_utils.cpp > CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.i
 
-CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/romoirib/QP/QPFPGA/fpga_utils.cpp -o CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.s
+CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/romoirib/QP/QPFPGA/cpp/src/fpga_utils.cpp -o CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.s
 
 # Object files for target qpfpga
 qpfpga_OBJECTS = \
 "CMakeFiles/qpfpga.dir/src/api.cpp.o" \
-"CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.o" \
-"CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.o"
+"CMakeFiles/qpfpga.dir/src/utils.cpp.o" \
+"CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.o"
 
 # External object files for target qpfpga
 qpfpga_EXTERNAL_OBJECTS =
 
 libqpfpga.so: CMakeFiles/qpfpga.dir/src/api.cpp.o
-libqpfpga.so: CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.o
-libqpfpga.so: CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.o
+libqpfpga.so: CMakeFiles/qpfpga.dir/src/utils.cpp.o
+libqpfpga.so: CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.o
 libqpfpga.so: CMakeFiles/qpfpga.dir/build.make
 libqpfpga.so: CMakeFiles/qpfpga.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/romoirib/QP/QPFPGA/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX shared library libqpfpga.so"

@@ -5,10 +5,6 @@
 #include "pcg.h"
 #include "hls_math.h"
 
-#ifndef MAX_SIZE
-#define MAX_SIZE 32768
-#endif
-
 void admm(int num_rows,
           int num_cols,
           // Regular format Matrix A (for preconditioner update)

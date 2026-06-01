@@ -1,6 +1,7 @@
 #ifndef SPMV_CSC_H
 #define SPMV_CSC_H
 
+#include "dse_config.h"
 #include "hls_stream.h"
 #include "hls_vector.h"
 

@@ -123,60 +123,6 @@ qpfpga/fast:
 	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/build
 .PHONY : qpfpga/fast
 
-home/romoirib/QP/QPFPGA/fpga_utils.o: home/romoirib/QP/QPFPGA/fpga_utils.cpp.o
-
-.PHONY : home/romoirib/QP/QPFPGA/fpga_utils.o
-
-# target to build an object file
-home/romoirib/QP/QPFPGA/fpga_utils.cpp.o:
-	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.o
-.PHONY : home/romoirib/QP/QPFPGA/fpga_utils.cpp.o
-
-home/romoirib/QP/QPFPGA/fpga_utils.i: home/romoirib/QP/QPFPGA/fpga_utils.cpp.i
-
-.PHONY : home/romoirib/QP/QPFPGA/fpga_utils.i
-
-# target to preprocess a source file
-home/romoirib/QP/QPFPGA/fpga_utils.cpp.i:
-	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.i
-.PHONY : home/romoirib/QP/QPFPGA/fpga_utils.cpp.i
-
-home/romoirib/QP/QPFPGA/fpga_utils.s: home/romoirib/QP/QPFPGA/fpga_utils.cpp.s
-
-.PHONY : home/romoirib/QP/QPFPGA/fpga_utils.s
-
-# target to generate assembly for a file
-home/romoirib/QP/QPFPGA/fpga_utils.cpp.s:
-	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/fpga_utils.cpp.s
-.PHONY : home/romoirib/QP/QPFPGA/fpga_utils.cpp.s
-
-home/romoirib/QP/QPFPGA/utils.o: home/romoirib/QP/QPFPGA/utils.cpp.o
-
-.PHONY : home/romoirib/QP/QPFPGA/utils.o
-
-# target to build an object file
-home/romoirib/QP/QPFPGA/utils.cpp.o:
-	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.o
-.PHONY : home/romoirib/QP/QPFPGA/utils.cpp.o
-
-home/romoirib/QP/QPFPGA/utils.i: home/romoirib/QP/QPFPGA/utils.cpp.i
-
-.PHONY : home/romoirib/QP/QPFPGA/utils.i
-
-# target to preprocess a source file
-home/romoirib/QP/QPFPGA/utils.cpp.i:
-	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.i
-.PHONY : home/romoirib/QP/QPFPGA/utils.cpp.i
-
-home/romoirib/QP/QPFPGA/utils.s: home/romoirib/QP/QPFPGA/utils.cpp.s
-
-.PHONY : home/romoirib/QP/QPFPGA/utils.s
-
-# target to generate assembly for a file
-home/romoirib/QP/QPFPGA/utils.cpp.s:
-	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/home/romoirib/QP/QPFPGA/utils.cpp.s
-.PHONY : home/romoirib/QP/QPFPGA/utils.cpp.s
-
 src/api.o: src/api.cpp.o
 
 .PHONY : src/api.o
@@ -204,6 +150,60 @@ src/api.cpp.s:
 	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/src/api.cpp.s
 .PHONY : src/api.cpp.s
 
+src/fpga_utils.o: src/fpga_utils.cpp.o
+
+.PHONY : src/fpga_utils.o
+
+# target to build an object file
+src/fpga_utils.cpp.o:
+	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.o
+.PHONY : src/fpga_utils.cpp.o
+
+src/fpga_utils.i: src/fpga_utils.cpp.i
+
+.PHONY : src/fpga_utils.i
+
+# target to preprocess a source file
+src/fpga_utils.cpp.i:
+	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.i
+.PHONY : src/fpga_utils.cpp.i
+
+src/fpga_utils.s: src/fpga_utils.cpp.s
+
+.PHONY : src/fpga_utils.s
+
+# target to generate assembly for a file
+src/fpga_utils.cpp.s:
+	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/src/fpga_utils.cpp.s
+.PHONY : src/fpga_utils.cpp.s
+
+src/utils.o: src/utils.cpp.o
+
+.PHONY : src/utils.o
+
+# target to build an object file
+src/utils.cpp.o:
+	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/src/utils.cpp.o
+.PHONY : src/utils.cpp.o
+
+src/utils.i: src/utils.cpp.i
+
+.PHONY : src/utils.i
+
+# target to preprocess a source file
+src/utils.cpp.i:
+	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/src/utils.cpp.i
+.PHONY : src/utils.cpp.i
+
+src/utils.s: src/utils.cpp.s
+
+.PHONY : src/utils.s
+
+# target to generate assembly for a file
+src/utils.cpp.s:
+	$(MAKE) -f CMakeFiles/qpfpga.dir/build.make CMakeFiles/qpfpga.dir/src/utils.cpp.s
+.PHONY : src/utils.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -213,15 +213,15 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... qpfpga"
-	@echo "... home/romoirib/QP/QPFPGA/fpga_utils.o"
-	@echo "... home/romoirib/QP/QPFPGA/fpga_utils.i"
-	@echo "... home/romoirib/QP/QPFPGA/fpga_utils.s"
-	@echo "... home/romoirib/QP/QPFPGA/utils.o"
-	@echo "... home/romoirib/QP/QPFPGA/utils.i"
-	@echo "... home/romoirib/QP/QPFPGA/utils.s"
 	@echo "... src/api.o"
 	@echo "... src/api.i"
 	@echo "... src/api.s"
+	@echo "... src/fpga_utils.o"
+	@echo "... src/fpga_utils.i"
+	@echo "... src/fpga_utils.s"
+	@echo "... src/utils.o"
+	@echo "... src/utils.i"
+	@echo "... src/utils.s"
 .PHONY : help
 
 

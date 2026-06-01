@@ -19,7 +19,9 @@
 // #define DEFAULT_EPS_ABS 1E-3f
 // #define DEFAULT_EPS_REL 1E-3f
 
-#define UNROLL_FACTOR 8
+#ifndef RESHAPE_FACTOR
+#define RESHAPE_FACTOR 8
+#endif
 
 #define MAX_TILES ( (MAX_SIZE / MAX_ROWS) * (MAX_SIZE / MAX_COLS) )
 
@@ -27,11 +29,11 @@ static float inf_norm(const float *v, int size)
 {
 #pragma HLS INLINE
     float max_val = 0.0f;
-    for (int i = 0; i < size; i += UNROLL_FACTOR)
+    for (int i = 0; i < size; i += RESHAPE_FACTOR)
     {
 #pragma HLS PIPELINE II = 1
         float local_max = 0.0f;
-        for (int j = 0; j < UNROLL_FACTOR; ++j)
+        for (int j = 0; j < RESHAPE_FACTOR; ++j)
         {
 #pragma HLS UNROLL
             const int idx = i + j;
@@ -214,10 +216,10 @@ void apply_new_rho(float rho_base_new, float &current_rho_base,
     float S_eff = rho_base_new / current_rho_base; 
 
     // Update vectors (Optimized for Latency with Block Unrolling)
-    for (int i = 0; i < num_rows; i += UNROLL_FACTOR) 
+    for (int i = 0; i < num_rows; i += RESHAPE_FACTOR) 
     {
 #pragma HLS PIPELINE II=1
-        for (int j = 0; j < UNROLL_FACTOR; ++j) 
+        for (int j = 0; j < RESHAPE_FACTOR; ++j) 
         {
 #pragma HLS UNROLL
             const int idx = i + j;
@@ -393,47 +395,47 @@ void admm(int num_rows,
 // DATAFLOW??
 
     float M_inv[MAX_SIZE];
-#pragma HLS ARRAY_RESHAPE variable=M_inv type=cyclic factor=UNROLL_FACTOR dim=1
+#pragma HLS ARRAY_RESHAPE variable=M_inv type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=M_inv type=RAM_T2P impl=URAM
 
     float b[MAX_SIZE];
-#pragma HLS ARRAY_RESHAPE variable=b type=cyclic factor=UNROLL_FACTOR dim=1 //Necessary for K_p in PCG
+#pragma HLS ARRAY_RESHAPE variable=b type=cyclic factor=RESHAPE_FACTOR dim=1 //Necessary for K_p in PCG
 #pragma HLS BIND_STORAGE variable=b type=RAM_T2P impl=URAM
 
     float x[MAX_SIZE];
-#pragma HLS ARRAY_RESHAPE variable=x type=cyclic factor=UNROLL_FACTOR dim=1
+#pragma HLS ARRAY_RESHAPE variable=x type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=x type=RAM_T2P impl=URAM
 
     float x_tilde[MAX_SIZE];
-#pragma HLS ARRAY_RESHAPE variable=x_tilde type=cyclic factor=UNROLL_FACTOR dim=1
+#pragma HLS ARRAY_RESHAPE variable=x_tilde type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=x_tilde type=RAM_T2P impl=URAM
 
     float y[MAX_SIZE];
-#pragma HLS ARRAY_RESHAPE variable=y type=cyclic factor=UNROLL_FACTOR dim=1
+#pragma HLS ARRAY_RESHAPE variable=y type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=y type=RAM_T2P impl=URAM
 
     float z[MAX_SIZE];
-#pragma HLS ARRAY_RESHAPE variable=z type=cyclic factor=UNROLL_FACTOR dim=1
+#pragma HLS ARRAY_RESHAPE variable=z type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=z type=RAM_T2P impl=URAM
 
     float z_tilde[MAX_SIZE];
-#pragma HLS ARRAY_RESHAPE variable=z_tilde type=cyclic factor=UNROLL_FACTOR dim=1
+#pragma HLS ARRAY_RESHAPE variable=z_tilde type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=z_tilde type=RAM_T2P impl=URAM
 
     float rho[MAX_SIZE];
-#pragma HLS ARRAY_RESHAPE variable=rho type=cyclic factor=UNROLL_FACTOR dim=1
+#pragma HLS ARRAY_RESHAPE variable=rho type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=rho type=RAM_T2P impl=URAM
 
     float tmp1[MAX_SIZE];
-#pragma HLS ARRAY_RESHAPE variable=tmp1 type=cyclic factor=UNROLL_FACTOR dim=1
+#pragma HLS ARRAY_RESHAPE variable=tmp1 type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=tmp1 type=RAM_T2P impl=URAM
 
     float tmp2[MAX_SIZE];
-#pragma HLS ARRAY_RESHAPE variable=tmp2 type=cyclic factor=UNROLL_FACTOR dim=1
+#pragma HLS ARRAY_RESHAPE variable=tmp2 type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=tmp2 type=RAM_T2P impl=URAM
 
     float rho_inv[MAX_SIZE];
-#pragma HLS ARRAY_RESHAPE variable=rho_inv type=cyclic factor=UNROLL_FACTOR dim=1
+#pragma HLS ARRAY_RESHAPE variable=rho_inv type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=rho_inv type=RAM_T2P impl=URAM
 
 // For MAZ_SIZE=65536 these three arrays do not fit in URAM, need to keep them in BRAM
@@ -586,10 +588,10 @@ void admm(int num_rows,
         // r_prim, note: inf_norm replaced inside loop to reduce an extra loop
         spmv_csc_tiled(num_rows, num_cols, mat_A, x, tmp1); // tmp1 = A*x
         Ax_norm = inf_norm(tmp1, num_rows);
-        for (int i = 0; i < num_rows; i += UNROLL_FACTOR)
+        for (int i = 0; i < num_rows; i += RESHAPE_FACTOR)
         {
 #pragma HLS PIPELINE II = 1
-            for (int j = 0; j < UNROLL_FACTOR; ++j)
+            for (int j = 0; j < RESHAPE_FACTOR; ++j)
             {
 #pragma HLS UNROLL
                 const int idx = i + j;
@@ -606,10 +608,10 @@ void admm(int num_rows,
         spmv_csc_tiled(num_cols, num_cols, mat_P, x, tmp2);    // tmp2 = P*x
         ATy_norm = inf_norm(tmp1, num_cols); // for convergence check and adaptive rho
         Px_norm = inf_norm(tmp2, num_cols);
-        for (int i = 0; i < num_cols; i += UNROLL_FACTOR)
+        for (int i = 0; i < num_cols; i += RESHAPE_FACTOR)
         {
 #pragma HLS PIPELINE II=1
-            for (int j = 0; j < UNROLL_FACTOR; ++j)
+            for (int j = 0; j < RESHAPE_FACTOR; ++j)
             {
 #pragma HLS UNROLL
                 const int idx = i + j;
