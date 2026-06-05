@@ -1,6 +1,67 @@
-export QPFPGA_LIBRARY="$(pwd)/libqpfpga.so"
-export QPFPGA_BITSTREAM="/lib/firmware/admm_pcg_acc_16PEs_8192x8192_unroll_8.bit"
-export LD_LIBRARY_PATH="$(pwd):${LD_LIBRARY_PATH:-}"
+xilinx@pynq:~/QPFPGA$ sudo QPFPGA_LIBRARY="/home/xilinx/QPFPGA/cpp/build/libqpfpga.so"      LD_LIBRARY_PATH="/usr/lib"      /home/xilinx/qpfpga-venv/bin/python examples/cvxpy_qpfpga_demo.py
+Attempting to load QPFPGA library from /home/xilinx/QPFPGA/cpp/build/libqpfpga.so... (Hardware selected dynamically)
+=== Problem assembly output ===
+n_var: 1024
+n_eq: 0
+n_ineq: 2048
 
-# run
-python3 examples/cvxpy_qpfpga_demo.py
+=== Solver call (using CVXPY interface) ===
+Calling problem.solve...
+===============================================================================
+                                     CVXPY                                     
+                                     v1.7.5                                    
+===============================================================================
+(CVXPY) Jun 05 10:50:33 AM: Your problem has 1024 variables, 2048 constraints, and 0 parameters.
+(CVXPY) Jun 05 10:50:33 AM: It is compliant with the following grammars: DCP, DQCP
+(CVXPY) Jun 05 10:50:33 AM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
+(CVXPY) Jun 05 10:50:33 AM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
+(CVXPY) Jun 05 10:50:33 AM: Your problem is compiled with the CPP canonicalization backend.
+-------------------------------------------------------------------------------
+                                  Compilation                                  
+-------------------------------------------------------------------------------
+(CVXPY) Jun 05 10:50:33 AM: Compiling problem (target solver=QPFPGA).
+(CVXPY) Jun 05 10:50:33 AM: Reduction chain: CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> QPFPGA
+(CVXPY) Jun 05 10:50:33 AM: Applying reduction CvxAttr2Constr
+(CVXPY) Jun 05 10:50:33 AM: Applying reduction Qp2SymbolicQp
+(CVXPY) Jun 05 10:50:33 AM: Applying reduction QpMatrixStuffing
+(CVXPY) Jun 05 10:50:33 AM: Applying reduction QPFPGA
+(CVXPY) Jun 05 10:50:33 AM: Finished problem compilation (took 9.621e-02 seconds).
+-------------------------------------------------------------------------------
+                                Numerical solver                               
+-------------------------------------------------------------------------------
+(CVXPY) Jun 05 10:50:33 AM: Invoking solver QPFPGA  to obtain a solution.
+=== QPFPGA received CVXPY data ===
+keys: ['A', 'F', 'G', 'P', 'b', 'bool_vars_idx', 'dims', 'int_vars_idx', 'lower_bounds', 'n_eq', 'n_ineq', 'n_var', 'param_prob', 'q', 'upper_bounds']
+P: shape=(1024, 1024), nnz=1024
+q: shape=(1024,)
+A: shape=(0, 1024), nnz=0
+b: shape=(0,)
+F: shape=(2048, 1024), nnz=2048
+g: shape=(2048,)
+
+==================================================
+           QPFPGA Hardware Execution Stats
+==================================================
+Status           : OPTIMAL
+ADMM Iterations  : 20
+PCG Iterations   : 20 (Avg: 1.0/ADMM)
+Primal Residual  : 4.48585e-04
+Dual Residual    : 7.79510e-04
+--------------------------------------------------
+Timing Breakdown:
+  C++ Total Call :   23.460 ms
+    ├─ Data Prep :   12.092 ms
+    └─ HW Exec   :   10.999 ms
+==================================================
+
+-------------------------------------------------------------------------------
+                                    Summary                                    
+-------------------------------------------------------------------------------
+(CVXPY) Jun 05 10:50:33 AM: Problem status: optimal
+(CVXPY) Jun 05 10:50:33 AM: Optimal value: -1.453e+02
+(CVXPY) Jun 05 10:50:33 AM: Compilation took 9.621e-02 seconds
+(CVXPY) Jun 05 10:50:33 AM: Solver (including time spent in interface) took 3.057e-02 seconds
+Total solve time (CVXPY call): 227.236 ms
+returned status: optimal
+returned x (first 4): [0.055611759424209595, 5.3133808251004666e-05, 0.31168222427368164, 0.5426013469696045]
+returned objective: -145.257103

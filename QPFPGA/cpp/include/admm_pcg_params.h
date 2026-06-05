@@ -5,6 +5,8 @@
 #define TILE_ROWS 8192
 #define TILE_COLS 8192
 
+#define RUIZ_ITER_DEFAULT 10
+
 #define ADMM_RHO 1.0f
 #define ADMM_RHO_EQ_OVER_RHO_INEQ 100
 #define ADMM_RHO_TOL 0.01f

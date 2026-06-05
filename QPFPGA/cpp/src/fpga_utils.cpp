@@ -1,6 +1,9 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <filesystem>
 #include "utils.h"
 #include "fpga_utils.h"
 
@@ -13,61 +16,62 @@ extern "C" {
     void cma_invalidate_cache(void *buf, unsigned long phys_addr, int size);
 }
 
-// Provide lightweight CMA stubs for host testing when PYNQ libcma is unavailable.
-// Mark as weak so a real PYNQ libcma implementation can override these symbols
-// when present on the target system.
-extern "C" {
-    void* cma_alloc(uint32_t len, uint32_t cacheable) __attribute__((weak));
-    unsigned long cma_get_phy_addr(void *buf) __attribute__((weak));
-    void cma_free(void *buf) __attribute__((weak));
-    void cma_flush_cache(void *buf, unsigned long phys_addr, int size) __attribute__((weak));
-    void cma_invalidate_cache(void *buf, unsigned long phys_addr, int size) __attribute__((weak));
-
-    void* cma_alloc(uint32_t len, uint32_t cacheable) {
-        (void)cacheable;
-        return std::malloc(len);
-    }
-    unsigned long cma_get_phy_addr(void *buf) {
-        // On host we cannot provide a real physical address; return the pointer value cast.
-        return (unsigned long)buf;
-    }
-    void cma_free(void *buf) { std::free(buf); }
-    void cma_flush_cache(void *buf, unsigned long phys_addr, int size) { (void)buf; (void)phys_addr; (void)size; }
-    void cma_invalidate_cache(void *buf, unsigned long phys_addr, int size) { (void)buf; (void)phys_addr; (void)size; }
-}
-
-// cma_copy is implemented in utils.cpp
+namespace fs = std::filesystem;
 
 // path: bitstreams/*.bit
 
-int load_bitstream(const char* path) {
-    // Prefer the canonical firmware/sysfs programming method: copy the bitstream
-    // into /lib/firmware and write the filename into the FPGA manager sysfs
-    // node. Fall back to a direct copy attempt if sysfs path differs.
-    std::string src(path);
-    std::string fname = src.substr(src.find_last_of("/\\") + 1);
-    std::string staged = std::string("/lib/firmware/") + fname;
-    std::string sysfs_firmware = "/sys/class/fpga_manager/fpga0/firmware";
-    std::string alternate_sysfs = "/sys/class/fpga_manager/fpga_manager/firmware";
-
-    // Copy to /lib/firmware
-    std::string copy_cmd = "cp -f '" + src + "' '" + staged + "'";
-    int rc = std::system(copy_cmd.c_str());
-    if (rc != 0) {
-        // Attempt a direct cat to firmware node as a last resort (may require root)
-        std::string direct_cmd = "cat '" + src + "' > /lib/firmware/xilinx/fpga_manager";
-        return std::system(direct_cmd.c_str());
+bool load_bitstream(const std::string& path) {
+    fs::path src(path);
+    if (!fs::exists(src)) {
+        std::cerr << "Error: Bitstream file does not exist at " << path << "\n";
+        return false;
     }
 
-    // Write the filename into sysfs to trigger programming
-    std::string echo_cmd = "echo '" + fname + "' > " + sysfs_firmware;
-    rc = std::system(echo_cmd.c_str());
-    if (rc == 0) return 0;
+    // 1. Copy the bitstream to /lib/firmware
+    fs::path dest_dir = "/lib/firmware";
+    fs::path dest = dest_dir / src.filename();
+    
+    try {
+        // Overwrite if it already exists in /lib/firmware
+        fs::copy_file(src, dest, fs::copy_options::overwrite_existing);
+    } catch (const fs::filesystem_error& e) {
+        std::cerr << "Error copying bitstream to /lib/firmware: " << e.what() << "\n";
+        std::cerr << "Are you running as root/sudo?\n";
+        return false;
+    }
 
-    // Try alternate sysfs location
-    echo_cmd = "echo '" + fname + "' > " + alternate_sysfs;
-    rc = std::system(echo_cmd.c_str());
-    return rc;
+    // 2. Set FPGA Manager flags (0 = full bitstream)
+    // Zynq Ultrascale+ supports partial reconfiguration. Flag '0' ensures full PL reset.
+    std::ofstream flags_file("/sys/class/fpga_manager/fpga0/flags");
+    if (flags_file) {
+        flags_file << "0";
+        flags_file.close();
+    } else {
+        std::cerr << "Warning: Could not open FPGA manager flags. Continuing anyway.\n";
+    }
+
+    // 3. Write filename to the firmware node to trigger programming
+    std::ofstream fw_file("/sys/class/fpga_manager/fpga0/firmware");
+    if (!fw_file) {
+        std::cerr << "Error: Could not open FPGA manager firmware node.\n";
+        return false;
+    }
+    fw_file << src.filename().string();
+    fw_file.close();
+
+    // 4. Verify programming was successful
+    std::ifstream state_file("/sys/class/fpga_manager/fpga0/state");
+    std::string state;
+    if (state_file) {
+        state_file >> state;
+        if (state != "operating") {
+            std::cerr << "Error: FPGA programming failed. State is: " << state << "\n";
+            return false;
+        }
+    }
+
+    std::cout << "Bitstream loaded successfully.\n";
+    return true;
 }
 
 void write_reg(void *base, uint32_t offset, uint32_t val) { *((volatile uint32_t *)((uint8_t *)base + offset)) = val; }

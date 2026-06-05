@@ -10,13 +10,13 @@ try:
     import cvxpy.reductions.solution as solution_mod
     from cvxpy.reductions.solvers import utilities
     from cvxpy.reductions.solvers.qp_solvers.qp_solver import QpSolver
-except Exception:  # pragma: no cover - import-time fallback for scaffold use.
+except Exception:
     intf = None
     s = None
     solution_mod = None
     utilities = None
 
-    class QpSolver:  # type: ignore[no-redef]
+    class QpSolver:
         pass
 
 from .backend import QPFPGABackend, as_osqp_problem, default_backend
@@ -85,6 +85,32 @@ class QPFPGA(QpSolver):
         qp_data = as_osqp_problem(data)
         options = self._solver_options(solver_opts)
         results = self.backend.solve(qp_data, options)
+
+        if verbose:
+            pcg_iters = results.extra_stats.get("pcg_iters", 0)
+            avg_pcg = (pcg_iters / results.num_iters) if results.num_iters else 0.0
+            bs_time = results.extra_stats.get("bitstream_time_s", 0.0) * 1000.0
+            cpp_time = results.extra_stats.get("total_cpp_time_s", 0.0) * 1000.0
+            setup_time = results.extra_stats.get("setup_time_ms", 0.0)
+            hw_time = results.solve_time_s * 1000.0
+            
+            print("\n" + "="*50)
+            print("           QPFPGA Hardware Execution Stats")
+            print("="*50)
+            print(f"Status           : {results.status.upper()}")
+            print(f"ADMM Iterations  : {results.num_iters}")
+            print(f"PCG Iterations   : {pcg_iters} (Avg: {avg_pcg:.1f}/ADMM)")
+            print(f"Primal Residual  : {results.primal_residual:.5e}")
+            print(f"Dual Residual    : {results.dual_residual:.5e}")
+            print("-" * 50)
+            print("Timing Breakdown:")
+            if bs_time > 0:
+                print(f"  Bitstream Load : {bs_time:>8.3f} ms")
+            print(f"  C++ Total Call : {cpp_time:>8.3f} ms")
+            print(f"    ├─ Data Prep : {setup_time:>8.3f} ms")
+            print(f"    └─ HW Exec   : {hw_time:>8.3f} ms")
+            print("="*50 + "\n")
+
         data["_qpfpga_result"] = results
         return results
 
@@ -102,22 +128,39 @@ class QPFPGA(QpSolver):
             s.EXTRA_STATS: solution,
         }
         status = self.STATUS_MAP.get(solution.status, s.SOLVER_ERROR)
+        
         if status in s.SOLUTION_PRESENT and solution.x is not None:
             primal_vars = {
-                self.VAR_ID: intf.DEFAULT_INTF.const_to_matrix(np.asarray(solution.x))
+                inverse_data[self.VAR_ID]: intf.DEFAULT_INTF.const_to_matrix(np.asarray(solution.x))
             }
-            dual_vars = {}
+            
+            dual_vars = None 
+            
             if solution.y is not None:
+                y_arr = np.asarray(solution.y)
                 n_eq = inverse_data[self.DIMS].zero
-                dual_vars = utilities.get_dual_values(
-                    np.asarray(solution.y[:n_eq]),
-                    utilities.extract_dual_value,
-                    inverse_data[self.EQ_CONSTR],
-                ) | utilities.get_dual_values(
-                    np.asarray(solution.y[n_eq:]),
-                    utilities.extract_dual_value,
-                    inverse_data[self.NEQ_CONSTR],
-                )
+                
+                eq_constrs = inverse_data.get(self.EQ_CONSTR, [])
+                ineq_constrs = inverse_data.get(self.NEQ_CONSTR, [])
+
+                try:
+                    mapped_duals = utilities.get_dual_values(
+                        y_arr[:n_eq],
+                        utilities.extract_dual_value,
+                        eq_constrs,
+                    ) | utilities.get_dual_values(
+                        y_arr[n_eq:],
+                        utilities.extract_dual_value,
+                        ineq_constrs,
+                    )
+                    
+                    # Only apply mapping if it actually extracted values
+                    if mapped_duals:
+                        dual_vars = mapped_duals
+
+                except Exception:
+                    pass 
+                    
             opt_val = solution.obj_val
             return Solution(status, opt_val, primal_vars, dual_vars, attr)
 

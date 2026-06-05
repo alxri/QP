@@ -3,6 +3,7 @@ from __future__ import annotations
 import ctypes
 from dataclasses import asdict
 import os
+import time
 import shlex
 import subprocess
 import shutil
@@ -25,12 +26,13 @@ class MockBackend:
 
     def solve(self, problem: QPData, options: QPSolverOptions) -> QPSolverResult:
         try:
-            import osqp  # type: ignore[import-not-found]
-        except Exception as exc:  # pragma: no cover - only used when osqp is missing
+            import osqp
+        except Exception as exc:
             raise RuntimeError(
                 "QPFPGA CPU backend requires the osqp package when no FPGA library is available."
             ) from exc
 
+        print("Solving QP using MockBackend with OSQP...")
         solver = osqp.OSQP()
         solver.setup(
             P=problem.P,
@@ -110,36 +112,96 @@ class CtypesBackend:
     def _ensure_bitstream_loaded(self) -> None:
         if self.bitstream_path is None or self._bitstream_loaded:
             return
+            
         if not self.bitstream_path.exists():
             raise FileNotFoundError(f"QPFPGA bitstream not found: {self.bitstream_path}")
+
+        print(f"Loading bitstream via PYNQ environment: {self.bitstream_path.name}...")
+
+        # Path to the isolated PYNQ python interpreter
+        pynq_python = "/usr/local/share/pynq-venv/bin/python"
+
+        # Python script to run inside that isolated environment
+        pynq_script = f"""
+from pynq import Overlay
+import sys
+try:
+    ol = Overlay('{self.bitstream_path.resolve()}')
+    print('Hardware initialized and clocks running!')
+except Exception as e:
+    print(f'PYNQ Overlay Error: {{e}}', file=sys.stderr)
+    sys.exit(1)
+"""
+
+        # Execute the script with the required XRT environment variables
+        import subprocess
+        import os
+        
+        # Necessary with sudo (strips environment variables). PYNQ requires XILINX_XRT to find the FPGA.
+        sub_env = os.environ.copy()
+        if "XILINX_XRT" not in sub_env:
+            sub_env["XILINX_XRT"] = "/usr"
+
+        t0_bs = time.perf_counter()
         try:
-            from pynq import Overlay  # type: ignore
-
-            Overlay(str(self.bitstream_path))
-        except Exception:
-            firmware_name = self.bitstream_path.name
-            firmware_candidates = [
-                Path("/sys/class/fpga_manager/fpga0/firmware"),
-                Path("/sys/class/fpga_manager/fpga1/firmware"),
-            ]
-            firmware_target = next((path for path in firmware_candidates if path.exists()), None)
-            if firmware_target is None:
-                raise RuntimeError(
-                    "Unable to program the bitstream: PYNQ Overlay is unavailable and no "
-                    "fpga_manager firmware node was found under /sys/class/fpga_manager/."
-                )
-
-            firmware_dir = Path("/lib/firmware")
-            firmware_dir.mkdir(parents=True, exist_ok=True)
-            staged_bitstream = firmware_dir / firmware_name
-            if staged_bitstream.resolve() != self.bitstream_path.resolve():
-                shutil.copy2(self.bitstream_path, staged_bitstream)
-
-            firmware_target.write_text(firmware_name)
-        self._bitstream_loaded = True
+            result = subprocess.run(
+                [pynq_python, "-c", pynq_script],
+                capture_output=True,
+                text=True,
+                check=True,
+                env=sub_env
+            )
+            if result.stdout:
+                print(result.stdout.strip())
+                
+            self._bitstream_loaded = True
+            self._last_bitstream_time_s = time.perf_counter() - t0_bs
+            
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to program FPGA via PYNQ!\nSTDOUT: {e.stdout}\nSTDERR: {e.stderr}")
+            raise RuntimeError("Bitstream programming failed. See errors above.")
 
     def solve(self, problem: QPData, options: QPSolverOptions) -> QPSolverResult:
-        self._ensure_bitstream_loaded()
+        from pathlib import Path
+        import os
+        import time
+        
+        self._last_bitstream_time_s = 0.0
+        
+        ncols = problem.A.shape[1]
+        nnz_per_col = problem.A.nnz / ncols if ncols > 0 else 0
+
+        # Heuristic Table
+        if nnz_per_col < 4:
+            target_bs = Path("/home/xilinx/QPFPGA/bitstreams/admm_pcg_16384x16384_reshape1_pes12.bit")
+        elif nnz_per_col < 16:
+            target_bs = Path("/home/xilinx/QPFPGA/bitstreams/admm_pcg_16384x16384_reshape8_pes20.bit")
+        else:
+            target_bs = Path("/home/xilinx/QPFPGA/bitstreams/admm_pcg_8192x8192_reshape1_pes30.bit")
+
+        # Only reprogram if it's the first run OR if the optimal bitstream changed
+        state_file = Path("/tmp/qpfpga_state.txt")
+        loaded_bs_name = ""
+
+        if state_file.exists():
+            loaded_bs_name = state_file.read_text().strip()
+
+        if loaded_bs_name != target_bs.name:
+            print(f"\n[QPFPGA Smart-Switch] Matrix A density: {nnz_per_col:.2f} nnz/col")
+            print(f"[QPFPGA Smart-Switch] Hardware changing: {loaded_bs_name or 'None'} -> {target_bs.name}")
+            
+            self.bitstream_path = target_bs
+            self._bitstream_loaded = False 
+
+            self._last_bitstream_time_s = 0.0
+            self._ensure_bitstream_loaded()
+            
+            # Save the successful load to the state file for the NEXT python run
+            state_file.write_text(target_bs.name)
+        else:
+            self.bitstream_path = target_bs
+            self._bitstream_loaded = True
+
         p_indptr = np.ascontiguousarray(problem.P.indptr, dtype=np.int32)
         p_indices = np.ascontiguousarray(problem.P.indices, dtype=np.int32)
         p_data = np.ascontiguousarray(problem.P.data, dtype=np.float32)
@@ -190,11 +252,14 @@ class CtypesBackend:
         y_out = np.zeros(problem.A.shape[0], dtype=np.float32)
         result_c = QPFPGAResultC()
 
+        t0_cpp = time.perf_counter()
         status = self._lib.qpfpga_solve(
             ctypes.byref(problem_c),
             ctypes.byref(options_c),
             ctypes.byref(result_c),
         )
+
+        total_cpp_time_s = time.perf_counter() - t0_cpp
 
         if result_c.x:
             x_out = np.ctypeslib.as_array(result_c.x, shape=(problem.q.shape[0],)).astype(np.float32, copy=True)
@@ -211,6 +276,10 @@ class CtypesBackend:
             num_iters=int(result_c.admm_iters),
             solve_time_s=float(result_c.solve_time_ms) / 1000.0,
             extra_stats={
+                "pcg_iters": int(result_c.pcg_iters),
+                "bitstream_time_s": self._last_bitstream_time_s,
+                "total_cpp_time_s": total_cpp_time_s,
+                "setup_time_ms": float(result_c.setup_time_ms),
                 "library_path": str(self.library_path),
                 "return_code": int(status),
                 "options": asdict(options),
@@ -222,20 +291,28 @@ def default_backend(library_path: str | Path | None = None) -> QPFPGABackend:
     force_cpu = os.environ.get("QPFPGA_FORCE_CPU", "")
     if force_cpu and force_cpu not in {"0", "false", "False"}:
         return MockBackend()
+        
     if library_path is None:
         library_path = os.environ.get("QPFPGA_LIBRARY")
-    bitstream_path = os.environ.get("QPFPGA_BITSTREAM")
+        
     if library_path is None:
-        return MockBackend()
+        print("QPFPGA_LIBRARY environment variable not set")
+        raise RuntimeError("QPFPGA_LIBRARY environment variable must be set to load the FPGA backend (cpp/build).")
+        
     try:
-        return CtypesBackend(library_path, bitstream_path=bitstream_path)
+        print(f"Attempting to load QPFPGA library from {library_path}... (Hardware selected dynamically)")
+        return CtypesBackend(library_path)
+        
     except (OSError, AttributeError):
-        return MockBackend()
+        print(f"Failed to load QPFPGA library from {library_path}; CPU fallback is not available.")
+        raise RuntimeError(
+             f"Failed to load QPFPGA library from {library_path}; CPU fallback is not available. Ensure that the library path is correct and points to a valid shared library."
+        )
 
 
 def as_osqp_problem(data: dict) -> QPData:
     try:
-        import cvxpy.settings as s  # type: ignore[import-not-found]
+        import cvxpy.settings as s
     except ModuleNotFoundError as exc:
         raise ImportError("CVXPY settings are required to map solver data keys.") from exc
 
@@ -246,7 +323,7 @@ def as_osqp_problem(data: dict) -> QPData:
     q = np.asarray(data[s.Q], dtype=np.float32)
     b = np.asarray(data[s.B], dtype=np.float32)
     g = np.asarray(data[s.G], dtype=np.float32)
-    l = np.concatenate([b, -np.inf * np.ones_like(g)])
+    l = np.concatenate([b, -1e17 * np.ones_like(g)])
     u = np.concatenate([b, g])
     return QPData(P=P, q=q, A=A, l=l, u=u)
 
@@ -296,6 +373,7 @@ class QPFPGAResultC(ctypes.Structure):
         ("dual_residual", ctypes.c_float),
         ("objective_value", ctypes.c_float),
         ("solve_time_ms", ctypes.c_double),
+        ("setup_time_ms", ctypes.c_double),
         ("x", ctypes.POINTER(ctypes.c_float)),
         ("y", ctypes.POINTER(ctypes.c_float)),
     ]

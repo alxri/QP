@@ -120,9 +120,9 @@ def main() -> None:
             DENSITY_NNZ = {"low": 1, "med": 8, "medium": 8, "high": 32}
             nnz = DENSITY_NNZ.get(density, None)
             if nnz is not None:
-                title_suffix = f"- 1024x1024 Matrix ({density} density: {nnz} nnz/col)"
+                title_suffix = f"({density} density: {nnz} nnz/col)"
             else:
-                title_suffix = f"- 1024x1024 Matrix ({density} density)"
+                title_suffix = f"({density} density)"
 
         # Only plot adaptive_rho = 0 as requested.
         df_density = df_density[pd.to_numeric(df_density["adaptive_rho"], errors="coerce") == 0]
@@ -245,7 +245,7 @@ def main() -> None:
                         pass
 
                 ax.annotate(
-                    f"NUM_PEs={int(pes_val)}",
+                    f"PEs={int(pes_val)}",
                     xy=(xb, yb),
                     xytext=(dx, dy),
                     textcoords="offset points",
@@ -271,7 +271,7 @@ def main() -> None:
         ax.set_xlabel("BRAM Utilization (%)")
         ax.set_ylabel(f"Latency [ms]")
         ax.set_yscale("linear")
-        ax.set_title(f"NUM_PEs vs Latency {title_suffix}", fontweight="bold")
+        ax.set_title(f"Number of PEs vs Latency {title_suffix}", fontweight="bold")
         # Format y-axis labels without scientific notation
         ax.yaxis.set_major_formatter(ScalarFormatter())
         ax.yaxis.get_major_formatter().set_scientific(False)

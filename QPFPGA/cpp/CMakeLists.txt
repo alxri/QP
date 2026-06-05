@@ -10,6 +10,23 @@ add_library(qpfpga SHARED
 target_include_directories(qpfpga
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        /usr/local/include
 )
 
+# Enforce C++17
 target_compile_features(qpfpga PUBLIC cxx_std_17)
+
+# Add Optimization and Warning flags
+target_compile_options(qpfpga PRIVATE -O3 -Wall)
+
+# Specify the library path for the linker
+target_link_directories(qpfpga PRIVATE /usr/local/lib)
+
+# Link the required libraries (cma, m, rt)
+target_link_libraries(qpfpga PRIVATE cma m rt)
+
+# Tell the linker where to find libcma.so at runtime (rpath)
+set_target_properties(qpfpga PROPERTIES
+    INSTALL_RPATH "/usr/local/lib"
+    BUILD_WITH_INSTALL_RPATH TRUE
+)

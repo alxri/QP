@@ -166,9 +166,9 @@ def main() -> None:
         out_path = args.out.with_name(f"{args.out.stem}_{density}{args.out.suffix}")
         nnz = density_nnz.get(density)
         if nnz is not None:
-            title_suffix = f" ({density}, {nnz} nnz/col)"
+            title_suffix = f" ({density} density: {nnz} nnz/col)"
         else:
-            title_suffix = f" ({density})"
+            title_suffix = f" ({density} density)"
 
         grouped = (
             df_density.groupby(["reshape_factor", "bram_util"], as_index=False)["solve_ms"]
@@ -217,7 +217,7 @@ def main() -> None:
                         va = "center"
 
                 ax.annotate(
-                    f"reshape_factor={int(reshape_val)}",
+                    f"RF={int(reshape_val)}",
                     xy=(xb, yb),
                     xytext=(dx, dy),
                     textcoords="offset points",
@@ -248,7 +248,7 @@ def main() -> None:
         ax.set_xlabel("BRAM Utilization (%)")
         ax.set_ylabel("Latency [ms]")
         ax.set_yscale("linear")
-        ax.set_title(f"reshape_factor vs Latency {title_suffix}", fontweight="bold")
+        ax.set_title(f"Reshape Factor vs Latency {title_suffix}", fontweight="bold")
         ax.yaxis.set_major_formatter(ScalarFormatter())
         ax.yaxis.get_major_formatter().set_scientific(False)
         ax.yaxis.get_major_formatter().set_useOffset(False)

@@ -7,10 +7,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/mman.h>
-#include <fstream>
-#include <iomanip>
-#include <random>
-#include <chrono>
+#include <pmt.h>
 
 // PYNQ libcma exports
 extern "C" {
@@ -33,13 +30,6 @@ extern "C" {
 #define MAP_SIZE               0x20000UL
 #define MAP_MASK               (MAP_SIZE - 1)
 
-#define OSQP_RHO 1.0f
-#define OSQP_RHO_EQ_OVER_RHO_INEQ 100
-#define OSQP_RHO_TOL 0.01f
-#define OSQP_INFTY 1e17f
-#define OSQP_RHO_MAX 1e6f
-#define OSQP_RHO_MIN 1e-6f
-
 using namespace std;
 
 struct int32_words { int32_t data[PACK_SIZE]; };
@@ -53,7 +43,6 @@ struct RunResult {
     float viol;
     double obj;
     double hw_ms;
-    float mae;
 };
 
 // ---------------------------------------------------------------------
@@ -74,10 +63,29 @@ void write_64bit_address(void *base, uint32_t offset, uintptr_t address) {
 
 uint32_t float_to_uint(float f) { uint32_t u; memcpy(&u, &f, 4); return u; }
 float uint_to_float(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }  
+
+size_t get_file_elements(const string& filename, size_t element_size) {
+    FILE* f = fopen(filename.c_str(), "rb");
+    if (!f) { cout << "ERROR: Could not open " << filename << endl; exit(1); }
+    fseek(f, 0, SEEK_END);
+    size_t sz = ftell(f);
+    fclose(f);
+    return sz / element_size;
+}
+
+template <typename T>
+void load_bin(const string& filename, vector<T>& dest) {
+    FILE* f = fopen(filename.c_str(), "rb");
+    if (!f) { cout << "ERROR: Could not open " << filename << endl; exit(1); }
+    size_t r = fread(dest.data(), sizeof(T), dest.size(), f);
+    if (r != dest.size()) { cout << "WARNING: Read mismatch in " << filename << endl; }
+    fclose(f);
+}
+
 int ceil_div(int a, int b) { return (a + b - 1) / b; }
 
 // ---------------------------------------------------------------------
-// CMA Memory Tracker
+// CMA Memory Tracker (Handles Cacheable Allocation + Flushing)
 // ---------------------------------------------------------------------
 struct CmaTracker {
     vector<void*> bufs;
@@ -86,9 +94,10 @@ struct CmaTracker {
     template <typename T>
     T* alloc(size_t elements) {
         size_t bytes = elements * sizeof(T);
+        // allocate as CACHEABLE (1) to allow AXI bursts and prevent Bus Faults
         T* ptr = (T*)cma_alloc(bytes, 1); 
         if (!ptr) { cout << "CMA allocation failed." << endl; exit(1); }
-        memset(ptr, 0, bytes); 
+        memset(ptr, 0, bytes); // Standard memset works now!
         bufs.push_back(ptr);
         sizes.push_back(bytes);
         return ptr;
@@ -114,7 +123,7 @@ struct CmaTracker {
 
 template <typename T>
 void cma_copy(T* dest, const T* src, size_t elements) {
-    memcpy(dest, src, elements * sizeof(T));
+    memcpy(dest, src, elements * sizeof(T)); // Standard memcpy works now!
 }
 
 // ---------------------------------------------------------------------
@@ -213,176 +222,143 @@ int main() {
     cout << "Loading overlay from /home/xilinx/admm/admm_fixed_tiles.bit...\n";
     cout << "Overlay loaded!\n\n";
 
-    const int num_rows = 1024;
-    const int num_cols = 1024;
+    // 1. Parameters
+    float sigma = 1e-2f;
+    float alpha = 1.8f;
+    float eps_abs = 1e-3f, eps_rel = 1e-3f;
+    float pcg_tol_fraction = 1.0f;
+    int admm_max_iter = 2000, pcg_max_iter = 5;
 
-    cout << "Generating Procedural Data: " << num_rows << " x " << num_cols << "...\n";
+    // 2. Data Loading
+    // string ddir = "32768x32768_data_bin_dse/high/";
+    string ddir = "1024x1024_data_bin_dse/low/";
+    int NUM_COLS = get_file_elements(ddir + "q.bin", sizeof(float));
+    int NUM_ROWS = get_file_elements(ddir + "l.bin", sizeof(float));
 
-    std::mt19937 rng(123);
-    std::uniform_real_distribution<float> x_dist(-2.0f, 2.0f);
-    std::uniform_real_distribution<float> p_dist(1.0f, 3.0f);
-    std::uniform_real_distribution<float> a_dist(-1.0f, 1.0f);
-    std::uniform_int_distribution<int> row_dist(0, num_rows - 1);
-    std::uniform_int_distribution<int> constraint_type_dist(0, 2);
-    std::uniform_real_distribution<float> slack_dist(0.5f, 5.0f);
+    vector<int> A_cptr(NUM_COLS + 1);
+    load_bin(ddir + "A_indptr.bin", A_cptr);
+    int A_NNZ = A_cptr.back();
 
-    // 1. Generate Ground Truth x* and Matrix P
-    std::vector<float> x_true(num_cols, 0.0f);
-    std::vector<float> q(num_cols, 0.0f);
-    
-    int P_nnz = num_cols;
-    std::vector<float> P_vals(P_nnz, 0.0f); 
-    std::vector<int> P_ridx(P_nnz, 0);
-    std::vector<int> P_cptr(num_cols + 1, 0);
-    std::vector<float> P_diag(num_cols, 0.0f); 
+    vector<int> P_cptr(NUM_COLS + 1);
+    load_bin(ddir + "P_indptr.bin", P_cptr);
+    int P_NNZ = P_cptr.back();
 
-    for (int c = 0; c < num_cols; ++c) {
-        x_true[c] = x_dist(rng); 
-        P_cptr[c] = c;
-        P_ridx[c] = c;
-        float d = p_dist(rng);
-        P_vals[c] = d;
-        P_diag[c] = d;
-        q[c] = -d * x_true[c]; 
-    }
-    P_cptr[num_cols] = P_nnz;
+    cout << "Loading QP data from: " << ddir << "\n";
+    cout << "Problem size: " << NUM_ROWS << " x " << NUM_COLS << "\n\n";
 
-    // 2. Generate Matrix A and AT
-    int A_nnz = num_cols;
-    std::vector<float> A_vals(A_nnz, 0.0f);
-    std::vector<int> A_ridx(A_nnz, 0);
-    std::vector<int> A_cptr(num_cols + 1, 0);
-    std::vector<float> z_true(num_rows, 0.0f);
-    
-    for (int c = 0; c < num_cols; ++c) {
-        A_cptr[c] = c;
-        A_ridx[c] = row_dist(rng);
-        float v = a_dist(rng);
-        if (std::fabs(v) < 1e-3f) v = 1e-3f;
-        A_vals[c] = v;
-        z_true[A_ridx[c]] += v * x_true[c];
-    }
-    A_cptr[num_cols] = A_nnz;
+    vector<float> P_diag(NUM_COLS), q(NUM_COLS), l(NUM_ROWS), u(NUM_ROWS);
+    vector<int> A_ridx(A_NNZ);
+    vector<float> A_vals(A_NNZ);
+    vector<int> P_ridx(P_NNZ);
+    vector<float> P_vals(P_NNZ);
+    vector<float> x_true(NUM_COLS);
 
-    std::vector<float> AT_vals;
-    std::vector<int> AT_ridx;
-    std::vector<int> AT_cptr;
-    transpose_csc(num_rows, num_cols, A_cptr, A_ridx, A_vals, AT_cptr, AT_ridx, AT_vals);
-
-    // 3. Assign Bounds based on z*
-    std::vector<float> l(num_rows, 0.0f);
-    std::vector<float> u(num_rows, 0.0f);
-    std::vector<float> rho(num_rows, 0.0f);
-
-    for (int i = 0; i < num_rows; i++) {
-        int type = constraint_type_dist(rng);
-        float slack1 = slack_dist(rng);
-        float slack2 = slack_dist(rng);
-
-        if (type == 0) { 
-            l[i] = z_true[i];
-            u[i] = z_true[i];
-        } 
-        else if (type == 1) { 
-            l[i] = z_true[i] - slack1;
-            u[i] = z_true[i] + slack2;
-        } 
-        else { 
-            l[i] = -OSQP_INFTY; 
-            u[i] = OSQP_INFTY;
-        }
-    }
+    load_bin(ddir + "P_diag.bin", P_diag);
+    load_bin(ddir + "q.bin", q);
+    load_bin(ddir + "l.bin", l);
+    load_bin(ddir + "u.bin", u);
+    load_bin(ddir + "A_indices.bin", A_ridx);
+    load_bin(ddir + "A_data.bin", A_vals);
+    load_bin(ddir + "P_indices.bin", P_ridx);
+    load_bin(ddir + "P_data.bin", P_vals);
+    load_bin(ddir + "x_true.bin", x_true);
 
     vector<float> P_diag_orig = P_diag;
     vector<float> q_orig = q;
-    
-    // 3.5 Apply Ruiz Equilibration (Fixes Missing 'E' Scope Error)
-    cout << "Applying Ruiz Equilibration...\n";
-    vector<float> E(num_cols, 1.0f), D(num_rows, 1.0f);
+    vector<float> l_orig = l;
+    vector<float> u_orig = u;
+    vector<float> A_vals_orig = A_vals;
+
+    // 3. Ruiz Equilibration
+    cout << "Applying Ruiz Equilibration...\n\n";
+    vector<float> E(NUM_COLS, 1.0f), D(NUM_ROWS, 1.0f);
     for (int iter = 0; iter < 10; ++iter) {
-        vector<float> A_col_norm(num_cols, 0.0f), A_row_norm(num_rows, 0.0f);
-        for (int c = 0; c < num_cols; ++c) {
+        vector<float> A_col_norm(NUM_COLS, 0.0f), A_row_norm(NUM_ROWS, 0.0f);
+        for (int c = 0; c < NUM_COLS; ++c) {
             for (int idx = A_cptr[c]; idx < A_cptr[c+1]; ++idx) {
-                float val = std::abs(A_vals[idx]);
-                A_col_norm[c] = std::max(A_col_norm[c], val);
-                A_row_norm[A_ridx[idx]] = std::max(A_row_norm[A_ridx[idx]], val);
+                float val = abs(A_vals[idx]);
+                A_col_norm[c] = max(A_col_norm[c], val);
+                A_row_norm[A_ridx[idx]] = max(A_row_norm[A_ridx[idx]], val);
             }
         }
-        vector<float> E_new(num_cols), D_new(num_rows);
-        for (int c = 0; c < num_cols; ++c) {
-            float x_norm = std::max(std::max(std::abs(P_diag[c]), A_col_norm[c]), 1e-4f);
-            E_new[c] = 1.0f / std::sqrt(x_norm);
+        
+        vector<float> E_new(NUM_COLS), D_new(NUM_ROWS);
+        for (int c = 0; c < NUM_COLS; ++c) {
+            float x_norm = max(max(abs(P_diag[c]), A_col_norm[c]), 1e-4f);
+            E_new[c] = 1.0f / sqrt(x_norm);
             E[c] *= E_new[c];
             P_diag[c] *= (E_new[c] * E_new[c]);
         }
-        for (int r = 0; r < num_rows; ++r) {
-            float z_norm = std::max(A_row_norm[r], 1e-4f);
-            D_new[r] = 1.0f / std::sqrt(z_norm);
+        for (int r = 0; r < NUM_ROWS; ++r) {
+            float z_norm = max(A_row_norm[r], 1e-4f);
+            D_new[r] = 1.0f / sqrt(z_norm);
             D[r] *= D_new[r];
         }
-        for (int c = 0; c < num_cols; ++c) {
+        for (int c = 0; c < NUM_COLS; ++c) {
             for (int idx = A_cptr[c]; idx < A_cptr[c+1]; ++idx) {
                 A_vals[idx] *= (D_new[A_ridx[idx]] * E_new[c]);
             }
         }
     }
 
-    for (int c = 0; c < num_cols; ++c) q[c] *= E[c];
-
-    for (int r = 0; r < num_rows; ++r) {
-        if (l[r] <= -OSQP_INFTY * 0.9f) l[r] = -OSQP_INFTY;
-        else l[r] *= D[r];
-
-        if (u[r] >= OSQP_INFTY * 0.9f) u[r] = OSQP_INFTY;
-        else u[r] *= D[r];
+    float max_val = 1e-15f; 
+    for (int c = 0; c < NUM_COLS; ++c) {
+        q[c] *= E[c];
+        max_val = max(max_val, max(abs(P_diag[c]), abs(q[c])));
     }
-
-    float max_val = 1e-15f;
-    for (int c = 0; c < num_cols; ++c) {
-        max_val = std::max(max_val, std::max(std::abs(P_diag[c]), std::abs(q[c])));
-    }
-    float c_scale = std::max(1.0f / max_val, 1e-4f);
+    float c_scale = max(1.0f / max_val, 1e-4f);
     
-    for (int c = 0; c < num_cols; ++c) { 
-        P_diag[c] *= c_scale; 
-        q[c] *= c_scale; 
+    for (int c = 0; c < NUM_COLS; ++c) { P_diag[c] *= c_scale; q[c] *= c_scale; }
+    for (int r = 0; r < NUM_ROWS; ++r) {
+        l[r] = (l[r] <= -0.9e17f) ? -1e17f : l[r] * D[r];
+        u[r] = (u[r] >= 0.9e17f)  ?  1e17f : u[r] * D[r];
     }
 
-    // Process Rho values post-equilibration
-    for (int i = 0; i < num_rows; i++) {
-        rho[i] = OSQP_RHO;
-        bool fin_l = (std::abs(l[i]) < OSQP_INFTY * 0.9f);
-        bool fin_u = (std::abs(u[i]) < OSQP_INFTY * 0.9f);
-        if (!fin_l && !fin_u) {
-            rho[i] = OSQP_RHO_MIN;
-        } else if (fin_l && fin_u && ((u[i] - l[i]) < 0.01f)) {
-            rho[i] = OSQP_RHO * OSQP_RHO_EQ_OVER_RHO_INEQ;
+    vector<float> rho(NUM_ROWS, 1.0f);
+    for(int r = 0; r < NUM_ROWS; r++) {
+        if (abs(l_orig[r]) >= 0.9e17f || abs(u_orig[r]) >= 0.9e17f) {
+            rho[r] = 1e-6f;
         }
-        rho[i] = std::max(OSQP_RHO_MIN, std::min(OSQP_RHO_MAX, rho[i]));
     }
     
-    // 4. Matrix Tiling
-    cout << "Slicing and Allocating Tiled Matrices...\n";
-    TiledMatrix tm_A = build_tiled_csc(num_rows, num_cols, A_cptr, A_ridx, A_vals);
-    TiledMatrix tm_AT = build_tiled_csc(num_cols, num_rows, AT_cptr, AT_ridx, AT_vals);
-    TiledMatrix tm_P = build_tiled_csc(num_cols, num_cols, P_cptr, P_ridx, P_vals);
+    for (float& val : A_vals) if (abs(val) > 0.0f && abs(val) < 1e-15f) val = 0.0f;
+    for (float& val : q)      if (abs(val) > 0.0f && abs(val) < 1e-15f) val = 0.0f;
+    for (float& val : P_diag) if (abs(val) > 0.0f && abs(val) < 1e-15f) val = 0.0f;
 
-    // 5. CACHEABLE CMA Allocations
+    // 4. Matrix Transpositions & Tiling
+    vector<int> AT_cptr, AT_ridx; vector<float> AT_vals;
+    transpose_csc(NUM_ROWS, NUM_COLS, A_cptr, A_ridx, A_vals, AT_cptr, AT_ridx, AT_vals);
+
+    cout << "Slicing and Allocating Tiled Matrices... (This may take a moment)\n";
+    cout << "  Tiling Matrix A...\n";
+    TiledMatrix tm_A = build_tiled_csc(NUM_ROWS, NUM_COLS, A_cptr, A_ridx, A_vals);
+    cout << "  Tiling Matrix AT...\n";
+    TiledMatrix tm_AT = build_tiled_csc(NUM_COLS, NUM_ROWS, AT_cptr, AT_ridx, AT_vals);
+
+    for (int c = 0; c < NUM_COLS; ++c) {
+        for (int idx = P_cptr[c]; idx < P_cptr[c+1]; ++idx) {
+            P_vals[idx] = P_diag[c]; 
+        }
+    }
+    cout << "  Tiling Matrix P...\n\n";
+    TiledMatrix tm_P = build_tiled_csc(NUM_COLS, NUM_COLS, P_cptr, P_ridx, P_vals);
+
+    // 5. Cacheable CMA Allocations
     CmaTracker cma;
 
-    int a_words_cnt = ceil_div(A_nnz, PACK_SIZE);
+    int a_words_cnt = ceil_div(A_NNZ, PACK_SIZE);
     int32_words* A_reg_ridx = cma.alloc<int32_words>(a_words_cnt);
     float32_words* A_reg_vals = cma.alloc<float32_words>(a_words_cnt);
-    int* A_reg_cptr = cma.alloc<int>(num_cols + 1);
+    int* A_reg_cptr = cma.alloc<int>(NUM_COLS + 1);
 
     vector<int32_words> temp_A_ridx(a_words_cnt, {0});
     vector<float32_words> temp_A_vals(a_words_cnt, {0.0f});
-    for (int i=0; i<A_nnz; i++) {
+    for (int i=0; i<A_NNZ; i++) {
         temp_A_ridx[i / PACK_SIZE].data[i % PACK_SIZE] = A_ridx[i];
         temp_A_vals[i / PACK_SIZE].data[i % PACK_SIZE] = A_vals[i];
     }
     
-    cma_copy(A_reg_cptr, A_cptr.data(), num_cols + 1);
+    cma_copy(A_reg_cptr, A_cptr.data(), NUM_COLS + 1);
     cma_copy(A_reg_ridx, temp_A_ridx.data(), a_words_cnt);
     cma_copy(A_reg_vals, temp_A_vals.data(), a_words_cnt);
 
@@ -398,13 +374,13 @@ int main() {
     ALLOC_TILE_CMA(AT, tm_AT);
     ALLOC_TILE_CMA(P, tm_P);
 
-    float* hw_Pdiag = cma.alloc<float>(num_cols); cma_copy(hw_Pdiag, P_diag.data(), num_cols);
-    float* hw_l = cma.alloc<float>(num_rows);     cma_copy(hw_l, l.data(), num_rows);
-    float* hw_u = cma.alloc<float>(num_rows);     cma_copy(hw_u, u.data(), num_rows);
-    float* hw_q = cma.alloc<float>(num_cols);     cma_copy(hw_q, q.data(), num_cols);
-    float* hw_rho = cma.alloc<float>(num_rows);   cma_copy(hw_rho, rho.data(), num_rows);
-    float* hw_x = cma.alloc<float>(num_cols);
-    float* hw_y = cma.alloc<float>(num_rows);
+    float* hw_Pdiag = cma.alloc<float>(NUM_COLS); cma_copy(hw_Pdiag, P_diag.data(), NUM_COLS);
+    float* hw_l = cma.alloc<float>(NUM_ROWS);     cma_copy(hw_l, l.data(), NUM_ROWS);
+    float* hw_u = cma.alloc<float>(NUM_ROWS);     cma_copy(hw_u, u.data(), NUM_ROWS);
+    float* hw_q = cma.alloc<float>(NUM_COLS);     cma_copy(hw_q, q.data(), NUM_COLS);
+    float* hw_rho = cma.alloc<float>(NUM_ROWS);   cma_copy(hw_rho, rho.data(), NUM_ROWS);
+    float* hw_x = cma.alloc<float>(NUM_COLS);
+    float* hw_y = cma.alloc<float>(NUM_ROWS);
 
     // 6. Memory Map
     int mem_fd = open("/dev/mem", O_RDWR | O_SYNC);
@@ -432,26 +408,15 @@ int main() {
 
     RunResult results[2];
 
-    float sigma = 1e-2f;
-    float alpha = 1.8f;
-    float eps_abs = 1e-3f, eps_rel = 1e-3f;
-    float pcg_tol_fraction = 1.0f;
-    int admm_max_iter = 2000, pcg_max_iter = 5;
-
     // 7. Execution Loop
     for (int ad_rho = 0; ad_rho <= 1; ++ad_rho) {
         printf("=== HW Run (adaptive_rho=%d) ===\n", ad_rho);
 
-        volatile float* v_hw_x = static_cast<volatile float*>(hw_x);
-        for(int i = 0; i < num_cols; i++) {
-            v_hw_x[i] = 0.0f;
-        }
-        volatile float* v_hw_y = static_cast<volatile float*>(hw_y);
-        for(int i = 0; i < num_rows; i++) {
-            v_hw_y[i] = 0.0f;
-        }
+        // Reset outputs
+        memset(hw_x, 0, NUM_COLS * sizeof(float));
+        memset(hw_y, 0, NUM_ROWS * sizeof(float));
 
-        write_reg(ctrl, 0x10, num_rows); write_reg(ctrl, 0x18, num_cols); write_reg(ctrl, 0x20, A_nnz);
+        write_reg(ctrl, 0x10, NUM_ROWS); write_reg(ctrl, 0x18, NUM_COLS); write_reg(ctrl, 0x20, A_NNZ);
         write_reg(ctrl, 0x28, tm_A.rtiles); write_reg(ctrl, 0x30, tm_A.ctiles);
         write_reg(ctrl, 0x38, tm_AT.rtiles); write_reg(ctrl, 0x40, tm_AT.ctiles);
         write_reg(ctrl, 0x48, tm_P.rtiles); write_reg(ctrl, 0x50, tm_P.ctiles);
@@ -461,68 +426,136 @@ int main() {
         write_reg(ctrl, 0x80, float_to_uint(eps_abs)); write_reg(ctrl, 0x88, float_to_uint(eps_rel)); 
         write_reg(ctrl, 0x90, float_to_uint(pcg_tol_fraction));
 
-        // Flush Cache to DDR
+        // SYNC CACHE TO RAM BEFORE HW START
         cma.flush_all();
 
+
+
+
+        printf("\n--- FPGA PRE-FLIGHT CHECK ---\n");
+        printf("IP Base Address: %p\n", ctrl);
+        
+
+
+
+        std::unique_ptr<pmt::PMT> sensor(pmt::xilinx::Xilinx::Create());
+        pmt::State start, end;
+        start = sensor->Read();
+        
         double hw_start = get_time_ms();
+
         write_reg(ctrl, 0x00, 0x01);
         
-        // High-res integer spin delay (approx 10us)
-        auto poll_start = std::chrono::high_resolution_clock::now();
-        while ((read_reg(ctrl, 0x00) & 0x02) == 0) {
-            auto now = std::chrono::high_resolution_clock::now();
-            while (std::chrono::duration_cast<std::chrono::microseconds>(now - poll_start).count() < 10) {
-                now = std::chrono::high_resolution_clock::now();
-            }
-            poll_start = std::chrono::high_resolution_clock::now();
-        }
-        
-        double hw_end = get_time_ms();
 
-        // Invalidate Cache to read DDR
-        cma.invalidate_all();
+        // // Wait loop + Throttle AXI-Lite
+        // while ((read_reg(ctrl, 0x00) & 0x02) == 0) {
+        //     usleep(100);
+        // }
+        
+        // double hw_end = get_time_ms();
+        // end = sensor->Read();
+
+        // // SYNC RAM TO CACHE AFTER HW FINISHES
+        // cma.invalidate_all();
+
+        // std::cout << "Power Measurements (Watts):\n";
+        // std::cout << "  FPGA Core Logic: " << end.watt_[1] << " W\n";
+        // std::cout << "  FPGA AUX:        " << end.watt_[2] << " W\n";
+        // std::cout << "  FPGA Total:      " << end.watt_[3] << " W\n";
+        // std::cout << "  Board Total:     " << end.watt_[4] << " W\n";
+        // std::cout << std::defaultfloat << "\n";
+
+
+        double core_energy = 0.0;
+        double aux_energy = 0.0;
+        double fpga_energy = 0.0;
+        double board_energy = 0.0;
+
+        pmt::State prev = start;
+
+        while ((read_reg(ctrl,0x00) & 0x02) == 0) {
+
+            usleep(10000);
+
+            pmt::State curr = sensor->Read();
+
+            std::chrono::duration<double> diff = curr.timestamp_ - prev.timestamp_;
+            double dt = diff.count();
+
+            core_energy  += 0.5 * (prev.watt_[1] + curr.watt_[1]) * dt;
+            aux_energy   += 0.5 * (prev.watt_[2] + curr.watt_[2]) * dt;
+            fpga_energy  += 0.5 * (prev.watt_[3] + curr.watt_[3]) * dt;
+            board_energy += 0.5 * (prev.watt_[4] + curr.watt_[4]) * dt;
+
+            prev = curr;
+        }
+
+            double hw_end = get_time_ms();
+    
+            std::cout << "Energy Measurements (Joules):\n";
+            std::cout << "  FPGA Core Logic: " << core_energy << " J\n";
+            std::cout << "  FPGA AUX:        " << aux_energy << " J\n";
+            std::cout << "  FPGA Total:      " << fpga_energy << " J\n";
+            std::cout << "  Board Total:     " << board_energy << " J\n";
+            std::cout << std::defaultfloat << "\n";
+
+            double runtime_s = (hw_end - hw_start) / 1000.0;
+
+            std::cout << "FPGA avg power = "
+                    << fpga_energy / runtime_s
+                    << " W\n";
+
 
         int admm_iters = read_reg(ctrl, 0x98);
         int pcg_iters = read_reg(ctrl, 0xa8);
         float p_res = uint_to_float(read_reg(ctrl, 0xb8));
         float d_res = uint_to_float(read_reg(ctrl, 0xc8));
         int status = read_reg(ctrl, 0xd8);
+        float avg_pcg = admm_iters > 0 ? (float)pcg_iters / admm_iters : 0.0f;
 
-        // Unscale x and calculate Objective & MAE
-        vector<float> x_unscaled(num_cols);
-        float mae = 0.0f;
-        double obj = 0.0;
-
-        for (int i = 0; i < num_cols; i++) {
+        vector<float> x_unscaled(NUM_COLS);
+        for (int i = 0; i < NUM_COLS; i++) {
             x_unscaled[i] = hw_x[i] * E[i];
-            mae += std::fabs(x_unscaled[i] - x_true[i]);
+        }
+
+        double obj = 0.0;
+        for (int i = 0; i < NUM_COLS; i++) {
             obj += 0.5 * P_diag_orig[i] * x_unscaled[i] * x_unscaled[i] + q_orig[i] * x_unscaled[i];
         }
-        mae /= num_cols;
 
-        results[ad_rho] = {admm_iters, pcg_iters, p_res, d_res, 0.0f, obj, hw_end - hw_start, mae};
+        vector<float> Ax(NUM_ROWS, 0.0f);
+        for (int c = 0; c < NUM_COLS; c++) {
+            for (int idx = A_cptr[c]; idx < A_cptr[c+1]; idx++) {
+                Ax[A_ridx[idx]] += A_vals_orig[idx] * x_unscaled[c];
+            }
+        }
+        float max_viol = 0.0f;
+        for (int r = 0; r < NUM_ROWS; r++) {
+            float viol_l = l_orig[r] - Ax[r];
+            float viol_u = Ax[r] - u_orig[r];
+            float v = max(0.0f, max(viol_l, viol_u));
+            max_viol = max(max_viol, v);
+        }
+
+        results[ad_rho] = {admm_iters, pcg_iters, p_res, d_res, max_viol, obj, hw_end - hw_start};
 
         printf("HW execution time: %.4f ms\n", hw_end - hw_start);
         printf("Status: %s\n", status == 1 ? "Converged" : "Max Iterations");
         printf("ADMM Iterations: %d\n", admm_iters);
-        printf("PCG Iterations : %d\n", pcg_iters);
+        printf("PCG Iterations : %d (Average pcg/admm: %.1f)\n", pcg_iters, avg_pcg);
         printf("Primal Residual: %.5e\n", p_res);
         printf("Dual Residual  : %.5e\n", d_res);
         printf("Objective Value: %.6e\n", obj);
-        printf("Mean Abs Error : %.5e\n", mae);
-
-        printf("\n--- First 10 Elements of x_unscaled ---\n");
-        for (int i = 0; i < std::min(10, num_cols); i++) {
-            printf("  x[%2d] = %13.6f | Expected: %13.6f\n", i, x_unscaled[i], x_true[i]);
-        }
-        printf("\n");
+        printf("Max Violation  : %.3e\n\n", max_viol);
     }
 
     printf("=== Summary ===\n");
     printf("ADMM iterations: off=%d | on=%d\n", results[0].admm_iters, results[1].admm_iters);
     printf("PCG iterations:  off=%d | on=%d\n", results[0].pcg_iters, results[1].pcg_iters);
-    printf("Objective Value: off=%.6e | on=%.6e\n", results[0].obj, results[1].obj);
-    printf("MAE from Truth:  off=%.3e | on=%.3e\n", results[0].mae, results[1].mae);
+    printf("Primal residual: off=%.3e | on=%.3e\n", results[0].r_prim, results[1].r_prim);
+    printf("Dual residual:   off=%.3e | on=%.3e\n", results[0].r_dual, results[1].r_dual);
+    printf("Violation:       off=%.3e | on=%.3e\n", results[0].viol, results[1].viol);
+    printf("Objective:       off=%.6e | on=%.6e\n", results[0].obj, results[1].obj);
     printf("HW time (ms):    off=%.3f | on=%.3f\n\n", results[0].hw_ms, results[1].hw_ms);
 
     munmap(ip_base, MAP_SIZE); close(mem_fd);

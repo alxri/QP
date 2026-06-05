@@ -119,7 +119,7 @@ def plot_resources(config_label, stats, out_dir):
     plt.axhline(y=100, color='r', linestyle='--', alpha=0.3)
     
     plt.ylabel("Utilization (%)", fontweight='bold', fontsize=11)
-    plt.title(f"Hardware Resource Footprint: {config_label}", fontweight='bold', fontsize=12, pad=15)
+    plt.title(f"Hardware Resource Utilization: {config_label}", fontweight='bold', fontsize=12, pad=15)
     plt.grid(axis='y', linestyle=':', alpha=0.6)
 
     for bar in bars:

@@ -20,6 +20,8 @@ extern "C" QPFPGAStatus qpfpga_solve(
 {
     if (!problem || !options || !result) return QPFPGA_STATUS_SOLVER_ERROR;
 
+    double prep_start = get_time_ms();
+
     int n = problem->n;
     int m = problem->m;
 
@@ -30,8 +32,7 @@ extern "C" QPFPGAStatus qpfpga_solve(
         float* out_y = new float[m];
         for (int i = 0; i < n; ++i) {
             float scale = (i < (int)E_vec.size()) ? E_vec[i] : 1.0f;
-            out_x[i] = (-q_vec[i] / std::max(P_diag_vec[i], 1e-6f)) * scale;
-        }
+            out_x[i] = (-q_vec[i] / std::max(P_diag_vec[i], options->sigma)) * scale;        }
         for (int i = 0; i < m; ++i) out_y[i] = 0.0f;
 
         result->status = QPFPGA_STATUS_OPTIMAL;
@@ -41,6 +42,7 @@ extern "C" QPFPGAStatus qpfpga_solve(
         result->dual_residual = 0.0f;
         result->objective_value = 0.0f;
         result->solve_time_ms = 0.0;
+        result->setup_time_ms = 0.0;
         result->x = out_x;
         result->y = out_y;
         return result->status;
@@ -66,12 +68,26 @@ extern "C" QPFPGAStatus qpfpga_solve(
     build_diag_from_csc(n, P_cptr, P_ridx, P_vals, P_diag);
 
     // Equilibration (in-place modifies A_vals, P_diag, q, l, u)
-    std::vector<float> D, E;
+    std::vector<float> D(m, 1.0f);
+    std::vector<float> E(n, 1.0f);
     try {
-        ruiz_equilibration(m, n, A_cptr, A_ridx, A_vals, P_diag, q, l, u, D, E, 6);
-    } catch (...) {
-        // If equilibration fails, continue with original data
+        ruiz_equilibration(m, n, A_cptr, A_ridx, A_vals, P_diag, q, l, u, D, E, RUIZ_ITER_DEFAULT);    } catch (...) {
     }
+
+    for (int c = 0; c < n; ++c) {
+        for (int idx = P_cptr[c]; idx < P_cptr[c+1]; ++idx) {
+            if (P_ridx[idx] == c) {
+                P_vals[idx] = P_diag[c];
+            } else {
+                P_vals[idx] = 0.0f; 
+            }
+        }
+    }
+
+    for (float& val : A_vals) if (std::abs(val) > 0.0f && std::abs(val) < 1e-15f) val = 0.0f;
+    for (float& val : P_vals) if (std::abs(val) > 0.0f && std::abs(val) < 1e-15f) val = 0.0f;
+    for (float& val : q)      if (std::abs(val) > 0.0f && std::abs(val) < 1e-15f) val = 0.0f;
+    for (float& val : P_diag) if (std::abs(val) > 0.0f && std::abs(val) < 1e-15f) val = 0.0f;
 
     // Build transpose of A
     std::vector<int> AT_cptr; std::vector<int> AT_ridx; std::vector<float> AT_vals;
@@ -103,14 +119,25 @@ extern "C" QPFPGAStatus qpfpga_solve(
     ALLOC_TILE_CMA_LOCAL(AT, tm_AT);
     ALLOC_TILE_CMA_LOCAL(P, tm_P);
 
-    float* hw_Pdiag = cma.alloc<float>(n); cma_copy(hw_Pdiag, P_diag.data(), n);
-    float* hw_l = cma.alloc<float>(m);     cma_copy(hw_l, l.data(), m);
-    float* hw_u = cma.alloc<float>(m);     cma_copy(hw_u, u.data(), m);
-    float* hw_q = cma.alloc<float>(n);     cma_copy(hw_q, q.data(), n);
     std::vector<float> rho = build_rho_vector(m, l, u);
-    float* hw_rho = cma.alloc<float>(m);   cma_copy(hw_rho, rho.data(), m);
-    float* hw_x = cma.alloc<float>(n);
-    float* hw_y = cma.alloc<float>(m);
+
+    int n_pad = ceil_div(n, PACK_SIZE) * PACK_SIZE;
+    int m_pad = ceil_div(m, PACK_SIZE) * PACK_SIZE;
+
+    P_diag.resize(n_pad, 0.0f);
+    q.resize(n_pad, 0.0f);
+    l.resize(m_pad, -ADMM_INFTY);
+    u.resize(m_pad, ADMM_INFTY);
+    rho.resize(m_pad, 1.0f);
+
+    // Allocate CMA buffers using the padded sizes
+    float* hw_Pdiag = cma.alloc<float>(n_pad); cma_copy(hw_Pdiag, P_diag.data(), n_pad);
+    float* hw_l = cma.alloc<float>(m_pad);     cma_copy(hw_l, l.data(), m_pad);
+    float* hw_u = cma.alloc<float>(m_pad);     cma_copy(hw_u, u.data(), m_pad);
+    float* hw_q = cma.alloc<float>(n_pad);     cma_copy(hw_q, q.data(), n_pad);
+    float* hw_rho = cma.alloc<float>(m_pad);   cma_copy(hw_rho, rho.data(), m_pad);
+    float* hw_x = cma.alloc<float>(n_pad);     // HW writes padded size, we read back 'n'
+    float* hw_y = cma.alloc<float>(m_pad);     // HW writes padded size, we read back 'm'
 
     // Memory map control registers
     int mem_fd = open("/dev/mem", O_RDWR | O_SYNC);
@@ -156,6 +183,8 @@ extern "C" QPFPGAStatus qpfpga_solve(
 
     cma.flush_all();
 
+    result->setup_time_ms = get_time_ms() - prep_start;
+    
     double hw_start = get_time_ms();
     write_reg(ctrl, XADMM_CONTROL_ADDR_AP_CTRL, 0x01);
 
@@ -169,7 +198,7 @@ extern "C" QPFPGAStatus qpfpga_solve(
             fprintf(stderr, "[qpfpga] accelerator timeout after %d ms, using CPU fallback.\n", timeout_ms);
             munmap(ip_base, MAP_SIZE);
             close(mem_fd);
-            cma.free_all();
+            // cma.free_all();
             return cpu_fallback(q, P_diag, E);
         }
     }
@@ -187,7 +216,7 @@ extern "C" QPFPGAStatus qpfpga_solve(
     // Copy out results into freshly allocated arrays returned to caller
     float* out_x = new float[n];
     float* out_y = new float[m];
-    for (int i = 0; i < n; ++i) out_x[i] = hw_x[i];
+    for (int i = 0; i < n; ++i) out_x[i] = hw_x[i] * E[i];
     for (int i = 0; i < m; ++i) out_y[i] = hw_y[i];
 
     result->status = (status == 1) ? QPFPGA_STATUS_OPTIMAL : QPFPGA_STATUS_USER_LIMIT;

@@ -172,11 +172,16 @@ void ruiz_equilibration(
     }
 
     // Scale constraints
-    for (int r = 0; r < NUM_ROWS; ++r) {
-        if (!std::isinf(l[r]))
+   for (int r = 0; r < NUM_ROWS; ++r) {
+        if (l[r] > -0.9f * ADMM_INFTY)
             l[r] *= D[r];
-        if (!std::isinf(u[r]))
+        else
+            l[r] = -ADMM_INFTY;
+
+        if (u[r] < 0.9f * ADMM_INFTY)
             u[r] *= D[r];
+        else
+            u[r] = ADMM_INFTY;
     }
 }
 
@@ -188,16 +193,14 @@ std::vector<float> build_rho_vector(
     std::vector<float> rho(NUM_ROWS, 1.0f);
 
     for (int r = 0; r < NUM_ROWS; ++r) {
-        bool fin_l = !std::isinf(l[r]);
-        bool fin_u = !std::isinf(u[r]);
-        // Free constraint
-        if (!fin_l && !fin_u) {
+        bool loose_l = (l[r] <= -0.9f * ADMM_INFTY);
+        bool loose_u = (u[r] >= 0.9f * ADMM_INFTY);
+
+        if (loose_l && loose_u) {
             rho[r] = 1e-6f;
         }
-
-        // Equality-like constraint
-        else if (fin_l && fin_u && ((u[r] - l[r]) < 0.01f)) {
-            rho[r] = 100.0f;
+        else if (!loose_l && !loose_u && ((u[r] - l[r]) < 1e-3f)) {
+            rho[r] = 100.0f; 
         }
     }
     return rho;

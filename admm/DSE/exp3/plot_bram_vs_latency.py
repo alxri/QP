@@ -1,3 +1,5 @@
+# python plot_bram_vs_latency.py --label-offsets pareto_label_offsets_by_density.json --legend-offsets legend_offsets.json
+
 #!/usr/bin/env python3
 """Plot BRAM utilization vs latency for exp3, split by density.
 
@@ -27,6 +29,16 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help=("Optional JSON file with per-label offsets. "
               "Format: {\"config_label\": [dx, dy], ...} where dx/dy are in points."),
+    )
+    parser.add_argument(
+        "--legend-offsets",
+        type=Path,
+        default=None,
+        help=(
+            'Optional JSON file with per-plot legend positions. '
+            'Format: {"output_stem": {"loc": "upper left", "bbox_anchor": [x, y]}, ... } '
+            'Coordinates for bbox_anchor are in axes fraction (0..1).'
+        ),
     )
     return parser
 
@@ -123,6 +135,38 @@ def main() -> None:
         except Exception as e:
             print(f"Error reading label offsets {args.label_offsets}: {e}. Continuing without offsets.")
 
+    # Load optional legend offsets JSON (per-output file stem)
+    legend_offsets: dict[str, dict] = {}
+    if args.legend_offsets is not None:
+        import json
+
+        try:
+            with open(args.legend_offsets, "r") as lh:
+                raw_leg = json.load(lh)
+
+            if isinstance(raw_leg, dict):
+                for k, v in raw_leg.items():
+                    if not isinstance(v, dict):
+                        print(f"Warning: legend offset for {k} is not an object, skipping")
+                        continue
+                    entry: dict = {}
+                    loc = v.get("loc")
+                    if isinstance(loc, str):
+                        entry["loc"] = loc
+                    bbox = v.get("bbox_anchor")
+                    if isinstance(bbox, (list, tuple)) and len(bbox) >= 2:
+                        try:
+                            entry["bbox_anchor"] = (float(bbox[0]), float(bbox[1]))
+                        except Exception:
+                            print(f"Warning: invalid bbox_anchor for {k}, expected two numbers. Skipping bbox.")
+                    legend_offsets[str(k)] = entry
+            else:
+                print(f"Warning: legend offsets file {args.legend_offsets} has unexpected format. Ignoring.")
+        except FileNotFoundError:
+            print(f"Legend offsets file not found: {args.legend_offsets}. Continuing without legend offsets.")
+        except Exception as e:
+            print(f"Error reading legend offsets {args.legend_offsets}: {e}. Continuing without legend offsets.")
+
     agg_fn = "mean" if args.metric == "mean" else "median"
     plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10})
     plt.style.use("seaborn-v0_8-whitegrid")
@@ -153,7 +197,28 @@ def main() -> None:
     # Latency thresholds (seconds) for filtered plots per density
     latency_thresholds = {"high": 40.0, "medium": 8.0, "med": 8.0, "low": 5.0}
 
-    def render_density_plot(df_density: pd.DataFrame, out_path: Path, density_label: str, title_suffix: str) -> None:
+    def series_label(tile_size: float, reshape: float) -> str:
+        return f"{int(tile_size)}x{int(tile_size)}, RF={int(reshape)}"
+
+    def build_series_color_map(df_density: pd.DataFrame) -> dict[str, str]:
+        labels = (
+            df_density[["tile_size", "reshape"]]
+            .drop_duplicates()
+            .sort_values(["tile_size", "reshape"])
+            .apply(lambda row: series_label(row["tile_size"], row["reshape"]), axis=1)
+            .tolist()
+        )
+        cycle = plt.rcParams["axes.prop_cycle"].by_key().get("color", ["#1f77b4"])
+        return {label: cycle[i % len(cycle)] for i, label in enumerate(labels)}
+
+    def render_density_plot(
+        df_density: pd.DataFrame,
+        out_path: Path,
+        density_label: str,
+        title_suffix: str,
+        series_color_map: dict[str, str],
+        legend_loc: str = "upper right",
+    ) -> None:
         grouped = (
             df_density.groupby(["tile_size", "reshape", "bram_util"], as_index=False)
             .agg({"solve_s": agg_fn, "pes": "first"})
@@ -165,15 +230,22 @@ def main() -> None:
 
         for (t_size, rs), grp in grouped.groupby(["tile_size", "reshape"]):
             grp = grp.sort_values("bram_util")
-            label_name = f"{int(t_size)}x{int(t_size)} (RS={int(rs)})"
+            label_name = series_label(t_size, rs)
+            color = series_color_map.get(label_name)
 
-            line = ax.plot(grp["bram_util"], grp["solve_s"], marker="o", linewidth=2, label=label_name)
-            color = line[0].get_color()
+            ax.plot(
+                grp["bram_util"],
+                grp["solve_s"],
+                marker="o",
+                linewidth=2,
+                label=label_name,
+                color=color,
+            )
 
             # Create text objects but don't place them permanently yet
             for xb, yb, p in zip(grp["bram_util"], grp["solve_s"], grp["pes"]):
                 t = ax.text(
-                    xb, yb, f"PE={int(p)}",
+                    xb, yb, f"PEs={int(p)}",
                     fontsize=8, ha="center", va="center",
                     bbox={"boxstyle": "round,pad=0.2", "fc": "white", "alpha": 0.8, "ec": color}
                 )
@@ -193,10 +265,31 @@ def main() -> None:
 
         ax.set_xlabel("BRAM Utilization (%)", fontweight="bold")
         ax.set_ylabel("Latency [s]", fontweight="bold")
-        ax.set_title(f"Tile Size & PEs vs Latency {title_suffix}", fontweight="bold", pad=15)
+        ax.set_title(f"Tile Size, PEs, Reshape Factor vs Latency {title_suffix}", fontweight="bold", pad=15)
         ax.yaxis.set_major_formatter(ScalarFormatter())
         ax.grid(True, which="major", linestyle="--", linewidth=0.8, alpha=0.7)
-        ax.legend(title="Configuration", bbox_to_anchor=(1.05, 1), loc='upper left')
+        # Allow per-output legend overrides from legend_offsets JSON (keyed by output stem)
+        legend_cfg = legend_offsets.get(out_path.stem, {}) if isinstance(legend_offsets, dict) else {}
+        cfg_loc = legend_cfg.get("loc", legend_loc)
+        bbox = legend_cfg.get("bbox_anchor")
+        if bbox is not None:
+            ax.legend(
+                title="",
+                loc=cfg_loc,
+                bbox_to_anchor=tuple(bbox),
+                bbox_transform=ax.transAxes,
+                prop={"size": 9, "weight": "normal"},
+                title_fontproperties={"weight": "bold"},
+                framealpha=0.85,
+            )
+        else:
+            ax.legend(
+                title="",
+                loc=cfg_loc,
+                prop={"size": 9, "weight": "normal"},
+                title_fontproperties={"weight": "bold"},
+                framealpha=0.85,
+            )
 
         fig.tight_layout()
         fig.savefig(out_path, dpi=200, bbox_inches='tight')
@@ -228,7 +321,13 @@ def main() -> None:
             return pd.DataFrame(pareto_rows).reset_index(drop=True)
         return candidates.iloc[0:0].copy()
 
-    def render_pareto_plot(df_density: pd.DataFrame, out_path: Path, density_label: str, title_suffix: str) -> None:
+    def render_pareto_plot(
+        df_density: pd.DataFrame,
+        out_path: Path,
+        density_label: str,
+        title_suffix: str,
+        legend_loc: str = "upper right",
+    ) -> None:
         """Render a Pareto plot: all points (light), pareto curve (highlighted), and mark pareto vs non-pareto."""
         # Use the grouped points to collapse duplicates
         points = (
@@ -247,7 +346,7 @@ def main() -> None:
         # Identify pareto indices in points
         if not pareto.empty:
             # plot pareto curve (connected) — no triangle markers
-            ax.plot(pareto["bram_util"], pareto["solve_s"], color="#d62728", linewidth=2, zorder=3, label="Pareto Optimal Curve")
+            ax.plot(pareto["bram_util"], pareto["solve_s"], color="#d62728", linewidth=2, zorder=3, label="Pareto Optimal Solutions")
 
             # mark non-pareto points that lie above the frontier as 'dominated'
             # Any point with solve_s > interpolated frontier at same or lower bram_util is dominated.
@@ -345,10 +444,28 @@ def main() -> None:
 
         ax.set_xlabel("BRAM Utilization (%)", fontweight="bold")
         ax.set_ylabel("Latency [s]", fontweight="bold")
-        ax.set_title(f"Pareto Curve: Tile Size & PEs {title_suffix}", fontweight="bold", pad=15)
+        ax.set_title(f"Pareto Solutions {title_suffix}", fontweight="bold", pad=15)
         ax.yaxis.set_major_formatter(ScalarFormatter())
         ax.grid(True, which="major", linestyle="--", linewidth=0.8, alpha=0.7)
-        ax.legend(title="Legend", bbox_to_anchor=(1.05, 1), loc='upper left')
+        legend_cfg = legend_offsets.get(out_path.stem, {}) if isinstance(legend_offsets, dict) else {}
+        cfg_loc = legend_cfg.get("loc", legend_loc)
+        bbox = legend_cfg.get("bbox_anchor")
+        if bbox is not None:
+            ax.legend(
+                title="",
+                loc=cfg_loc,
+                bbox_to_anchor=tuple(bbox),
+                bbox_transform=ax.transAxes,
+                prop={"size": 9},
+                framealpha=0.85,
+            )
+        else:
+            ax.legend(
+                title="",
+                loc=cfg_loc,
+                prop={"size": 9},
+                framealpha=0.85,
+            )
 
         fig.tight_layout()
         fig.savefig(out_path, dpi=200, bbox_inches='tight')
@@ -359,10 +476,12 @@ def main() -> None:
         df_density = df[df["density"].astype(str) == density].copy()
         if df_density.empty: continue
 
+        series_color_map = build_series_color_map(df_density)
+
         out_path = args.out.with_name(f"{args.out.stem}_{density}{args.out.suffix}")
         nnz = density_nnz.get(density)
-        title_suffix = f" ({density}, {nnz} nnz/col)" if nnz is not None else f" ({density})"
-        render_density_plot(df_density, out_path, density, title_suffix)
+        title_suffix = f" ({density} density: {nnz} nnz/col)" if nnz is not None else f" ({density})"
+        render_density_plot(df_density, out_path, density, title_suffix, series_color_map)
 
         # If this density has a configured latency threshold, produce an additional filtered plot
         if density in latency_thresholds:
@@ -375,17 +494,18 @@ def main() -> None:
                     df_under,
                     out_path_under,
                     density,
-                    f" ({density}, {nnz} nnz/col, latency <= {int(thr)} s)",
+                    f" ({density} density: {nnz} nnz/col)",
+                    series_color_map,
                 )
 
                 # 2) pareto plot for the same under-x dataset
                 out_path_under_pareto = args.out.with_name(f"{args.out.stem}_{density}_under{int(thr)}s_pareto{args.out.suffix}")
                 render_pareto_plot(
-                    df_under,
-                    out_path_under_pareto,
-                    density,
-                    f" ({density}, {nnz} nnz/col, latency <= {int(thr)} s)",
-                )
+                            df_under,
+                            out_path_under_pareto,
+                            density,
+                            f" ({density} density: {nnz} nnz/col)",
+                        )
             else:
                 print(f"Skipped {density} under-{int(thr)}s plot because no rows met the latency threshold.")
 

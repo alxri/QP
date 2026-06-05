@@ -57,6 +57,7 @@ struct QPFPGAResult {
     float dual_residual;
     float objective_value;
     double solve_time_ms;
+    double setup_time_ms;
     const float* x;
     const float* y;
 };
