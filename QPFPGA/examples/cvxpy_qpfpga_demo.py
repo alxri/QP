@@ -57,7 +57,7 @@ def main() -> None:
     print("Calling problem.solve...")
 
     t0 = time.perf_counter()
-    value = problem.solve(solver="QPFPGA", verbose=True)
+    value = problem.solve(solver="QPFPGA", verbose=True, measure_energy=True)
     t1 = time.perf_counter()
     print(f"Total solve time (CVXPY call): {(t1 - t0) * 1000:.3f} ms")
 

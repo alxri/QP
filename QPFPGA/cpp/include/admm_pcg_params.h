@@ -2,8 +2,6 @@
 #define ADMM_PCG_PARAMS_H
 
 #define PACK_SIZE 16
-#define TILE_ROWS 8192
-#define TILE_COLS 8192
 
 #define RUIZ_ITER_DEFAULT 10
 

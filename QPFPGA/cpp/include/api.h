@@ -37,6 +37,8 @@ struct QPFPGAOptions {
     int32_t admm_max_iter;
     int32_t pcg_max_iter;
     int32_t adaptive_rho;
+    int tile_size;
+    int measure_energy;
 };
 
 struct QPFPGAProblem {
@@ -58,6 +60,10 @@ struct QPFPGAResult {
     float objective_value;
     double solve_time_ms;
     double setup_time_ms;
+    double core_energy_j;
+    double aux_energy_j;
+    double fpga_energy_j;
+    double board_energy_j;
     const float* x;
     const float* y;
 };

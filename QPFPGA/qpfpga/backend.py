@@ -165,19 +165,35 @@ except Exception as e:
         from pathlib import Path
         import os
         import time
+
+        # Problem size check agains FPGA limits
+        MAX_DIM = 32768
+        n_vars = problem.q.shape[0]
+        m_constrs = problem.A.shape[0]
+        
+        if n_vars > MAX_DIM or m_constrs > MAX_DIM:
+            raise ValueError(
+                f"QPFPGA Hardware Limit Exceeded: The accelerator supports a maximum of "
+                f"{MAX_DIM} variables and {MAX_DIM} constraints.\n"
+                f"Your problem has n={n_vars} variables and m={m_constrs} constraints.\n"
+                f"Please reduce the problem size."
+            )
         
         self._last_bitstream_time_s = 0.0
-        
+
         ncols = problem.A.shape[1]
         nnz_per_col = problem.A.nnz / ncols if ncols > 0 else 0
 
         # Heuristic Table
         if nnz_per_col < 4:
             target_bs = Path("/home/xilinx/QPFPGA/bitstreams/admm_pcg_16384x16384_reshape1_pes12.bit")
+            hw_tile_size = 16384
         elif nnz_per_col < 16:
             target_bs = Path("/home/xilinx/QPFPGA/bitstreams/admm_pcg_16384x16384_reshape8_pes20.bit")
+            hw_tile_size = 16384
         else:
             target_bs = Path("/home/xilinx/QPFPGA/bitstreams/admm_pcg_8192x8192_reshape1_pes30.bit")
+            hw_tile_size = 8192
 
         # Only reprogram if it's the first run OR if the optimal bitstream changed
         state_file = Path("/tmp/qpfpga_state.txt")
@@ -187,8 +203,8 @@ except Exception as e:
             loaded_bs_name = state_file.read_text().strip()
 
         if loaded_bs_name != target_bs.name:
-            print(f"\n[QPFPGA Smart-Switch] Matrix A density: {nnz_per_col:.2f} nnz/col")
-            print(f"[QPFPGA Smart-Switch] Hardware changing: {loaded_bs_name or 'None'} -> {target_bs.name}")
+            print(f"\n[QPFPGA] Matrix A density: {nnz_per_col:.2f} nnz/col")
+            print(f"[QPFPGA] Hardware changing: {loaded_bs_name or 'None'} -> {target_bs.name}")
             
             self.bitstream_path = target_bs
             self._bitstream_loaded = False 
@@ -247,6 +263,8 @@ except Exception as e:
             admm_max_iter=ctypes.c_int32(options.admm_max_iter),
             pcg_max_iter=ctypes.c_int32(options.pcg_max_iter),
             adaptive_rho=ctypes.c_int32(int(options.adaptive_rho)),
+            tile_size=ctypes.c_int32(hw_tile_size),
+            measure_energy=ctypes.c_int32(int(options.measure_energy))
         )
         x_out = np.zeros(problem.q.shape[0], dtype=np.float32)
         y_out = np.zeros(problem.A.shape[0], dtype=np.float32)
@@ -280,6 +298,10 @@ except Exception as e:
                 "bitstream_time_s": self._last_bitstream_time_s,
                 "total_cpp_time_s": total_cpp_time_s,
                 "setup_time_ms": float(result_c.setup_time_ms),
+                "core_energy_j": float(result_c.core_energy_j),
+                "aux_energy_j": float(result_c.aux_energy_j),
+                "fpga_energy_j": float(result_c.fpga_energy_j),
+                "board_energy_j": float(result_c.board_energy_j),
                 "library_path": str(self.library_path),
                 "return_code": int(status),
                 "options": asdict(options),
@@ -349,6 +371,8 @@ class QPFPGAOptionsC(ctypes.Structure):
         ("admm_max_iter", ctypes.c_int32),
         ("pcg_max_iter", ctypes.c_int32),
         ("adaptive_rho", ctypes.c_int32),
+        ("tile_size", ctypes.c_int32),
+        ("measure_energy", ctypes.c_int32),
     ]
 
 
@@ -374,6 +398,10 @@ class QPFPGAResultC(ctypes.Structure):
         ("objective_value", ctypes.c_float),
         ("solve_time_ms", ctypes.c_double),
         ("setup_time_ms", ctypes.c_double),
+        ("core_energy_j", ctypes.c_double),
+        ("aux_energy_j", ctypes.c_double),
+        ("fpga_energy_j", ctypes.c_double),
+        ("board_energy_j", ctypes.c_double),
         ("x", ctypes.POINTER(ctypes.c_float)),
         ("y", ctypes.POINTER(ctypes.c_float)),
     ]

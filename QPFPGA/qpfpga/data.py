@@ -29,6 +29,7 @@ class QPSolverOptions:
     admm_max_iter: int = 2000
     pcg_max_iter: int = 5
     adaptive_rho: bool = False
+    measure_energy: bool = False
     extra: dict[str, Any] = field(default_factory=dict)
 
 

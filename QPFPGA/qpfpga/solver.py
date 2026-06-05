@@ -64,9 +64,10 @@ class QPFPGA(QpSolver):
             admm_max_iter=int(solver_opts.get("admm_max_iter", 5000)),
             pcg_max_iter=int(solver_opts.get("pcg_max_iter", 5)),
             adaptive_rho=bool(solver_opts.get("adaptive_rho", True)),
+            measure_energy=bool(solver_opts.get("measure_energy", False)),
             extra={k: v for k, v in solver_opts.items() if k not in {
                 "sigma", "alpha", "eps_abs", "eps_rel", "pcg_tol_fraction",
-                "admm_max_iter", "pcg_max_iter", "adaptive_rho"
+                "admm_max_iter", "pcg_max_iter", "adaptive_rho", "measure_energy"
             }},
         )
 
@@ -84,6 +85,15 @@ class QPFPGA(QpSolver):
             print(f"g: shape={np.asarray(data[s.G]).shape}")
         qp_data = as_osqp_problem(data)
         options = self._solver_options(solver_opts)
+
+        if verbose:
+            print("\n=== OSQP Canonical Form (Hardware Input) ===")
+            print(f"P: shape={qp_data.P.shape}, nnz={qp_data.P.nnz}")
+            print(f"q: shape={qp_data.q.shape}")
+            print(f"A: shape={qp_data.A.shape}, nnz={qp_data.A.nnz}")
+            print(f"l: shape={qp_data.l.shape}")
+            print(f"u: shape={qp_data.u.shape}")
+
         results = self.backend.solve(qp_data, options)
 
         if verbose:
@@ -110,6 +120,26 @@ class QPFPGA(QpSolver):
             print(f"    ├─ Data Prep : {setup_time:>8.3f} ms")
             print(f"    └─ HW Exec   : {hw_time:>8.3f} ms")
             print("="*50 + "\n")
+
+            if options.measure_energy:
+                core_e = results.extra_stats.get("core_energy_j", 0.0)
+                aux_e = results.extra_stats.get("aux_energy_j", 0.0)
+                fpga_e = results.extra_stats.get("fpga_energy_j", 0.0)
+                board_e = results.extra_stats.get("board_energy_j", 0.0)
+                
+                # Calculate average power
+                hw_time_s = results.solve_time_s
+                avg_power = (fpga_e / hw_time_s) if hw_time_s > 0 else 0.0
+                
+                print("-" * 50)
+                print("Energy Measurements:")
+                print(f"  FPGA Core Logic : {core_e:.6f} J")
+                print(f"  FPGA AUX        : {aux_e:.6f} J")
+                print(f"  FPGA Total      : {fpga_e:.6f} J")
+                print(f"  Board Total     : {board_e:.6f} J")
+                print(f"  Avg FPGA Power  : {avg_power:.3f} W")
+                
+            print("="*50 + "\n")    
 
         data["_qpfpga_result"] = results
         return results

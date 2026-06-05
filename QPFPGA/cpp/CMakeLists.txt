@@ -10,6 +10,7 @@ add_library(qpfpga SHARED
 target_include_directories(qpfpga
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/pmt
         /usr/local/include
 )
 
@@ -22,10 +23,10 @@ target_compile_options(qpfpga PRIVATE -O3 -Wall)
 # Specify the library path for the linker
 target_link_directories(qpfpga PRIVATE /usr/local/lib)
 
-# Link the required libraries (cma, m, rt)
-target_link_libraries(qpfpga PRIVATE cma m rt)
+# Link the required libraries (cma, m, rt) AND pmt
+target_link_libraries(qpfpga PRIVATE cma m rt pmt)
 
-# Tell the linker where to find libcma.so at runtime (rpath)
+# Tell the linker where to find libcma.so and libpmt.so at runtime (rpath)
 set_target_properties(qpfpga PROPERTIES
     INSTALL_RPATH "/usr/local/lib"
     BUILD_WITH_INSTALL_RPATH TRUE

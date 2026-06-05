@@ -13,28 +13,28 @@ float uint_to_float(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
 int ceil_div(int a, int b) { return (a + b - 1) / b; }
 
 // Matrix utilities (TiledMatrix declared in utils.h)
-TiledMatrix build_tiled_csc(int global_rows, int global_cols, const vector<int>& cptr_in, const vector<int>& ridx_in, const vector<float>& vals_in) {
+TiledMatrix build_tiled_csc(int global_rows, int global_cols, const vector<int>& cptr_in, const vector<int>& ridx_in, const vector<float>& vals_in, int tile_size) {
     TiledMatrix tm;
-    tm.rtiles = ceil_div(global_rows, TILE_ROWS);
-    tm.ctiles = ceil_div(global_cols, TILE_COLS);
+    tm.rtiles = ceil_div(global_rows, tile_size);
+    tm.ctiles = ceil_div(global_cols, tile_size);
     int num_tiles = tm.rtiles * tm.ctiles;
 
     tm.counts.resize(num_tiles, 0);
     tm.noff.resize(num_tiles, 0);
     tm.coff.resize(num_tiles, 0);
 
-    vector<vector<vector<int>>> t_rows(num_tiles, vector<vector<int>>(TILE_COLS));
-    vector<vector<vector<float>>> t_vals(num_tiles, vector<vector<float>>(TILE_COLS));
+    vector<vector<vector<int>>> t_rows(num_tiles, vector<vector<int>>(tile_size));
+    vector<vector<vector<float>>> t_vals(num_tiles, vector<vector<float>>(tile_size));
 
     for (int c = 0; c < global_cols; ++c) {
-        int tc = c / TILE_COLS;
-        int local_c = c % TILE_COLS;
+        int tc = c / tile_size;
+        int local_c = c % tile_size;
         for (int idx = cptr_in[c]; idx < cptr_in[c+1]; ++idx) {
             int r = ridx_in[idx];
             float v = vals_in[idx];
-            int tr = r / TILE_ROWS;
+            int tr = r / tile_size;
             int tile_idx = tr * tm.ctiles + tc;
-            t_rows[tile_idx][local_c].push_back(r % TILE_ROWS);
+            t_rows[tile_idx][local_c].push_back(r % tile_size);
             t_vals[tile_idx][local_c].push_back(v);
         }
     }
@@ -43,9 +43,9 @@ TiledMatrix build_tiled_csc(int global_rows, int global_cols, const vector<int>&
     for (int tile_idx = 0; tile_idx < num_tiles; ++tile_idx) {
         tm.coff[tile_idx] = tm.cptr.size();
         
-        vector<int> local_cptr(TILE_COLS + 1, 0);
+        vector<int> local_cptr(tile_size + 1, 0);
         int tile_nnz = 0;
-        for (int c = 0; c < TILE_COLS; ++c) {
+        for (int c = 0; c < tile_size; ++c) {
             tile_nnz += t_rows[tile_idx][c].size();
             local_cptr[c+1] = tile_nnz;
         }
@@ -59,7 +59,7 @@ TiledMatrix build_tiled_csc(int global_rows, int global_cols, const vector<int>&
         vector<int> flat_r(words * PACK_SIZE, 0);
         vector<float> flat_v(words * PACK_SIZE, 0.0f);
 
-        for (int c = 0; c < TILE_COLS; ++c) {
+        for (int c = 0; c < tile_size; ++c) {
             for (size_t i = 0; i < t_rows[tile_idx][c].size(); ++i) {
                 flat_r[flat_idx] = t_rows[tile_idx][c][i];
                 flat_v[flat_idx] = t_vals[tile_idx][c][i];

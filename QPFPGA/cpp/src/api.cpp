@@ -12,6 +12,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#include <pmt.h>
 
 extern "C" QPFPGAStatus qpfpga_solve(
     const QPFPGAProblem* problem,
@@ -94,9 +95,10 @@ extern "C" QPFPGAStatus qpfpga_solve(
     transpose_csc(m, n, A_cptr, A_ridx, A_vals, AT_cptr, AT_ridx, AT_vals);
 
     // Tile matrices
-    TiledMatrix tm_A = build_tiled_csc(m, n, A_cptr, A_ridx, A_vals);
-    TiledMatrix tm_AT = build_tiled_csc(n, m, AT_cptr, AT_ridx, AT_vals);
-    TiledMatrix tm_P = build_tiled_csc(n, n, P_cptr, P_ridx, P_vals);
+    int t_size = options->tile_size;
+    TiledMatrix tm_A = build_tiled_csc(m, n, A_cptr, A_ridx, A_vals, t_size);
+    TiledMatrix tm_AT = build_tiled_csc(n, m, AT_cptr, AT_ridx, AT_vals, t_size);
+    TiledMatrix tm_P = build_tiled_csc(n, n, P_cptr, P_ridx, P_vals, t_size);
 
     // Prepare CMA buffers and copy data for A (packed words)
     CmaTracker cma;
@@ -183,27 +185,71 @@ extern "C" QPFPGAStatus qpfpga_solve(
 
     cma.flush_all();
 
+
+    double core_energy = 0.0;
+    double aux_energy = 0.0;
+    double fpga_energy = 0.0;
+    double board_energy = 0.0;
+
+    std::unique_ptr<pmt::PMT> sensor;
+    pmt::State prev_state;
+
+    if (options->measure_energy) {
+        sensor = pmt::xilinx::Xilinx::Create();
+        
+        sensor->Read();
+        prev_state = sensor->Read();
+    }
+
     result->setup_time_ms = get_time_ms() - prep_start;
-    
+
     double hw_start = get_time_ms();
+    
+    // Start accelerator
     write_reg(ctrl, XADMM_CONTROL_ADDR_AP_CTRL, 0x01);
 
-    // Poll for completion with a hard timeout so the board does not freeze.
-    const int timeout_ms = 5000;
-    auto poll_start = std::chrono::steady_clock::now();
-    while ((read_reg(ctrl, XADMM_CONTROL_ADDR_AP_CTRL) & 0x02) == 0) {
-        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now() - poll_start).count();
-        if (elapsed_ms > timeout_ms) {
-            fprintf(stderr, "[qpfpga] accelerator timeout after %d ms, using CPU fallback.\n", timeout_ms);
-            munmap(ip_base, MAP_SIZE);
-            close(mem_fd);
-            // cma.free_all();
-            return cpu_fallback(q, P_diag, E);
+    if (options->measure_energy) {
+        while ((read_reg(ctrl, XADMM_CONTROL_ADDR_AP_CTRL) & 0x02) == 0) {
+            usleep(10000);
+
+            pmt::State curr_state = sensor->Read();
+            std::chrono::duration<double> diff = curr_state.timestamp_ - prev_state.timestamp_;
+            double dt = diff.count();
+
+            core_energy  += 0.5 * (prev_state.watt_[1] + curr_state.watt_[1]) * dt;
+            aux_energy   += 0.5 * (prev_state.watt_[2] + curr_state.watt_[2]) * dt;
+            fpga_energy  += 0.5 * (prev_state.watt_[3] + curr_state.watt_[3]) * dt;
+            board_energy += 0.5 * (prev_state.watt_[4] + curr_state.watt_[4]) * dt;
+
+            prev_state = curr_state;
+        }
+        
+        pmt::State curr_state = sensor->Read();
+        std::chrono::duration<double> diff = curr_state.timestamp_ - prev_state.timestamp_;
+        double dt = diff.count();
+        if (dt > 0) {
+            core_energy  += 0.5 * (prev_state.watt_[1] + curr_state.watt_[1]) * dt;
+            aux_energy   += 0.5 * (prev_state.watt_[2] + curr_state.watt_[2]) * dt;
+            fpga_energy  += 0.5 * (prev_state.watt_[3] + curr_state.watt_[3]) * dt;
+            board_energy += 0.5 * (prev_state.watt_[4] + curr_state.watt_[4]) * dt;
+        }
+
+    } else {
+        while ((read_reg(ctrl, XADMM_CONTROL_ADDR_AP_CTRL) & 0x02) == 0) {
+            usleep(100);
         }
     }
 
     double hw_end = get_time_ms();
+
+    // Assign everything back to Python
+    result->core_energy_j = core_energy;
+    result->aux_energy_j = aux_energy;
+    result->fpga_energy_j = fpga_energy;
+    result->board_energy_j = board_energy;
+
+    printf("Measured Energy (J): Core=%.4f | Aux=%.4f | FPGA=%.4f | Board=%.4f\n",
+           core_energy, aux_energy, fpga_energy, board_energy);
 
     cma.invalidate_all();
 
