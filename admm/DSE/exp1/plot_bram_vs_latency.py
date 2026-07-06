@@ -280,7 +280,7 @@ def main() -> None:
         ax.grid(True, which="major", linestyle="--", linewidth=0.8, alpha=0.7)
 
         fig.tight_layout()
-        fig.savefig(out_path, dpi=200)
+        fig.savefig(out_path, dpi=300)
         plt.close(fig)
         print(f"Saved plot: {out_path}")
 

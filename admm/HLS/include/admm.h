@@ -4,6 +4,7 @@
 #include "spmv_csc.h"
 #include "pcg.h"
 #include "hls_math.h"
+#include "config.h"
 
 void admm(int num_rows,
           int num_cols,

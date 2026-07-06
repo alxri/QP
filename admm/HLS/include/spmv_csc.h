@@ -1,19 +1,9 @@
 #ifndef SPMV_CSC_H
 #define SPMV_CSC_H
 
-#include "dse_config.h"
 #include "hls_stream.h"
 #include "hls_vector.h"
-
-
-
-#ifndef MAX_COLS
-#define MAX_COLS 8192
-#endif
-
-#ifndef MAX_ROWS
-#define MAX_ROWS 8192
-#endif
+#include "config.h"
 
 #ifndef MAX_NNZ
 #define MAX_NNZ 200000 // For Vitis simulation purposes, not determining for hw

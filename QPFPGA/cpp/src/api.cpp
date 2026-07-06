@@ -33,7 +33,8 @@ extern "C" QPFPGAStatus qpfpga_solve(
         float* out_y = new float[m];
         for (int i = 0; i < n; ++i) {
             float scale = (i < (int)E_vec.size()) ? E_vec[i] : 1.0f;
-            out_x[i] = (-q_vec[i] / std::max(P_diag_vec[i], options->sigma)) * scale;        }
+            out_x[i] = (-q_vec[i] / std::max(P_diag_vec[i], options->sigma)) * scale;        
+        }
         for (int i = 0; i < m; ++i) out_y[i] = 0.0f;
 
         result->status = QPFPGA_STATUS_OPTIMAL;
@@ -71,16 +72,21 @@ extern "C" QPFPGAStatus qpfpga_solve(
     // Equilibration (in-place modifies A_vals, P_diag, q, l, u)
     std::vector<float> D(m, 1.0f);
     std::vector<float> E(n, 1.0f);
+    float c_scale = 1.0f; // Track cost scaling factor to unscale 'y' later
+
     try {
-        ruiz_equilibration(m, n, A_cptr, A_ridx, A_vals, P_diag, q, l, u, D, E, RUIZ_ITER_DEFAULT);    } catch (...) {
+        // NOTE: Make sure ruiz_equilibration signature in utils.h is updated to accept c_scale by reference!
+        ruiz_equilibration(m, n, A_cptr, A_ridx, A_vals, P_diag, q, l, u, D, E, c_scale, RUIZ_ITER_DEFAULT);    
+    } catch (...) {
     }
 
     for (int c = 0; c < n; ++c) {
         for (int idx = P_cptr[c]; idx < P_cptr[c+1]; ++idx) {
-            if (P_ridx[idx] == c) {
-                P_vals[idx] = P_diag[c];
+            int r = P_ridx[idx];
+            if (r == c) {
+                P_vals[idx] = P_diag[c]; 
             } else {
-                P_vals[idx] = 0.0f; 
+                P_vals[idx] = P_vals[idx] * E[r] * E[c] * c_scale; 
             }
         }
     }
@@ -170,8 +176,6 @@ extern "C" QPFPGAStatus qpfpga_solve(
     write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_RHO_IN_DATA, cma_get_phy_addr(hw_rho)); write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_X_OUT_DATA, cma_get_phy_addr(hw_x));
     write_64bit_address(ctrl_r, XADMM_CONTROL_R_ADDR_Y_OUT_DATA, cma_get_phy_addr(hw_y));
 
-    // Optionally load bitstream if provided via options->sigma < 0 (cheap hack to pass path?) - skip here
-
     // Write control scalars and start
     write_reg(ctrl, XADMM_CONTROL_ADDR_NUM_ROWS_DATA, m); write_reg(ctrl, XADMM_CONTROL_ADDR_NUM_COLS_DATA, n); write_reg(ctrl, XADMM_CONTROL_ADDR_A_NNZ_DATA, (int)A_vals.size());
     write_reg(ctrl, XADMM_CONTROL_ADDR_A_NUM_ROW_TILES_DATA, tm_A.rtiles); write_reg(ctrl, XADMM_CONTROL_ADDR_A_NUM_COL_TILES_DATA, tm_A.ctiles);
@@ -185,7 +189,6 @@ extern "C" QPFPGAStatus qpfpga_solve(
 
     cma.flush_all();
 
-
     double core_energy = 0.0;
     double aux_energy = 0.0;
     double fpga_energy = 0.0;
@@ -196,7 +199,6 @@ extern "C" QPFPGAStatus qpfpga_solve(
 
     if (options->measure_energy) {
         sensor = pmt::xilinx::Xilinx::Create();
-        
         sensor->Read();
         prev_state = sensor->Read();
     }
@@ -262,8 +264,9 @@ extern "C" QPFPGAStatus qpfpga_solve(
     // Copy out results into freshly allocated arrays returned to caller
     float* out_x = new float[n];
     float* out_y = new float[m];
+    
     for (int i = 0; i < n; ++i) out_x[i] = hw_x[i] * E[i];
-    for (int i = 0; i < m; ++i) out_y[i] = hw_y[i];
+    for (int i = 0; i < m; ++i) out_y[i] = hw_y[i] * D[i] / c_scale;
 
     result->status = (status == 1) ? QPFPGA_STATUS_OPTIMAL : QPFPGA_STATUS_USER_LIMIT;
     result->admm_iters = admm_iters;

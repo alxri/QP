@@ -87,6 +87,7 @@ void ruiz_equilibration(
 	std::vector<float>& u,
 	std::vector<float>& D,
 	std::vector<float>& E,
+	float& c_scale,
 	int iterations = 10);
 
 std::vector<float> build_rho_vector(int NUM_ROWS, const std::vector<float>& l, const std::vector<float>& u);

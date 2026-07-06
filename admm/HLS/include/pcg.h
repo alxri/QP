@@ -3,11 +3,7 @@
 
 #include "spmv_csc.h"
 #include "hls_math.h"
-
-
-#ifndef MAX_SIZE
-#define MAX_SIZE 32768
-#endif
+#include "config.h"
 
 void pcg(int num_rows,
          int num_cols,

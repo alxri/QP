@@ -1,9 +1,5 @@
 #include "pcg.h"
 
-#ifndef RESHAPE_FACTOR
-#define RESHAPE_FACTOR 8
-#endif
-
 static float inf_norm(const float *v, int size)
 {
 #pragma HLS INLINE
@@ -43,7 +39,7 @@ static float dot_prod(const float *x, const float *y, int size)
         const float p2 = x[i + 2] * y[i + 2];
         const float p3 = x[i + 3] * y[i + 3];
 
-        // Add into the oldest partial sum, then rotate.
+        // add into the oldest partial sum, then rotate.
         const float sum_ab = p0 + p1;
         const float sum_cd = p2 + p3;
         const float sum_all = sum_ab + sum_cd;
@@ -59,11 +55,10 @@ static float dot_prod(const float *x, const float *y, int size)
 #pragma HLS PIPELINE II = 1
         acc0 += x[i] * y[i];
     }
-    // Final reduction
+    // final reduction
     return (acc0 + acc1) + (acc2 + acc3);
 }
 
-// make struct for CSC data to reduce number of arguments and simplify function calls ?
 void pcg(int num_rows,
          int num_cols,
          const TiledMatrix &mat_A,
@@ -81,63 +76,19 @@ void pcg(int num_rows,
          int pcg_max_iterations)
 {
 #pragma HLS INLINE
-/* From ADMM receive
-*   - Pointers of Matrix P in CSC format (P_col_ptr, P_row_idx, P_values) - read from DDR
-*   - Pointers of Matrix A in CSC format (A_col_ptr, A_row_idx, A_values) - read from DDR
-*   - Pointers of Transpose of A in CSC format (A_col_ptr_T, A_row_idx_T, A_values_T) - read from DDR
-*
-*   - Diagonal preconditioner M_inv (as a vector)
-*
-*   - Vector b, computed in ADMM
-*   - Diagonal matrix rho (as a vector of its diagonal entries)
-*   - Scalar sigma
-*   - Scalar epsilon (epsilon from CPU)
-*/
 
-
-
-// Local vector buffers for computation (Cannot be shared)
-// float x_local[MAX_SIZE];
 float r[MAX_SIZE];
 float p[MAX_SIZE];
-// float K_p[MAX_SIZE];
-// float M_inv[MAX_SIZE];
-// float rho[MAX_SIZE];
 
-// Reusable scratchpads
-// float scratch1[MAX_SIZE]; // b and tmp0 can share the same buffer as they are used at different times in the algorithm
-// float scratch2[MAX_SIZE]; // y can also be used to store intermediate results like A*p and AT*(rho*(A*p)) to save memory, as they are used at different times in the algorithm
-
-// #pragma HLS BIND_STORAGE variable=x_local type=RAM_T2P impl=URAM
-// #pragma HLS ARRAY_RESHAPE variable=x_local type=cyclic factor=RESHAPE_FACTOR dim=1
-// #pragma HLS BIND_STORAGE variable=scratch1 type=RAM_T2P impl=URAM
-// #pragma HLS ARRAY_RESHAPE variable=scratch1 type=cyclic factor=RESHAPE_FACTOR dim=1
-// #pragma HLS BIND_STORAGE variable=scratch2 type=RAM_T2P impl=URAM
-// #pragma HLS ARRAY_RESHAPE variable=scratch2 type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=r type=RAM_T2P impl=URAM
 #pragma HLS ARRAY_RESHAPE variable=r type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=p type=RAM_T2P impl=URAM
 #pragma HLS ARRAY_RESHAPE variable=p type=cyclic factor=RESHAPE_FACTOR dim=1
-// #pragma HLS BIND_STORAGE variable=K_p type=RAM_T2P impl=URAM
-// #pragma HLS ARRAY_RESHAPE variable=K_p type=cyclic factor=RESHAPE_FACTOR dim=1
 
-
-// #pragma HLS BIND_STORAGE variable=M_inv type=RAM_T2P impl=URAM
-// #pragma HLS ARRAY_RESHAPE variable=M_inv type=cyclic factor=RESHAPE_FACTOR dim=1
-// Note: rho is length num_rows (constraints).
-
-
-// Scalar variables for PCG
 float alpha;
 float beta;
 
-// Warm-started PCG:
-// - Treat incoming x as an initial guess (ADMM keeps x_tilde across iterations).
-// - Compute initial residual r = b - K*x, then proceed with standard PCG.
-// scratch1 is used for intermediate SpMVs; scratch2 temporarily holds K*x and then z=M^{-1}r.
-
-// scratch1[0..num_rows): A*x
-// spmv_csc(num_rows, num_cols, A_nnz, A_row_idx, A_col_ptr, A_values, x, scratch1);
+// scratch1 = A*x
 spmv_csc_tiled(num_rows, num_cols, mat_A, x, scratch1);
 
 // scratch1 = rho .* (A*x)
@@ -155,15 +106,13 @@ for (int i = 0; i < num_rows; i += RESHAPE_FACTOR)
     }
 }
 
-// scratch2[0..num_cols): A^T * (rho .* (A*x))
-// spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values, scratch1, scratch2);
+// scratch2 = A^T * (rho .* (A*x))
 spmv_csc_tiled(num_cols, num_rows, mat_AT, scratch1, scratch2);
 
-// scratch1[0..num_cols): P*x
-// spmv_csc(num_cols, num_cols, P_nnz, P_row_idx, P_col_ptr, P_values, x, scratch1);
+// scratch1 = P*x
 spmv_csc_tiled(num_cols, num_cols, mat_P, x, scratch1);
 
-// scratch2[0..num_cols): K*x = P*x + sigma*x + A^T*(rho*(A*x))
+// scratch2 = P*x + sigma*x + A^T*(rho*(A*x))
 for (int i = 0; i < num_cols; i += RESHAPE_FACTOR)
 {
 #pragma HLS PIPELINE II = 1
@@ -192,25 +141,19 @@ for (int i = 0; i < num_cols; ++i)
 
 
 float rT_y = dot_prod(r, scratch2, num_cols); // r^T y
-// float rT_r = dot_prod(r, r, num_cols);        // ||r||_2^2
 
 // Relative residual stop: ||r||inf <= eps * ||b||inf
 float r_norm = 0.0f;
 r_norm = inf_norm(r, num_cols);
-// float b_norm = 0.0f;
-// b_norm = inf_norm(b, num_cols);
 
-// const float threshold = epsilon * b_norm;
 
 #define K_p b // Reuse b's memory to store K*p result since b is not needed after initialization
-// float *K_p = b; // Reuse b's memory to store K*p result since b is not needed after initialization
 
 int iter_count = 0;
 
 for (int k = 0; k < pcg_max_iterations && r_norm > epsilon; ++k)
 {
-    // scratch1[0..num_rows): A*p
-    // spmv_csc(num_rows, num_cols, A_nnz, A_row_idx, A_col_ptr, A_values, p, scratch1);
+    // scratch1 = A*p
     spmv_csc_tiled(num_rows, num_cols, mat_A, p, scratch1);
 
     // scratch1 = rho .* (A*p)
@@ -229,11 +172,9 @@ for (int k = 0; k < pcg_max_iterations && r_norm > epsilon; ++k)
     }
 
     // K_p = A^T * (rho .* (A*p))
-    // spmv_csc(num_cols, num_rows, A_nnz, AT_row_idx, AT_col_ptr, AT_values, scratch1, K_p);
     spmv_csc_tiled(num_cols, num_rows, mat_AT, scratch1, K_p);
 
-    // scratch1[0..num_cols): P*p
-    // spmv_csc(num_cols, num_cols, P_nnz, P_row_idx, P_col_ptr, P_values, p, scratch1);
+    // scratch1 = P*p
     spmv_csc_tiled(num_cols, num_cols, mat_P, p, scratch1);
 
     // K_p = P*p + sigma*p + A^T*(rho*(A*p))
@@ -251,7 +192,8 @@ for (int k = 0; k < pcg_max_iterations && r_norm > epsilon; ++k)
         }
     }
 
-    float pT_K_p = dot_prod(p, K_p, num_cols); // Dot product of p and K_p, INSERT INTO PREVIOUS LOOP?
+    // alpha = (r^T y) / (p^T K p)
+    float pT_K_p = dot_prod(p, K_p, num_cols);
     if (pT_K_p <= 0.0f) 
     {
         break;
@@ -281,14 +223,12 @@ for (int k = 0; k < pcg_max_iterations && r_norm > epsilon; ++k)
             }
         }
     }
-
-    float rT_y_next = dot_prod(r, scratch2, num_cols); // Dot product of r and y // INSERT INTO PREVIOUS LOOP, CANNOT CALL DOT PROD FUNCTION
+    // beta = (r_new^T y_new) / (r_old^T y_old)
+    float rT_y_next = dot_prod(r, scratch2, num_cols);
     if (rT_y_next <= 0.0f) 
     {
         break;
     }
-    // rT_r = dot_prod(r, r, num_cols); // Dot product of r with itself
-
     beta = rT_y_next / rT_y; // Scalar division
 
     for (int i = 0; i < num_cols; i += RESHAPE_FACTOR)

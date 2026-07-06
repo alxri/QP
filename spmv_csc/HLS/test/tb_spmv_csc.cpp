@@ -6,8 +6,8 @@
 #include "spmv_csc.h"
 
 // Define global dimensions and tile sizes
-#define GLOBAL_ROWS 4096
-#define GLOBAL_COLS 4096
+#define GLOBAL_ROWS 1024
+#define GLOBAL_COLS 1024
 #define TILE_ROWS 1024
 #define TILE_COLS 1024
 
@@ -30,8 +30,8 @@ int main() {
     std::cout << "Global Size: " << GLOBAL_ROWS << "x" << GLOBAL_COLS << std::endl;
     std::cout << "Tile Size:   " << TILE_ROWS << "x" << TILE_COLS << std::endl;
 
-    // Density for ~1 nnz per column
-    float density = 1.0f / GLOBAL_ROWS; 
+    // Density for ~10 nnz per column
+    float density = 10.0f / GLOBAL_ROWS; 
 
     std::vector<float> x_global(GLOBAL_COLS, 0.0f);
     std::vector<CooTuple> global_coo;
@@ -47,7 +47,7 @@ int main() {
         x_global[i] = value_dist(generator);
     }
 
-    // 2. Generate Global Sparse Matrix (~1 nnz/col)
+    // 2. Generate Global Sparse Matrix (~10 nnz/col)
     for (int c = 0; c < GLOBAL_COLS; ++c) {
         for (int r = 0; r < GLOBAL_ROWS; ++r) {
             if (prob_dist(generator) < density) {

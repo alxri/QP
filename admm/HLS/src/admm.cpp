@@ -1,29 +1,5 @@
 #include "admm.h"
 
-#define OSQP_CG_TOL_MIN 1e-5f
-#define OSQP_INFTY 1e17f
-#define OSQP_DIVISION_TOL 1e-10f
-// #define OSQP_CG_TOL_MIN_SQ (OSQP_CG_TOL_MIN * OSQP_CG_TOL_MIN)
-
-// #define PCG_TOLERANCE_FRACTION 0.01f
-#define OSQP_CHECK_TERMINATION 5
-
-#define OSQP_ADAPTIVE_RHO_INTERVAL 50
-#define OSQP_ADAPTIVE_RHO_TOLERANCE 2
-
-#define OSQP_RHO 0.1f
-#define OSQP_RHO_MAX 1e6f
-#define OSQP_RHO_MIN 1e-6f
-#define OSQP_RHO_EQ_OVER_RHO_INEQ 1e03
-
-// #define DEFAULT_EPS_ABS 1E-3f
-// #define DEFAULT_EPS_REL 1E-3f
-
-#ifndef RESHAPE_FACTOR
-#define RESHAPE_FACTOR 8
-#endif
-
-#define MAX_TILES ( (MAX_SIZE / MAX_ROWS) * (MAX_SIZE / MAX_COLS) )
 
 static float inf_norm(const float *v, int size)
 {
@@ -63,7 +39,7 @@ void update_preconditioner(
 
     for (int i = 0; i < num_cols; i++) {
         
-        // 1. Array of accumulators to break the RAW dependency
+        // Array of accumulators to break the RAW dependency
         float A_col_sum_lanes[16];
 #pragma HLS ARRAY_PARTITION variable=A_col_sum_lanes complete
         
@@ -95,13 +71,11 @@ void update_preconditioner(
             int row_j = current_A_rows[lane_idx];
             float val = current_A_vals[lane_idx];
             
-            // 2. Accumulate into the specific lane.
-            // Since lane_idx cycles 0..15, the same lane is only updated 
-            // every 16 cycles. This natively hides the FP addition latency.
+            // Accumulate into the specific lane.
             A_col_sum_lanes[lane_idx] += rho[row_j] * (val * val); 
         }
         
-        // 3. Combinational reduction tree at the end of the column
+        // Combinational reduction tree at the end of the column
         float A_col_sum = 0.0f;
         for (int k = 0; k < 16; k++) {
 #pragma HLS UNROLL
@@ -126,8 +100,8 @@ void update_eps(float b_norm,
 #pragma HLS INLINE
     eps_old = eps;
 
-    // CUDA logic: Tighten tolerance if PCG solves in ZERO iterations repeatedly
-    // Do NOT tighten if it hits max iterations (that makes a hard problem harder!)
+    // Tighten tolerance if PCG solves in 0 iterations repeatedly
+    // Do not tighten if it hits max iterations
     if (num_iterations > 0)
     {
         if (num_pcg_iterations == 0) {
@@ -136,7 +110,6 @@ void update_eps(float b_norm,
             zero_pcg_iters = 0;
         }
 
-        // OSQP default reduction_threshold is usually 5 or 10
         if (zero_pcg_iters >= 5) {
             pcg_tol_fraction *= 0.5f;
             zero_pcg_iters = 0;
@@ -146,16 +119,13 @@ void update_eps(float b_norm,
     float eps_new;
     if (num_iterations == 0)
     {
-        // Iteration 0: eps_prev = rhs_norm * reduction_factor
         eps_new = b_norm * pcg_tol_fraction; 
     }
     else
     {
-        // Iteration > 0: eps = reduction_factor * sqrt(prim_res * dual_res)
         eps_new = pcg_tol_fraction * hls::sqrt(r_prim * r_dual);
     }
 
-    // Clamp between MIN_TOL and eps_old (eps should monotonically decrease)
     if (eps_new < OSQP_CG_TOL_MIN) {
         eps_new = OSQP_CG_TOL_MIN;
     }
@@ -192,17 +162,17 @@ static float estimate_new_rho(float r_prim, float r_dual,
 {
 #pragma HLS INLINE
 
-    // 1. Scale the primal and dual residuals by their respective norms
+    // Scale the primal and dual residuals by their respective norms
     float prim_res_norm = hls::fmax(norm_z, norm_Ax);
     float prim_res_scaled = r_prim / (prim_res_norm + OSQP_DIVISION_TOL);
 
     float dual_res_norm = hls::fmax(norm_q, hls::fmax(ATy_norm, Px_norm));
     float dual_res_scaled = r_dual / (dual_res_norm + OSQP_DIVISION_TOL);
 
-    // 2. Compute the scaling factor (S) with square root
+    // Compute the scaling factor 
     float S = hls::sqrt(prim_res_scaled / hls::fmax(dual_res_scaled, OSQP_DIVISION_TOL)); 
     
-    // 3. Compute new base rho
+    // Compute new base rho
     float rho_base_new = current_rho_base * S; 
     rho_base_new = clamp(rho_base_new, OSQP_RHO_MIN, OSQP_RHO_MAX); 
     
@@ -284,39 +254,6 @@ void admm(int num_rows,
           float *r_dual_out,
           int *status_out)
 {
-/* From CPU (sw) receive
-*   - Pointers of Matrix P in CSC format (P_col_ptr, P_row_idx, P_values) + nnz - read from DDR 
-*   - Diagonal of Matrix P (P_diag) - read from DDR
-*   - Pointers of Matrix A in CSC format (A_col_ptr, A_row_idx, A_values) + nnz - read from DDR
-*   - Pointers of Transpose of A in CSC format (A_col_ptr_T, A_row_idx_T, A_values_T) - read from DDR
-*
-*   - Vector l - copy to BRAM ?
-*   - Vector u - copy to BRAM ?
-*
-*   - Vector q - copy to BRAM
-*   - Vector rho, initialization in CPU - copy to BRAM
-*   - Scalar sigma - copy to register
-*   - Scalar alpha - copy to register
-*
-*   - num_rows, num_cols, P_nnz, A_nnz
-*
-*   - pcg_max_iterations, admm_max_iterations
-*
-* Computed in ADMM to feed into PCG:
-*   - Diagonal preconditioner M_inv (as a vector)
-*   - Vector b, computed in ADMM
-*   - Vector rho updates every UPDATE_RHO iterations
-*   - Scalar epsilon_sq
-*
-*
-* Write result back to DDR:
-*   - Vector x (primal solution to the QP)
-*   - Vector y (dual solution to the QP)
-*   - admm_num_iterations_out: number of ADMM iterations
-*   - pcg_num_iterations_out: accumulated number of PCG iterations over all ADMM iterations
-*   - Status flag: how solver terminated (converged, max iterations reached)
-*   - Final residuals: primal and dual residual norms to verify quality of solution
-*/
 #pragma HLS INTERFACE m_axi port = A_row_idx offset = slave bundle = gmem0 depth = MAX_NNZ_WORDS
 #pragma HLS INTERFACE m_axi port = A_col_ptr offset = slave bundle = gmem1 depth = MAX_COL_PTR
 #pragma HLS INTERFACE m_axi port = A_values offset = slave bundle = gmem2 depth = MAX_NNZ_WORDS
@@ -352,12 +289,6 @@ void admm(int num_rows,
 #pragma HLS INTERFACE m_axi port = x_out offset = slave bundle = gmem3 depth = MAX_COLS
 #pragma HLS INTERFACE m_axi port = y_out offset = slave bundle = gmem3 depth = MAX_ROWS
 
-// #pragma HLS INTERFACE m_axi port = admm_num_iterations_out offset = slave bundle = gmem3 depth = 1
-// #pragma HLS INTERFACE m_axi port = pcg_num_iterations_out offset = slave bundle = gmem3 depth = 1
-// #pragma HLS INTERFACE m_axi port = status_out offset = slave bundle = gmem3 depth = 1
-// #pragma HLS INTERFACE m_axi port = r_prim_out offset = slave bundle = gmem3 depth = 1
-// #pragma HLS INTERFACE m_axi port = r_dual_out offset = slave bundle = gmem3 depth = 1
-
 #pragma HLS INTERFACE s_axilite port = A_num_row_tiles bundle = control
 #pragma HLS INTERFACE s_axilite port = A_num_col_tiles bundle = control
 #pragma HLS INTERFACE s_axilite port = AT_num_row_tiles bundle = control
@@ -385,14 +316,9 @@ void admm(int num_rows,
 #pragma HLS INTERFACE s_axilite port = admm_max_iterations bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
-// // Only one SpMV engine
+// Only one SpMV engine
 #pragma HLS ALLOCATION function instances=spmv_csc limit=1
 
-// Which arrays live in ADMM vs in PCG??
-
-// Array reshape ?
-
-// DATAFLOW??
 
     float M_inv[MAX_SIZE];
 #pragma HLS ARRAY_RESHAPE variable=M_inv type=cyclic factor=RESHAPE_FACTOR dim=1
@@ -438,7 +364,6 @@ void admm(int num_rows,
 #pragma HLS ARRAY_RESHAPE variable=rho_inv type=cyclic factor=RESHAPE_FACTOR dim=1
 #pragma HLS BIND_STORAGE variable=rho_inv type=RAM_T2P impl=URAM
 
-// For MAZ_SIZE=65536 these three arrays do not fit in URAM, need to keep them in BRAM
     float l[MAX_SIZE];
 #pragma HLS BIND_STORAGE variable=l type=RAM_T2P impl=URAM
 
@@ -448,11 +373,7 @@ void admm(int num_rows,
     float q[MAX_SIZE];
 #pragma HLS BIND_STORAGE variable=q type=RAM_T2P impl=URAM
 
-// #pragma HLS BIND_STORAGE variable=x_tilde type=RAM_T2P impl=URAM
-// #pragma HLS BIND_STORAGE variable=x type=RAM_T2P impl=URAM
-// #pragma HLS BIND_STORAGE variable=y type=RAM_T2P impl=URAM
 
-// Pack into structs
     TiledMatrix mat_A = {
         A_num_row_tiles, A_num_col_tiles, 
         A_tile_nnz_counts, A_tile_nnz_offsets, A_tile_col_offsets, 
@@ -481,12 +402,6 @@ void admm(int num_rows,
 
     float eps_prim = 0.0f;
     float eps_dual = 0.0f;
-
-    // float eps_abs = DEFAULT_EPS_ABS;
-    // float eps_rel = DEFAULT_EPS_REL;
-
-    // float alpha;
-    // float sigma;
 
     int num_iterations = 0;
     int num_pcg_iterations = 0;
@@ -537,13 +452,13 @@ void admm(int num_rows,
         // Adaptive Rho Update every OSQP_ADAPTIVE_RHO_INTERVAL iterations
         if (adaptive_rho && (num_iterations > 0 && num_iterations % OSQP_ADAPTIVE_RHO_INTERVAL == 0)) 
         {
-            // 1. Calculate the proposed new rho
+            // Calculate the proposed new rho
             float rho_new = estimate_new_rho(r_prim, r_dual, 
                                              norm_z, Ax_norm, 
                                              norm_q, ATy_norm, Px_norm, 
                                              current_rho_base);
             
-            // 2. Check if the proposed rho is outside the tolerance window
+            // Check if the proposed rho is outside the tolerance window
             float upper_bound = current_rho_base * OSQP_ADAPTIVE_RHO_TOLERANCE;
             float lower_bound = current_rho_base / OSQP_ADAPTIVE_RHO_TOLERANCE;
 

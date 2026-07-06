@@ -25,10 +25,10 @@
 
 // #define CEIL_DIV(a, b) (((a) + (b) - 1) / (b))
 
-// #define MAX_COL_PTR (MAX_COLS + 1)
+// #define MAX_COL_PTR   (MAX_COLS + 1)
 // #define MAX_COL_WORDS CEIL_DIV(MAX_COLS, PACK_SIZE)
 // #define MAX_ROW_WORDS CEIL_DIV(MAX_ROWS, PACK_SIZE)
-// #define MAX_NNZ_WORDS CEIL_DIV(MAX_NNZ, PACK_SIZE)
+// #define MAX_NNZ_WORDS CEIL_DIV(MAX_NNZ,  PACK_SIZE)
 
 // // 512 bit packed types (16 floats per packet)
 // typedef hls::vector<float, PACK_SIZE> float16;
@@ -37,11 +37,11 @@
 // void spmv_csc(int num_rows,
 //               int num_cols,
 //               int nnz,
-//               const int16 *A_row_idx,
+//               const int *A_row_idx,
 //               const int *A_col_ptr,
-//               const float16 *A_values,
+//               const float *A_values,
 //               const float *x,
-//               float16 *y,
+//               float *y,
 //               bool clear_y,
 //               bool write_y);
 

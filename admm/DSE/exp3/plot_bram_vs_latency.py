@@ -292,7 +292,7 @@ def main() -> None:
             )
 
         fig.tight_layout()
-        fig.savefig(out_path, dpi=200, bbox_inches='tight')
+        fig.savefig(out_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
         print(f"Saved plot: {out_path}")
 

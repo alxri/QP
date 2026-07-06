@@ -104,7 +104,7 @@ def plot_resources(config_label, stats, out_dir):
                  f'{height}%', ha='center', va='bottom', fontsize=9, fontweight='bold')
 
     plt.tight_layout()
-    plt.savefig(out_dir / f"util_{config_label}.png", dpi=200)
+    plt.savefig(out_dir / f"util_{config_label}.png", dpi=300)
     plt.close()
 
 def main():

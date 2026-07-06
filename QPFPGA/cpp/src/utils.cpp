@@ -108,6 +108,7 @@ void ruiz_equilibration(
     std::vector<float>& u,
     std::vector<float>& D,
     std::vector<float>& E,
+    float& c_scale,
     int iterations)
 {
     D.assign(NUM_ROWS, 1.0f);
@@ -163,7 +164,7 @@ void ruiz_equilibration(
         max_val = std::max(max_val, std::max(std::fabs(P_diag[c]), std::fabs(q[c])));
     }
 
-    float c_scale = std::max(1.0f / max_val, 1e-4f);
+    c_scale = std::max(1.0f / max_val, 1e-4f);
 
     // Apply final cost scaling
     for (int c = 0; c < NUM_COLS; ++c) {
