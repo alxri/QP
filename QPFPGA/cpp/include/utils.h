@@ -75,7 +75,7 @@ struct TiledMatrix {
 TiledMatrix build_tiled_csc(int global_rows, int global_cols, const std::vector<int>& cptr_in, const std::vector<int>& ridx_in, const std::vector<float>& vals_in, int tile_size);
 void transpose_csc(int rows, int cols, const std::vector<int>& cptr, const std::vector<int>& ridx, const std::vector<float>& vals, std::vector<int>& cptr_t, std::vector<int>& ridx_t, std::vector<float>& vals_t);
 
-void ruiz_equilibration(
+void apply_scaling(
 	int NUM_ROWS,
 	int NUM_COLS,
 	const std::vector<int>& A_cptr,

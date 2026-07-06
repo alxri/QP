@@ -27,7 +27,7 @@ bool load_bitstream(const std::string& path) {
         return false;
     }
 
-    // 1. Copy the bitstream to /lib/firmware
+    // Copy the bitstream to /lib/firmware
     fs::path dest_dir = "/lib/firmware";
     fs::path dest = dest_dir / src.filename();
     
@@ -40,8 +40,7 @@ bool load_bitstream(const std::string& path) {
         return false;
     }
 
-    // 2. Set FPGA Manager flags (0 = full bitstream)
-    // Zynq Ultrascale+ supports partial reconfiguration. Flag '0' ensures full PL reset.
+    // Set FPGA Manager flags (0 = full bitstream)
     std::ofstream flags_file("/sys/class/fpga_manager/fpga0/flags");
     if (flags_file) {
         flags_file << "0";
@@ -50,7 +49,7 @@ bool load_bitstream(const std::string& path) {
         std::cerr << "Warning: Could not open FPGA manager flags. Continuing anyway.\n";
     }
 
-    // 3. Write filename to the firmware node to trigger programming
+    // Write filename to the firmware node to trigger programming
     std::ofstream fw_file("/sys/class/fpga_manager/fpga0/firmware");
     if (!fw_file) {
         std::cerr << "Error: Could not open FPGA manager firmware node.\n";
@@ -59,7 +58,7 @@ bool load_bitstream(const std::string& path) {
     fw_file << src.filename().string();
     fw_file.close();
 
-    // 4. Verify programming was successful
+    // Verify programming was successful
     std::ifstream state_file("/sys/class/fpga_manager/fpga0/state");
     std::string state;
     if (state_file) {

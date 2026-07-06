@@ -69,14 +69,13 @@ extern "C" QPFPGAStatus qpfpga_solve(
     std::vector<float> P_diag;
     build_diag_from_csc(n, P_cptr, P_ridx, P_vals, P_diag);
 
-    // Equilibration (in-place modifies A_vals, P_diag, q, l, u)
+    // Scaling (in-place modifies A_vals, P_diag, q, l, u)
     std::vector<float> D(m, 1.0f);
     std::vector<float> E(n, 1.0f);
     float c_scale = 1.0f; // Track cost scaling factor to unscale 'y' later
 
     try {
-        // NOTE: Make sure ruiz_equilibration signature in utils.h is updated to accept c_scale by reference!
-        ruiz_equilibration(m, n, A_cptr, A_ridx, A_vals, P_diag, q, l, u, D, E, c_scale, RUIZ_ITER_DEFAULT);    
+        apply_scaling(m, n, A_cptr, A_ridx, A_vals, P_diag, q, l, u, D, E, c_scale, SCALING_ITER_DEFAULT);    
     } catch (...) {
     }
 

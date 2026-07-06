@@ -1,7 +1,5 @@
 #include "utils.h"
 
-
-
 double get_time_ms() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -96,7 +94,7 @@ void transpose_csc(int rows, int cols, const vector<int>& cptr, const vector<int
     }
 }
 
-void ruiz_equilibration(
+void apply_scaling(
     int NUM_ROWS,
     int NUM_COLS,
     const std::vector<int>& A_cptr,
@@ -113,7 +111,7 @@ void ruiz_equilibration(
 {
     D.assign(NUM_ROWS, 1.0f);
     E.assign(NUM_COLS, 1.0f);
-    // Ruiz iterations
+    // Scaling iterations
     for (int iter = 0; iter < iterations; ++iter) {
         std::vector<float> A_col_norm(NUM_COLS, 0.0f);
         std::vector<float> A_row_norm(NUM_ROWS, 0.0f);

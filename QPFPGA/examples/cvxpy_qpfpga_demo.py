@@ -7,9 +7,7 @@ import scipy.sparse as sp
 import cvxpy as cp
 import time
 
-# 1. FAIL-SAFE: Ensure the library path is set before importing qpfpga
 if "QPFPGA_LIBRARY" not in os.environ:
-    # Look for the .so file in the expected build directory
     expected_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "cpp", "build", "libqpfpga.so"))
     if os.path.exists(expected_path):
         os.environ["QPFPGA_LIBRARY"] = expected_path
@@ -18,33 +16,24 @@ if "QPFPGA_LIBRARY" not in os.environ:
         print("Please compile the backend or set QPFPGA_LIBRARY manually.")
         sys.exit(1)
 
-# Now we can safely import the library
-import qpfpga  # This triggers the registration of cp.QPFPGA
+import qpfpga  # registration of cp.QPFPGA
 
 def main() -> None:
-    # Set seed for reproducible matrices
     np.random.seed(123)
     
-    # Define Dimensions: 16 variables to exactly match FPGA PACK_SIZE
     N = 1024
     
-    # 1. Define Problem Data
-    # P_data is a 16x16 diagonal matrix with values between [1.0, 5.0]
     P_diag = np.random.uniform(1.0, 5.0, N).astype(np.float32)
     P_data = np.diag(P_diag)
     
-    # q_data is a 16-element vector
     q_data = np.random.uniform(-2.0, 2.0, N).astype(np.float32)
 
     print("=== Problem assembly output ===")
     
-    # 2. CVXPY Problem Formulation
     x = cp.Variable(N)
     
-    # Objective: 0.5 * x^T * P * x + q^T * x
     objective = cp.Minimize(0.5 * cp.quad_form(x, P_data) + q_data @ x)
     
-    # Constraints: 0 <= x <= 1 for all 16 variables (generates 32 inequalities)
     constraints = [x >= 0, x <= 1]
     problem = cp.Problem(objective, constraints)
 

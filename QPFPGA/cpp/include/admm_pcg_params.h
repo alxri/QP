@@ -3,7 +3,7 @@
 
 #define PACK_SIZE 16
 
-#define RUIZ_ITER_DEFAULT 10
+#define SCALING_ITER_DEFAULT 10
 
 #define ADMM_RHO 1.0f
 #define ADMM_RHO_EQ_OVER_RHO_INEQ 100
