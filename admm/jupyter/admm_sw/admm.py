@@ -11,7 +11,7 @@ ADMM_RHO_MIN = 1e-6
 ADMM_RHO_EQ_OVER_RHO_INEQ = 1e3
 OSQP_RHO_TOL = 1e-4
 
-def apply_ruiz_scaling(P_diag, A_sparse, q, l, u, iters=10):
+def apply_scaling(P_diag, A_sparse, q, l, u, iters=10):
     n = len(P_diag)
     m = A_sparse.shape[0]
     E = np.ones(n, dtype=np.float32)

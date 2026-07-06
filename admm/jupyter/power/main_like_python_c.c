@@ -482,7 +482,7 @@ int main(void) {
     memcpy(A_vals_orig, A_vals, (size_t)A_nnz * sizeof(float));
 
     // -----------------------------------------------------------------
-    // Ruiz scaling (matches notebook apply_ruiz_scaling)
+    // Ruiz scaling (matches notebook apply_scaling)
     // -----------------------------------------------------------------
     printf("Applying Ruiz Equilibration...\n\n");
 

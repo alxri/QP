@@ -269,8 +269,8 @@ int main() {
     vector<float> u_orig = u;
     vector<float> A_vals_orig = A_vals;
 
-    // 3. Ruiz Equilibration
-    cout << "Applying Ruiz Equilibration...\n\n";
+    // 3. Scaling
+    cout << "Applying Scaling...\n\n";
     vector<float> E(NUM_COLS, 1.0f), D(NUM_ROWS, 1.0f);
     for (int iter = 0; iter < 10; ++iter) {
         vector<float> A_col_norm(NUM_COLS, 0.0f), A_row_norm(NUM_ROWS, 0.0f);

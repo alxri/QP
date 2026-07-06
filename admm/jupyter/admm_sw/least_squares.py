@@ -4,7 +4,7 @@ import time
 import numpy as np
 import scipy.sparse as sp
 
-from admm import apply_ruiz_scaling, init_rho_vec, solve_admm_pcg
+from admm import apply_scaling, init_rho_vec, solve_admm_pcg
 
 
 # Problem data.
@@ -62,9 +62,9 @@ q_f32 = q_osqp.astype(np.float32)
 l_f32 = l_osqp.astype(np.float32)
 u_f32 = u_osqp.astype(np.float32)
 
-# Apply Ruiz Scaling
+# Apply Scaling
 (P_scaled_diag, A_scaled, q_scaled, l_scaled, u_scaled, 
- E_scale, D_scale, c_scale) = apply_ruiz_scaling(
+ E_scale, D_scale, c_scale) = apply_scaling(
     P_diag_orig, A_sparse_f32, q_f32, l_f32, u_f32, iters=10
 )
 

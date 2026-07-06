@@ -296,8 +296,8 @@ int main() {
     vector<float> P_diag_orig = P_diag;
     vector<float> q_orig = q;
     
-    // 3.5 Apply Ruiz Equilibration (Fixes Missing 'E' Scope Error)
-    cout << "Applying Ruiz Equilibration...\n";
+    // 3.5 Apply Scaling
+    cout << "Applying Scaling...\n";
     vector<float> E(num_cols, 1.0f), D(num_rows, 1.0f);
     for (int iter = 0; iter < 10; ++iter) {
         vector<float> A_col_norm(num_cols, 0.0f), A_row_norm(num_rows, 0.0f);

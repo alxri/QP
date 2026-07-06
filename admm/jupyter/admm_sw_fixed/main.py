@@ -224,13 +224,13 @@ print(f"Problem size: {num_rows} x {num_cols}")
 P_diag_orig = P_sparse.diagonal().astype(np.float32)
 
 # =====================================================================
-# 3. Matrix Scaling (Ruiz Equilibration + Cost Scaling)
+# 3. Matrix Scaling
 # =====================================================================
 
-print("Applying Ruiz Equilibration...")
+print("Applying Scaling...")
 OSQP_INFTY = 1e17
 
-def apply_ruiz_scaling(P_diag, A_sparse, q, l, u, iters=10):
+def apply_scaling(P_diag, A_sparse, q, l, u, iters=10):
     n = len(P_diag)
     m = A_sparse.shape[0]
 
@@ -270,7 +270,7 @@ def apply_ruiz_scaling(P_diag, A_sparse, q, l, u, iters=10):
     return P_scaled, A_scaled, q_scaled, l_scaled, u_scaled, E, D, c
 
 (P_diag_scaled, A_sparse_scaled, q_scaled, 
- l_scaled, u_scaled, E_scale, D_scale, c_scale) = apply_ruiz_scaling(
+ l_scaled, u_scaled, E_scale, D_scale, c_scale) = apply_scaling(
     P_diag_orig, A_sparse, q, l_in, u_in
 )
 

@@ -270,8 +270,8 @@ int main() {
     vector<float> q_orig = q;
     std::vector<float> rho(num_rows, 0.0f);
     
-    // 2. Apply Ruiz Equilibration
-    cout << "Applying Ruiz Equilibration...\n";
+    // 2. Apply Scaling
+    cout << "Applying Scaling...\n";
     vector<float> E(num_cols, 1.0f), D(num_rows, 1.0f);
     for (int iter = 0; iter < 10; ++iter) {
         vector<float> A_col_norm(num_cols, 0.0f), A_row_norm(num_rows, 0.0f);

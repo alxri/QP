@@ -296,9 +296,9 @@ int main() {
     const std::vector<float> A_vals_orig = A_vals;
 
     // -----------------------------------------------------------------
-    // Ruiz scaling (matches notebook apply_ruiz_scaling)
+    // Scaling
     // -----------------------------------------------------------------
-    std::cout << "Applying Ruiz Equilibration...\n\n";
+    std::cout << "Applying Scaling...\n\n";
 
     std::vector<float> E(num_cols, 1.0f);
     std::vector<float> D(num_rows, 1.0f);

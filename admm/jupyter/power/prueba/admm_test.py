@@ -153,9 +153,9 @@ A_sparse = sp.csc_matrix((A_vals, A_row_idx, A_col_ptr), shape=(NUM_ROWS, NUM_CO
 AT_sparse = A_sparse.T.tocsc()
 P_sparse = sp.diags(P_diag).tocsc()
 
-# 2. Ruiz Equilibration
-print("Applying Ruiz Equilibration...\n")
-def apply_ruiz_scaling(P_d, A_sp, q_vec, l_vec, u_vec, iters=10):
+# 2. Scaling
+print("Applying Scaling...\n")
+def apply_scaling(P_d, A_sp, q_vec, l_vec, u_vec, iters=10):
     n, m = len(P_d), A_sp.shape[0]
     E = np.ones(n, dtype=np.float32)
     D = np.ones(m, dtype=np.float32)
@@ -184,7 +184,7 @@ def apply_ruiz_scaling(P_d, A_sp, q_vec, l_vec, u_vec, iters=10):
     c = max(c, 1e-4)
     return P_scaled * c, A_scaled, q_scaled * c, l_scaled, u_scaled, E, D, c
 
-(P_diag_s, A_sp_s, q_s, l_s, u_s, E_scale, D_scale, c_scale) = apply_ruiz_scaling(P_diag, A_sparse, q, l, u)
+(P_diag_s, A_sp_s, q_s, l_s, u_s, E_scale, D_scale, c_scale) = apply_scaling(P_diag, A_sparse, q, l, u)
 AT_sp_s = A_sp_s.T.tocsc()
 P_sp_s = sp.diags(P_diag_s).tocsc()
 
